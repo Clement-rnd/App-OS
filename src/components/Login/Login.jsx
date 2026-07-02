@@ -3,7 +3,11 @@ import logo from '../../assets/opinion-system-logo.svg'
 import './Login.css'
 
 export function Login() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+
+  const isValid = email.includes('@') && password.length > 0
 
   return (
     <div className="login">
@@ -28,8 +32,10 @@ export function Login() {
           <div className="login__input-wrapper">
             <input
               className="login__input"
-              type="text"
-              placeholder="Votre indentifiant"
+              type="email"
+              placeholder="Votre identifiant"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
             />
           </div>
 
@@ -38,6 +44,8 @@ export function Login() {
               className="login__input"
               type={showPassword ? 'text' : 'password'}
               placeholder="Mot de passe"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
             />
             <button
               className="login__eye-btn"
@@ -52,7 +60,11 @@ export function Login() {
           </div>
 
           <div className="login__btn-wrapper">
-            <button className="login__btn" type="button">
+            <button
+              className={`login__btn${isValid ? ' login__btn--enabled' : ''}`}
+              type="button"
+              disabled={!isValid}
+            >
               Se connecter
             </button>
           </div>

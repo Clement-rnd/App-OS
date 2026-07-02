@@ -157,9 +157,16 @@
   border: none;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   font-family: 'Poppins', sans-serif;
   color: #8ea1b2;
+  cursor: not-allowed;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.login__btn--enabled {
+  background-color: #ffd500;
+  color: #102d69;
   cursor: pointer;
 }
 

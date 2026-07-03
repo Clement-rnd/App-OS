@@ -23,7 +23,7 @@
 }
 
 .login__status-bar {
-  height: 24px;
+  height: max(24px, env(safe-area-inset-top));
   width: 100%;
 }
 
@@ -91,7 +91,7 @@
   flex-direction: column;
   gap: 16px;
   align-items: flex-end;
-  padding-bottom: 40px;
+  padding-bottom: max(40px, env(safe-area-inset-bottom) + 16px);
   width: 100%;
 }
 

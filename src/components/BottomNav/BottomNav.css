@@ -1,0 +1,44 @@
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  height: 80px;
+  background-color: #ffffff;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.12);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav__item {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bottom-nav__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 100px;
+}
+
+.bottom-nav__icon-wrap img {
+  width: 24px;
+  height: 24px;
+}
+
+.bottom-nav__item--active .bottom-nav__icon-wrap {
+  background-color: rgba(44, 149, 255, 0.1);
+}

@@ -1,9 +1,5 @@
 import logoCompact from '../../assets/home/logo-compact.svg'
 import iconBell from '../../assets/home/icon-bell.svg'
-import iconHouse from '../../assets/home/icon-house.svg'
-import iconChat from '../../assets/home/icon-chat.svg'
-import iconSend from '../../assets/home/icon-send.svg'
-import iconUser from '../../assets/home/icon-user.svg'
 import iconSwap from '../../assets/home/icon-swap.svg'
 import iconStatNote from '../../assets/home/icon-stat-note.svg'
 import iconStatReviews from '../../assets/home/icon-stat-reviews.svg'
@@ -18,6 +14,7 @@ import iconGoogle from '../../assets/home/icon-google.svg'
 import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
+import { BottomNav } from '../BottomNav/BottomNav'
 import './Home.css'
 
 const reviews = [
@@ -89,7 +86,7 @@ function ReviewCard({ review }) {
   )
 }
 
-export function Home() {
+export function Home({ onNavigate, onOpenQuestionnaire }) {
   return (
     <div className="home">
       <header className="home__header">
@@ -168,7 +165,7 @@ export function Home() {
               votre réputation
             </h2>
             <p className="home__cta-subtext">en envoyant des questionnaires</p>
-            <button type="button" className="home__cta-btn">
+            <button type="button" className="home__cta-btn" onClick={onOpenQuestionnaire}>
               Récolter des avis
             </button>
           </div>
@@ -204,29 +201,7 @@ export function Home() {
         </div>
       </div>
 
-      <nav className="home__bottom-nav">
-        <button type="button" className="home__nav-item home__nav-item--active">
-          <span className="home__nav-icon-wrap">
-            <img src={iconHouse} alt="" />
-          </span>
-          <span className="home__nav-label">Acceuil</span>
-        </button>
-        <button type="button" className="home__nav-item">
-          <span className="home__nav-icon-wrap">
-            <img src={iconChat} alt="" />
-          </span>
-        </button>
-        <button type="button" className="home__nav-item">
-          <span className="home__nav-icon-wrap">
-            <img src={iconSend} alt="" />
-          </span>
-        </button>
-        <button type="button" className="home__nav-item">
-          <span className="home__nav-icon-wrap">
-            <img src={iconUser} alt="" />
-          </span>
-        </button>
-      </nav>
+      <BottomNav active="home" onNavigate={onNavigate} />
     </div>
   )
 }

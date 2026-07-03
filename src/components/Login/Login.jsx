@@ -7,7 +7,7 @@ export function Login({ onLogin, onSkip }) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
-  const isValid = email.includes('@') && password.length > 0
+  const isValid = email.includes('@') && password.length >= 8
 
   return (
     <div className="login">

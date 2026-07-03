@@ -1,0 +1,113 @@
+.sign-up-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.sign-up-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  animation: sign-up-modal-fade-in 200ms ease-out;
+}
+
+.sign-up-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 328px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 20px;
+  font-family: 'Poppins', sans-serif;
+  animation: sign-up-modal-pop-in 200ms ease-out;
+}
+
+@keyframes sign-up-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sign-up-modal-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.sign-up-modal__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #041b44;
+  border-radius: 20px 20px 0 0;
+}
+
+.sign-up-modal__title {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: normal;
+  color: #ffffff;
+  text-align: center;
+}
+
+.sign-up-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 12px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.sign-up-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 16px;
+}
+
+.sign-up-modal__text {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  color: #041b44;
+  text-align: center;
+}
+
+.sign-up-modal__form-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 16px;
+  border: 1px solid rgba(44, 149, 255, 0.3);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c95ff;
+}

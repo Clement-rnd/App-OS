@@ -1,18 +1,27 @@
 import { useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
+import { StatusBar } from '../StatusBar/StatusBar'
+import { SignUpModal } from '../SignUpModal/SignUpModal'
 import './Login.css'
 
-export function Login({ onLogin, onSkip }) {
-  const [email, setEmail] = useState('')
+export function Login({ onLogin, onSkip, onForgotPassword }) {
+  const [identifiant, setIdentifiant] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [touched, setTouched] = useState({ identifiant: false, password: false })
+  const [showSignUpModal, setShowSignUpModal] = useState(false)
 
-  const isValid = email.includes('@') && password.length >= 8
+  const isIdentifiantValid = identifiant.trim().length > 0
+  const isPasswordValid = password.length >= 8
+  const isValid = isIdentifiantValid && isPasswordValid
+
+  const identifiantError = touched.identifiant && !isIdentifiantValid
+  const passwordError = touched.password && !isPasswordValid
 
   return (
     <div className="login">
       <div className="login__header">
-        <div className="login__status-bar" />
+        <StatusBar />
         <button className="login__skip-btn" type="button" onClick={onSkip}>
           Skip
         </button>
@@ -32,33 +41,51 @@ export function Login({ onLogin, onSkip }) {
         </div>
 
         <div className="login__form">
-          <div className="login__input-wrapper">
-            <input
-              className="login__input"
-              type="email"
-              placeholder="Votre identifiant"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-            />
+          <div className="login__field">
+            <div className={`login__input-wrapper${identifiantError ? ' login__input-wrapper--error' : ''}`}>
+              <input
+                className="login__input"
+                type="text"
+                placeholder="Votre identifiant"
+                value={identifiant}
+                onChange={e => setIdentifiant(e.target.value)}
+                onBlur={() => setTouched(t => ({ ...t, identifiant: true }))}
+              />
+            </div>
+            {identifiantError && (
+              <p className="login__error-text">Entrez un nom d'utilisateur valide</p>
+            )}
           </div>
 
-          <div className="login__input-wrapper">
-            <input
-              className="login__input"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Mot de passe"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-            <button
-              className="login__eye-btn"
-              onClick={() => setShowPassword(v => !v)}
-              type="button"
-              aria-label="Afficher le mot de passe"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#8ea1b2" width="20" height="20">
-                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-              </svg>
+          <div className="login__field">
+            <div className={`login__input-wrapper${passwordError ? ' login__input-wrapper--error' : ''}`}>
+              <input
+                className="login__input"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Mot de passe"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                onBlur={() => setTouched(t => ({ ...t, password: true }))}
+              />
+              <button
+                className="login__eye-btn"
+                onClick={() => setShowPassword(v => !v)}
+                type="button"
+                aria-label="Afficher le mot de passe"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#8ea1b2" width="20" height="20">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+              </button>
+            </div>
+            {passwordError && (
+              <p className="login__error-text">Entrez un mot de passe valide</p>
+            )}
+          </div>
+
+          <div className="login__forgot-wrapper">
+            <button className="login__forgot-btn" type="button" onClick={onForgotPassword}>
+              Mot de passe oublié?
             </button>
           </div>
 
@@ -75,12 +102,18 @@ export function Login({ onLogin, onSkip }) {
 
           <div className="login__footer">
             <p className="login__footer-text">Vous n'avez pas de compte OS ?</p>
-            <button className="login__register-btn" type="button">
+            <button
+              className="login__register-btn"
+              type="button"
+              onClick={() => setShowSignUpModal(true)}
+            >
               Inscrivez Vous
             </button>
           </div>
         </div>
       </div>
+
+      {showSignUpModal && <SignUpModal onClose={() => setShowSignUpModal(false)} />}
     </div>
   )
 }

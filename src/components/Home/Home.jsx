@@ -1,10 +1,6 @@
 import { useRef, useState } from 'react'
 import logoCompact from '../../assets/home/logo-compact.svg'
 import iconBell from '../../assets/home/icon-bell.svg'
-import iconHouse from '../../assets/home/icon-house.svg'
-import iconChat from '../../assets/home/icon-chat.svg'
-import iconSend from '../../assets/home/icon-send.svg'
-import iconUser from '../../assets/home/icon-user.svg'
 import iconStatReviews from '../../assets/home/icon-stat-reviews.svg'
 import iconStatChevron from '../../assets/home/icon-stat-chevron.svg'
 import phoneIllustration1 from '../../assets/home/phone-illustration-1.svg'
@@ -18,6 +14,7 @@ import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
 import { StatusBar } from '../StatusBar/StatusBar'
+import { BottomNav } from '../BottomNav/BottomNav'
 import './Home.css'
 
 const reviews = [
@@ -112,7 +109,7 @@ function ReviewCard({ review }) {
 
 const REVIEW_CARD_STEP = 312 + 16 // card width + gap
 
-export function Home() {
+export function Home({ onNavigate, onOpenQuestionnaire }) {
   const reviewsScrollerRef = useRef(null)
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)
 
@@ -209,7 +206,7 @@ export function Home() {
               votre réputation
             </h2>
             <p className="home__cta-subtext">en envoyant des questionnaires</p>
-            <button type="button" className="home__cta-btn">
+            <button type="button" className="home__cta-btn" onClick={onOpenQuestionnaire}>
               Récolter des avis
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" width="18" height="18">
                 <path
@@ -256,33 +253,7 @@ export function Home() {
         </div>
       </div>
 
-      <nav className="home__bottom-nav">
-        <div className="home__nav-row">
-          <button type="button" className="home__nav-item home__nav-item--active" aria-label="Accueil">
-            <span className="home__nav-icon-wrap">
-              <img src={iconHouse} alt="" />
-            </span>
-          </button>
-          <button type="button" className="home__nav-item" aria-label="Messages">
-            <span className="home__nav-icon-wrap">
-              <img src={iconChat} alt="" />
-            </span>
-          </button>
-          <button type="button" className="home__nav-item" aria-label="Envoyer">
-            <span className="home__nav-icon-wrap">
-              <img src={iconSend} alt="" />
-            </span>
-          </button>
-          <button type="button" className="home__nav-item" aria-label="Profil">
-            <span className="home__nav-icon-wrap">
-              <img src={iconUser} alt="" />
-            </span>
-          </button>
-        </div>
-        <div className="home__nav-home-indicator-wrap">
-          <span className="home__nav-home-indicator" />
-        </div>
-      </nav>
+      <BottomNav active="home" onNavigate={onNavigate} />
     </div>
   )
 }

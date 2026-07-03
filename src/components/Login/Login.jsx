@@ -2,7 +2,7 @@ import { useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
 import './Login.css'
 
-export function Login() {
+export function Login({ onLogin, onSkip }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -13,6 +13,9 @@ export function Login() {
     <div className="login">
       <div className="login__header">
         <div className="login__status-bar" />
+        <button className="login__skip-btn" type="button" onClick={onSkip}>
+          Skip
+        </button>
       </div>
 
       <div className="login__logo-section">
@@ -64,6 +67,7 @@ export function Login() {
               className={`login__btn${isValid ? ' login__btn--enabled' : ''}`}
               type="button"
               disabled={!isValid}
+              onClick={onLogin}
             >
               Se connecter
             </button>

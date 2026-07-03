@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 21.466 61.4521" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Intersect" opacity="0.33" filter="url(#filter0_f_0_3605)">
+<path d="M9.46893 3.71655C10.6545 3.12841 11.7412 3.10997 12.589 3.55932C13.8483 4.18434 15.1082 4.81185 16.3703 5.44018C16.3516 5.43097 16.3316 5.42354 16.3127 5.41479C16.3451 5.42984 16.3776 5.44531 16.4094 5.46167C16.4008 5.45726 16.3926 5.45136 16.384 5.44702C16.4966 5.50309 16.6092 5.5599 16.7219 5.61597V5.64917C16.6959 5.63095 16.6683 5.61463 16.6418 5.59741C17.6113 6.22906 18.2199 7.52086 18.2199 9.29077V56.157C6.65445 59.0249 6.79729 61.4677 12.1652 44.5339C1.6734 30.6062 1.29883 16.4473 6.59588 5.14624L9.46893 3.71655Z" fill="var(--fill-0, #041B45)"/>
+</g>
+<defs>
+<filter id="filter0_f_0_3605" x="-1.01922e-07" y="-1.13767e-07" width="21.466" height="61.4521" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1.62304" result="effect1_foregroundBlur_0_3605"/>
+</filter>
+</defs>
+</svg>

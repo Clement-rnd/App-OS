@@ -14,6 +14,7 @@
 
 /* Header */
 .login__header {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -25,6 +26,20 @@
 .login__status-bar {
   height: max(24px, env(safe-area-inset-top));
   width: 100%;
+}
+
+.login__skip-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  color: #ffffff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 /* Logo */

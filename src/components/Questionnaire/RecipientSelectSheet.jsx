@@ -20,6 +20,16 @@ const CONTACTS = [
   { id: 'lou', name: 'Lou Natic', phone: '+33 6 78 90 12 34' },
   { id: 'moe', name: 'Moe Lasses', phone: '+33 6 89 01 23 45' },
   { id: 'sue', name: 'Sue Fley', phone: '+33 6 90 12 34 56' },
+  { id: 'rick', name: "Rick O'Shea", phone: '+33 6 11 22 33 44' },
+  { id: 'barb', name: 'Barb Dwyer', phone: '+33 6 15 26 37 48' },
+  { id: 'manuel', name: 'Manuel Labor', phone: '+33 6 20 31 42 53' },
+  { id: 'terry', name: 'Terry Aki', phone: '+33 6 25 36 47 58' },
+  { id: 'paige', name: 'Paige Turner', phone: '+33 6 30 41 52 63' },
+  { id: 'stan', name: 'Stan Dupp', phone: '+33 6 35 46 57 68' },
+  { id: 'warren', name: 'Warren Peace', phone: '+33 6 40 51 62 73' },
+  { id: 'marge', name: 'Marge Arita', phone: '+33 6 44 55 66 77' },
+  { id: 'carrie', name: 'Carrie Oki', phone: '+33 6 50 61 72 83' },
+  { id: 'robin', name: 'Robin Banks', phone: '+33 6 60 71 82 93' },
 ]
 
 export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {

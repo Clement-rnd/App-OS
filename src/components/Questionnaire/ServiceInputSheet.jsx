@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import iconClose from '../../assets/home/icon-detail-close.svg'
+import { useSheetDrag } from '../../hooks/useSheetDrag'
 import './ServiceInputSheet.css'
 
 const MAX_LENGTH = 80
@@ -20,10 +21,24 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
   const handleClose = () => closeWithAnimation(onClose)
   const handleSubmit = () => closeWithAnimation(() => onSubmit?.(value.trim()))
 
+  const { dragHandlers, dragStyle, isDragClosing } = useSheetDrag({
+    onRequestClose: handleClose,
+    closeDurationMs: CLOSE_ANIMATION_MS,
+  })
+
   return (
     <div className={`service-sheet-overlay${isClosing ? ' service-sheet-overlay--closing' : ''}`}>
       <div className="service-sheet-backdrop" onClick={handleClose} />
-      <div className="service-sheet" role="dialog" aria-label="Quel service avez-vous récemment fourni ?">
+      <div
+        className={`service-sheet${isClosing && !isDragClosing ? ' service-sheet--closing' : ''}`}
+        role="dialog"
+        aria-label="Quel service avez-vous récemment fourni ?"
+        style={dragStyle}
+      >
+        <div className="service-sheet__handle-row" {...dragHandlers}>
+          <span className="service-sheet__handle" />
+        </div>
+
         <div className="service-sheet__appbar">
           <p className="service-sheet__title">Quel service avez-vous récemment fourni ?</p>
           <button type="button" className="service-sheet__close" onClick={handleClose} aria-label="Fermer">

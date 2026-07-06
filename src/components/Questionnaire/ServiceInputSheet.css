@@ -23,6 +23,29 @@
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
   animation: service-sheet-slide-up 380ms ease-out;
+  transition: transform 220ms ease-out;
+}
+
+.service-sheet--closing {
+  animation: service-sheet-slide-down 380ms ease-in forwards;
+}
+
+.service-sheet__handle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  width: 100%;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.service-sheet__handle {
+  width: 60px;
+  height: 5px;
+  border-radius: 2.5px;
+  background-color: #dfe9ef;
 }
 
 @keyframes service-sheet-fade-in {
@@ -65,15 +88,11 @@
   animation: service-sheet-fade-out 260ms ease-in forwards;
 }
 
-.service-sheet-overlay--closing .service-sheet {
-  animation: service-sheet-slide-down 380ms ease-in forwards;
-}
-
 .service-sheet__appbar {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 20px 20px 0;
+  padding: 0 20px;
   width: 100%;
   flex-shrink: 0;
 }

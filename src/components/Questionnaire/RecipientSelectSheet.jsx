@@ -3,9 +3,11 @@ import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconSearch from '../../assets/recipients/icon-search.svg'
 import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import iconCheckSelected from '../../assets/recipients/icon-check-selected.svg'
+import { useSheetDrag } from '../../hooks/useSheetDrag'
 import './RecipientSelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
+const SHEET_ENTRANCE_MS = 380
 const MAX_RECIPIENTS = 5
 
 const CONTACTS = [
@@ -30,6 +32,11 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
     setIsClosing(true)
     setTimeout(callback, CLOSE_ANIMATION_MS)
   }
+
+  const { dragHandlers, dragStyle, isDragClosing } = useSheetDrag({
+    onRequestClose: () => closeWithAnimation(onClose),
+    closeDurationMs: CLOSE_ANIMATION_MS,
+  })
 
   const normalizedQuery = query.trim().toLowerCase()
   const normalizedPhoneQuery = normalizedQuery.replace(/\s+/g, '')
@@ -60,8 +67,13 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
   return (
     <div className={`recipient-sheet-overlay${isClosing ? ' recipient-sheet-overlay--closing' : ''}`}>
       <div className="recipient-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
-      <div className="recipient-sheet" role="dialog" aria-label="Ajouter des destinataires">
-        <div className="recipient-sheet__handle-row">
+      <div
+        className={`recipient-sheet${isClosing && !isDragClosing ? ' recipient-sheet--closing' : ''}`}
+        role="dialog"
+        aria-label="Ajouter des destinataires"
+        style={dragStyle}
+      >
+        <div className="recipient-sheet__handle-row" {...dragHandlers}>
           <span className="recipient-sheet__handle" />
         </div>
 
@@ -77,7 +89,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
           </button>
         </div>
 
-        <div className="recipient-sheet__search-wrap">
+        <div className="recipient-sheet__search-wrap" style={{ animationDelay: `${SHEET_ENTRANCE_MS}ms` }}>
           <div className="recipient-sheet__search">
             <img src={iconSearch} alt="" />
             <input
@@ -90,7 +102,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
           </div>
         </div>
 
-        <div className="recipient-sheet__results-row">
+        <div className="recipient-sheet__results-row" style={{ animationDelay: `${SHEET_ENTRANCE_MS + 60}ms` }}>
           <p className="recipient-sheet__results-label">
             {query ? `Contacts Trouvés (${filtered.length})` : `Contacts (${filtered.length})`}
           </p>
@@ -112,7 +124,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
                 key={contact.id}
                 type="button"
                 className={`recipient-sheet__item${isSelected ? ' recipient-sheet__item--selected' : ''}`}
-                style={{ animationDelay: `${60 + Math.min(index, 5) * 50}ms` }}
+                style={{ animationDelay: `${SHEET_ENTRANCE_MS + 60 + Math.min(index, 5) * 50}ms` }}
                 onClick={() => toggleContact(contact.id)}
               >
                 <span className="recipient-sheet__avatar">{contact.name[0]}</span>

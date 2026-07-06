@@ -24,6 +24,11 @@
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
   animation: recipient-sheet-slide-up 380ms ease-out;
+  transition: transform 220ms ease-out;
+}
+
+.recipient-sheet--closing {
+  animation: recipient-sheet-slide-down 380ms ease-in forwards;
 }
 
 @keyframes recipient-sheet-fade-in {
@@ -66,10 +71,6 @@
   animation: recipient-sheet-fade-out 260ms ease-in forwards;
 }
 
-.recipient-sheet-overlay--closing .recipient-sheet {
-  animation: recipient-sheet-slide-down 380ms ease-in forwards;
-}
-
 .recipient-sheet__handle-row {
   display: flex;
   align-items: center;
@@ -77,6 +78,8 @@
   padding: 8px 0;
   width: 100%;
   flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
 }
 
 .recipient-sheet__handle {
@@ -180,7 +183,6 @@
   width: 100%;
   flex-shrink: 0;
   animation: recipient-sheet-content-fade-in 280ms ease-out both;
-  animation-delay: 60ms;
 }
 
 .recipient-sheet__results-label {

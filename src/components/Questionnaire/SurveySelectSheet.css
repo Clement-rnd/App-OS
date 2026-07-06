@@ -24,6 +24,11 @@
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
   animation: survey-sheet-slide-up 380ms ease-out;
+  transition: transform 220ms ease-out;
+}
+
+.survey-sheet--closing {
+  animation: survey-sheet-slide-down 380ms ease-in forwards;
 }
 
 @keyframes survey-sheet-fade-in {
@@ -66,10 +71,6 @@
   animation: survey-sheet-fade-out 260ms ease-in forwards;
 }
 
-.survey-sheet-overlay--closing .survey-sheet {
-  animation: survey-sheet-slide-down 380ms ease-in forwards;
-}
-
 .survey-sheet__handle-row {
   display: flex;
   align-items: center;
@@ -77,6 +78,8 @@
   padding: 8px 0;
   width: 100%;
   flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
 }
 
 .survey-sheet__handle {

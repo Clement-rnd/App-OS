@@ -3,6 +3,7 @@ import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconTabBadge from '../../assets/questionnaire/icon-tab-badge.svg'
 import iconListBadge from '../../assets/questionnaire/icon-list-item-badge.svg'
 import iconChevron from '../../assets/reviews/icon-chevron-big.svg'
+import { useSheetDrag } from '../../hooks/useSheetDrag'
 import './SurveySelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -57,6 +58,11 @@ export function SurveySelectSheet({ onClose, onSelect }) {
 
   const entranceBaseDelay = hasSwitchedTabRef.current ? 0 : SHEET_ENTRANCE_MS
 
+  const { dragHandlers, dragStyle, isDragClosing } = useSheetDrag({
+    onRequestClose: () => closeWithAnimation(onClose),
+    closeDurationMs: CLOSE_ANIMATION_MS,
+  })
+
   useLayoutEffect(() => {
     if (frameHeight === null || !contentRef.current) return
     const newHeight = contentRef.current.scrollHeight
@@ -70,8 +76,13 @@ export function SurveySelectSheet({ onClose, onSelect }) {
   return (
     <div className={`survey-sheet-overlay${isClosing ? ' survey-sheet-overlay--closing' : ''}`}>
       <div className="survey-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
-      <div className="survey-sheet" role="dialog" aria-label="Sélectionnez une enquête à envoyer">
-        <div className="survey-sheet__handle-row">
+      <div
+        className={`survey-sheet${isClosing && !isDragClosing ? ' survey-sheet--closing' : ''}`}
+        role="dialog"
+        aria-label="Sélectionnez une enquête à envoyer"
+        style={dragStyle}
+      >
+        <div className="survey-sheet__handle-row" {...dragHandlers}>
           <span className="survey-sheet__handle" />
         </div>
 

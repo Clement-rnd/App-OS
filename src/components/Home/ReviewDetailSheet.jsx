@@ -125,9 +125,7 @@ export function ReviewDetailSheet({ review, onClose, onOpenRespond }) {
               Demandez de partager sur Google
             </button>
           )}
-          <div className="review-detail-sheet__home-indicator-wrap">
-            <span className="review-detail-sheet__home-indicator" />
-          </div>
+          <div className="review-detail-sheet__home-indicator-wrap" />
         </div>
       </div>
     </div>

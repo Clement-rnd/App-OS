@@ -129,9 +129,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
           >
             Ajouter des destinataires ({selectedCount})
           </button>
-          <div className="recipient-sheet__home-indicator-wrap">
-            <span className="recipient-sheet__home-indicator" />
-          </div>
+          <div className="recipient-sheet__home-indicator-wrap" />
         </div>
       </div>
     </div>

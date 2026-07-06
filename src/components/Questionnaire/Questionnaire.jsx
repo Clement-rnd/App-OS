@@ -364,9 +364,7 @@ export function Questionnaire({ onNavigate }) {
           Envoyer le sondage
           <img src={iconSendDisabled} alt="" />
         </button>
-        <div className="questionnaire__home-indicator">
-          <span />
-        </div>
+        <div className="questionnaire__home-indicator" />
       </footer>
 
       {isServiceSheetOpen && (

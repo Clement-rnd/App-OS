@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
-import { StatusBar } from '../StatusBar/StatusBar'
 import { SignUpModal } from '../SignUpModal/SignUpModal'
 import './Login.css'
 
@@ -21,7 +20,7 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
   return (
     <div className="login">
       <div className="login__header">
-        <StatusBar />
+        <div className="login__status-bar" />
         <button className="login__skip-btn" type="button" onClick={onSkip}>
           Skip
         </button>

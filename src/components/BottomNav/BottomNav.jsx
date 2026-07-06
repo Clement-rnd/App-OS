@@ -31,9 +31,7 @@ export function BottomNav({ active, onNavigate, badges = {} }) {
           </button>
         ))}
       </div>
-      <div className="bottom-nav__home-indicator-wrap">
-        <span className="bottom-nav__home-indicator" />
-      </div>
+      <div className="bottom-nav__home-indicator-wrap" />
     </nav>
   )
 }

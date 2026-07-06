@@ -66,16 +66,7 @@
 }
 
 .bottom-nav__home-indicator-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 113px max(8px, env(safe-area-inset-bottom));
   width: 100%;
-}
-
-.bottom-nav__home-indicator {
-  width: 134px;
-  height: 5px;
-  border-radius: 2.5px;
-  background-color: #000000;
+  padding-top: 8px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
 }

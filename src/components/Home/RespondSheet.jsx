@@ -100,9 +100,7 @@ export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
               Supprimer la réponse
             </button>
           )}
-          <div className="respond-sheet__home-indicator-wrap">
-            <span className="respond-sheet__home-indicator" />
-          </div>
+          <div className="respond-sheet__home-indicator-wrap" />
         </div>
       </div>
     </div>

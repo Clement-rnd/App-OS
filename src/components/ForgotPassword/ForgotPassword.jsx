@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
 import illustration from '../../assets/forgot-password-illustration.svg'
-import { StatusBar } from '../StatusBar/StatusBar'
 import './ForgotPassword.css'
 
 export function ForgotPassword({ onBack, onSendLink, onResetPassword }) {
@@ -33,7 +32,7 @@ export function ForgotPassword({ onBack, onSendLink, onResetPassword }) {
   return (
     <div className="forgot-password">
       <div className="forgot-password__header">
-        <StatusBar />
+        <div className="forgot-password__status-bar" />
       </div>
 
       <div className="forgot-password__logo-section">

@@ -600,17 +600,7 @@
 }
 
 .questionnaire__home-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   height: 28px;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
-}
-
-.questionnaire__home-indicator span {
-  width: 134px;
-  height: 5px;
-  border-radius: 2.5px;
-  background-color: #dfe9ef;
 }

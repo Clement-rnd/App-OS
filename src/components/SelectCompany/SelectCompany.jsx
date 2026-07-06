@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
-import { StatusBar } from '../StatusBar/StatusBar'
 import './SelectCompany.css'
 
 const COMPANIES = [
@@ -91,7 +90,7 @@ export function SelectCompany({ onContinue }) {
   return (
     <div className="select-company">
       <div className="select-company__header">
-        <StatusBar />
+        <div className="select-company__status-bar" />
       </div>
 
       <div className="select-company__logo-section">

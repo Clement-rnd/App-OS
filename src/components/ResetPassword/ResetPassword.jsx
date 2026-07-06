@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
-import { StatusBar } from '../StatusBar/StatusBar'
 import './ResetPassword.css'
 
 const REQUIREMENTS = [
@@ -69,7 +68,7 @@ export function ResetPassword({ onBack, onResetPassword }) {
   return (
     <div className="reset-password">
       <div className="reset-password__header">
-        <StatusBar />
+        <div className="reset-password__status-bar" />
       </div>
 
       <div className="reset-password__logo-section">

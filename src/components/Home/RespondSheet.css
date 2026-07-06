@@ -262,16 +262,6 @@
 }
 
 .respond-sheet__home-indicator-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 8px;
   width: 100%;
-}
-
-.respond-sheet__home-indicator {
-  width: 134px;
-  height: 5px;
-  border-radius: 2.5px;
-  background-color: #dfe9ef;
+  padding-top: 8px;
 }

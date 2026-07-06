@@ -12,7 +12,6 @@ import iconGoogle from '../../assets/home/icon-google.svg'
 import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
-import { StatusBar } from '../StatusBar/StatusBar'
 import { BottomNav } from '../BottomNav/BottomNav'
 import { StarRating } from '../StarRating/StarRating'
 import { ReviewDetailSheet } from './ReviewDetailSheet'
@@ -214,7 +213,7 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
   return (
     <div className="home">
       <header className="home__header">
-        <StatusBar />
+        <div className="home__status-bar" />
         <div className="home__appbar">
           <img className="home__logo" src={logoCompact} alt="Opinion System" />
           <button className="home__notif-btn" type="button" aria-label="Notifications">

@@ -316,17 +316,7 @@
 }
 
 .recipient-sheet__home-indicator-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
   padding-top: 8px;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
-  width: 100%;
-}
-
-.recipient-sheet__home-indicator {
-  width: 134px;
-  height: 5px;
-  border-radius: 2.5px;
-  background-color: #dfe9ef;
 }

@@ -58,9 +58,7 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
             Valider
             <img src={iconSendDisabled} alt="" />
           </button>
-          <div className="service-sheet__home-indicator-wrap">
-            <span className="service-sheet__home-indicator" />
-          </div>
+          <div className="service-sheet__home-indicator-wrap" />
         </div>
       </div>
     </div>

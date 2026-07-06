@@ -24,13 +24,13 @@
 }
 
 .login__status-bar {
-  height: max(24px, env(safe-area-inset-top));
+  height: env(safe-area-inset-top);
   width: 100%;
 }
 
 .login__skip-btn {
   position: absolute;
-  top: calc(12px + max(24px, env(safe-area-inset-top)) + 8px);
+  top: calc(12px + env(safe-area-inset-top) + 8px);
   right: 16px;
   font-size: 12px;
   font-weight: 500;

@@ -27,7 +27,7 @@
 }
 
 .questionnaire__status-bar {
-  height: max(48px, env(safe-area-inset-top) + 24px);
+  height: env(safe-area-inset-top);
   width: 100%;
 }
 

@@ -186,7 +186,7 @@ export function Reviews({ onNavigate }) {
         </div>
       </div>
 
-      <BottomNav active="chat" onNavigate={onNavigate} />
+      <BottomNav active="chat" onNavigate={onNavigate} badges={{ chat: 8 }} />
     </div>
   )
 }

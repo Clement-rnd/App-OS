@@ -1,0 +1,123 @@
+.review-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+}
+
+.review-summary-card__title {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.review-summary-card__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 100px;
+  background-color: #ede7f6;
+  font-size: 16px;
+  font-weight: 700;
+  color: #4527a0;
+}
+
+.review-summary-card__title-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.review-summary-card__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.review-summary-card__author {
+  font-size: 14px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.review-summary-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.review-summary-card__rating img {
+  width: 20px;
+  height: 20px;
+}
+
+.review-summary-card__rating span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.review-summary-card__date {
+  font-size: 10px;
+  font-weight: 500;
+  color: #b8c2cc;
+}
+
+.review-summary-card__chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.review-summary-card__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16px;
+  white-space: nowrap;
+}
+
+.review-summary-card__chip img {
+  width: 12px;
+  height: 12px;
+}
+
+.review-summary-card__chip--promoter {
+  background-color: #e9fff2;
+  color: #43b6a3;
+}
+
+.review-summary-card__chip--passive {
+  background-color: #fff3e0;
+  color: #ed6c02;
+}
+
+.review-summary-card__chip--detractor {
+  background-color: #ffece7;
+  color: #fc6530;
+}
+
+.review-summary-card__chip--muted {
+  color: #8ea1b2;
+  padding: 3px 8px 3px 4px;
+}
+
+.review-summary-card__text {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.43;
+  letter-spacing: 0.17px;
+  color: #041b44;
+}

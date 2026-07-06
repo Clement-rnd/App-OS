@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import logoCompact from '../../assets/home/logo-compact.svg'
 import iconBell from '../../assets/home/icon-bell.svg'
 import iconStatReviews from '../../assets/home/icon-stat-reviews.svg'
@@ -8,29 +8,42 @@ import phoneIllustration2 from '../../assets/home/phone-illustration-2.svg'
 import phoneIllustration3 from '../../assets/home/phone-illustration-3.svg'
 import backgroundStars from '../../assets/home/background-stars.svg'
 import iconReviewRating from '../../assets/home/icon-review-rating.svg'
-import iconStar from '../../assets/home/icon-star.svg'
 import iconGoogle from '../../assets/home/icon-google.svg'
 import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
 import { StatusBar } from '../StatusBar/StatusBar'
 import { BottomNav } from '../BottomNav/BottomNav'
+import { StarRating } from '../StarRating/StarRating'
+import { ReviewDetailSheet } from './ReviewDetailSheet'
+import { RespondSheet } from './RespondSheet'
+import { getNpsCategory } from '../../utils/nps'
 import './Home.css'
 
-const reviews = [
+const initialReviews = [
   {
     id: 1,
     author: 'Jean David Lépineux',
     rating: '4.5',
     date: '06/09/2026',
     text: "Une expérience fantastique du début à la fin ! L'équipe était professionel et m'ont aider à chaque étape du processus, je recommande vivement leurs services.",
+    npsScore: 10,
+    service: 'Vente de propriété',
+    googleShared: false,
+    ratings: { reception: 5, qualite: 4, communication: 5, delais: 4 },
+    response: null,
   },
   {
     id: 2,
     author: 'Amélie Rousseau',
-    rating: '4.0',
+    rating: '3.5',
     date: '05/09/2026',
     text: "Service rapide et efficace, seul bémol le délai d'attente initial mais le résultat final était à la hauteur de nos attentes.",
+    npsScore: 6,
+    service: 'Location de propriété',
+    googleShared: true,
+    ratings: { reception: 4, qualite: 4, communication: 3, delais: 3 },
+    response: null,
   },
   {
     id: 3,
@@ -38,6 +51,11 @@ const reviews = [
     rating: '5.0',
     date: '04/09/2026',
     text: 'Un accompagnement impeccable du début à la fin, je recommande vivement cette agence à tous ceux qui cherchent un service de qualité.',
+    npsScore: 10,
+    service: 'Vente de propriété',
+    googleShared: false,
+    ratings: { reception: 5, qualite: 5, communication: 5, delais: 5 },
+    response: null,
   },
   {
     id: 4,
@@ -45,6 +63,11 @@ const reviews = [
     rating: '4.0',
     date: '02/09/2026',
     text: "Bonne expérience globale, quelques délais de réponse mais l'équipe a su nous rassurer et répondre à toutes nos questions.",
+    npsScore: 7,
+    service: 'Estimation immobilière',
+    googleShared: false,
+    ratings: { reception: 4, qualite: 4, communication: 3, delais: 2 },
+    response: null,
   },
   {
     id: 5,
@@ -52,12 +75,46 @@ const reviews = [
     rating: '4.5',
     date: '30/08/2026',
     text: 'Très professionnel et à l’écoute de nos besoins, un grand merci pour leur réactivité et leur suivi personnalisé.',
+    npsScore: 9,
+    service: 'Vente de propriété',
+    googleShared: true,
+    ratings: { reception: 5, qualite: 4, communication: 4, delais: 4 },
+    response: null,
+  },
+  {
+    id: 6,
+    author: 'Chris P. Bacon',
+    rating: '2.0',
+    date: '06/09/2026',
+    text: 'Une expérience horrible du début à la fin. Personne ne répondait à mes messages et le suivi du dossier a été très mal géré.',
+    npsScore: 2,
+    service: 'Location de propriété',
+    googleShared: false,
+    ratings: { reception: 2, qualite: 1, communication: 1, delais: 2 },
+    response: null,
   },
 ]
 
-function ReviewCard({ review }) {
+const NPS_CHIP_CLASS = {
+  Promoteur: 'home__chip--promoter',
+  Passif: 'home__chip--passive',
+  Détracteur: 'home__chip--detractor',
+}
+
+function ReviewCard({ review, onOpenDetails, onOpenRespond }) {
+  const rating = parseFloat(review.rating)
+  const npsCategory = getNpsCategory(rating)
+
   return (
-    <div className="home__review-card">
+    <div
+      className="home__review-card"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenDetails?.(review)}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') onOpenDetails?.(review)
+      }}
+    >
       <div className="home__review-title">
         <p className="home__review-author">{review.author}</p>
         <div className="home__review-score">
@@ -68,36 +125,37 @@ function ReviewCard({ review }) {
 
       <div className="home__review-meta">
         <span className="home__review-date">{review.date}</span>
-        <div className="home__review-stars">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <img key={i} src={iconStar} alt="" className="home__review-star" />
-          ))}
-          <span className="home__review-star home__review-star--half">
-            <img src={iconStar} alt="" className="home__review-star-bg" />
-            <img src={iconStar} alt="" className="home__review-star-fg" />
-          </span>
-        </div>
+        <StarRating rating={rating} />
       </div>
 
       <div className="home__review-chips">
-        <span className="home__chip home__chip--promoter">Promoteur</span>
+        <span className={`home__chip ${NPS_CHIP_CLASS[npsCategory]}`}>{npsCategory}</span>
         <span className="home__chip home__chip--muted">
           <img src={logoIconSmall} alt="" />
           Certifié OS
         </span>
         <span className="home__chip home__chip--muted">
           <img src={iconGoogle} alt="" />
-          Partagé
+          {review.googleShared ? 'Partagé' : 'Non partagé'}
         </span>
       </div>
 
       <p className="home__review-text">{review.text}</p>
 
       <div className="home__review-actions">
-        <button type="button" className="home__review-action">
-          <img src={iconArrowReply} alt="" />
-          Répondre
-        </button>
+        {!review.response && (
+          <button
+            type="button"
+            className="home__review-action"
+            onClick={e => {
+              e.stopPropagation()
+              onOpenRespond?.(review)
+            }}
+          >
+            <img src={iconArrowReply} alt="" />
+            Répondre
+          </button>
+        )}
         <button type="button" className="home__review-action home__review-action--end">
           Détails
           <img src={iconChevronRight} alt="" />
@@ -111,7 +169,34 @@ const REVIEW_CARD_STEP = 312 + 16 // card width + gap
 
 export function Home({ onNavigate, onOpenQuestionnaire }) {
   const reviewsScrollerRef = useRef(null)
+  const [reviews, setReviews] = useState(initialReviews)
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)
+  const [selectedReview, setSelectedReview] = useState(null)
+  const [respondingReview, setRespondingReview] = useState(null)
+  const [showResponseAlert, setShowResponseAlert] = useState(false)
+  const [responseAlertText, setResponseAlertText] = useState('')
+
+  const handleOpenRespond = review => {
+    setSelectedReview(null)
+    setRespondingReview(review)
+  }
+
+  const handleSubmitResponse = (review, responseText) => {
+    const wasEditing = Boolean(review.response)
+    const updatedReview = { ...review, response: responseText }
+    setReviews(list => list.map(r => (r.id === review.id ? updatedReview : r)))
+    setRespondingReview(null)
+    setSelectedReview(updatedReview)
+    setResponseAlertText(wasEditing ? 'Une reponse a ete modifiee' : 'Une reponse a ete envoye')
+    setShowResponseAlert(true)
+  }
+
+  const handleDeleteResponse = review => {
+    const updatedReview = { ...review, response: null }
+    setReviews(list => list.map(r => (r.id === review.id ? updatedReview : r)))
+    setRespondingReview(null)
+    setSelectedReview(updatedReview)
+  }
 
   const handleReviewsScroll = () => {
     const scroller = reviewsScrollerRef.current
@@ -119,6 +204,12 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
     const index = Math.round(scroller.scrollLeft / REVIEW_CARD_STEP)
     setActiveReviewIndex(Math.max(0, Math.min(index, reviews.length - 1)))
   }
+
+  useEffect(() => {
+    if (!showResponseAlert) return
+    const timer = setTimeout(() => setShowResponseAlert(false), 4000)
+    return () => clearTimeout(timer)
+  }, [showResponseAlert])
 
   return (
     <div className="home">
@@ -136,11 +227,7 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
       <div className="home__content">
         <div className="home__greeting">
           <div className="home__greeting-text">
-            <p className="home__greeting-hello">Bonjour,</p>
-            <p className="home__greeting-name">
-              <span>Annie Mation</span>
-              <span className="home__greeting-wave">👋</span>
-            </p>
+            <p className="home__greeting-name">Annie Mation</p>
             <div className="home__greeting-company">
               <span>Bastien Arfi Immobilier</span>
             </div>
@@ -239,7 +326,12 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
 
         <div className="home__reviews-scroller" ref={reviewsScrollerRef} onScroll={handleReviewsScroll}>
           {reviews.map(review => (
-            <ReviewCard key={review.id} review={review} />
+            <ReviewCard
+              key={review.id}
+              review={review}
+              onOpenDetails={setSelectedReview}
+              onOpenRespond={handleOpenRespond}
+            />
           ))}
         </div>
 
@@ -253,7 +345,43 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
         </div>
       </div>
 
-      <BottomNav active="home" onNavigate={onNavigate} />
+      <BottomNav active="home" onNavigate={onNavigate} badges={{ chat: 8 }} />
+
+      {selectedReview && (
+        <ReviewDetailSheet
+          review={selectedReview}
+          onClose={() => setSelectedReview(null)}
+          onOpenRespond={handleOpenRespond}
+        />
+      )}
+
+      {respondingReview && (
+        <RespondSheet
+          review={respondingReview}
+          onClose={() => setRespondingReview(null)}
+          onSubmit={handleSubmitResponse}
+          onDelete={handleDeleteResponse}
+        />
+      )}
+
+      {showResponseAlert && (
+        <div className="home__response-alert" role="status">
+          <p className="home__response-alert-text">{responseAlertText}</p>
+          <button
+            type="button"
+            className="home__response-alert-close"
+            onClick={() => setShowResponseAlert(false)}
+            aria-label="Fermer"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="none">
+              <path
+                d="M15.1828 3.93281C15.4268 3.68883 15.8225 3.68903 16.0666 3.93281C16.3107 4.17688 16.3107 4.57252 16.0666 4.8166L10.883 9.99921L16.0666 15.1828C16.3107 15.4269 16.3107 15.8225 16.0666 16.0666C15.8225 16.3107 15.4269 16.3107 15.1828 16.0666L9.99921 10.883L4.8166 16.0666C4.57252 16.3107 4.17688 16.3107 3.93281 16.0666C3.68903 15.8225 3.68883 15.4268 3.93281 15.1828L9.11542 9.99921L3.93281 4.8166C3.68912 4.57249 3.68886 4.17675 3.93281 3.93281C4.17675 3.68886 4.57249 3.68912 4.8166 3.93281L9.99921 9.11542L15.1828 3.93281Z"
+                fill="#4294f7"
+              />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   )
 }

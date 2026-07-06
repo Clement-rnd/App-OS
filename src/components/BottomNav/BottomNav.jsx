@@ -11,7 +11,7 @@ const TABS = [
   { key: 'user', icon: iconUser },
 ]
 
-export function BottomNav({ active, onNavigate }) {
+export function BottomNav({ active, onNavigate, badges = {} }) {
   return (
     <nav className="bottom-nav">
       <div className="bottom-nav__row">
@@ -24,6 +24,9 @@ export function BottomNav({ active, onNavigate }) {
           >
             <span className="bottom-nav__icon-wrap">
               <img src={tab.icon} alt="" />
+              {badges[tab.key] > 0 && (
+                <span className="bottom-nav__badge">{badges[tab.key]}</span>
+              )}
             </span>
           </button>
         ))}

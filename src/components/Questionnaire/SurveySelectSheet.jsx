@@ -6,6 +6,8 @@ import iconChevron from '../../assets/reviews/icon-chevron-big.svg'
 import './SurveySelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
+const TAB_EXIT_MS = 200
+const SHEET_ENTRANCE_MS = 380
 
 const CERTIFIED_SURVEYS = [
   { id: 'transaction', title: 'Transaction immobilière', subtitle: '10 questions - 3 fois certifié' },
@@ -27,7 +29,9 @@ export function SurveySelectSheet({ onClose, onSelect }) {
   const [tab, setTab] = useState('certified')
   const [isClosing, setIsClosing] = useState(false)
   const [frameHeight, setFrameHeight] = useState(null)
+  const [isContentExiting, setContentExiting] = useState(false)
   const contentRef = useRef(null)
+  const hasSwitchedTabRef = useRef(false)
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -36,12 +40,19 @@ export function SurveySelectSheet({ onClose, onSelect }) {
   }
 
   const changeTab = nextTab => {
-    if (nextTab === tab) return
+    if (nextTab === tab || isContentExiting) return
     if (contentRef.current) {
       setFrameHeight(contentRef.current.scrollHeight)
     }
-    setTab(nextTab)
+    setContentExiting(true)
+    setTimeout(() => {
+      hasSwitchedTabRef.current = true
+      setTab(nextTab)
+      setContentExiting(false)
+    }, TAB_EXIT_MS)
   }
+
+  const entranceBaseDelay = hasSwitchedTabRef.current ? 0 : SHEET_ENTRANCE_MS
 
   useLayoutEffect(() => {
     if (frameHeight === null || !contentRef.current) return
@@ -104,17 +115,22 @@ export function SurveySelectSheet({ onClose, onSelect }) {
             if (e.target === e.currentTarget && e.propertyName === 'height') setFrameHeight(null)
           }}
         >
-          <div className="survey-sheet__tab-content" key={tab} ref={contentRef}>
-            <div className="survey-sheet__banner-wrap">
+          <div
+            className={`survey-sheet__tab-content${isContentExiting ? ' survey-sheet__tab-content--exiting' : ''}`}
+            key={tab}
+            ref={contentRef}
+          >
+            <div className="survey-sheet__banner-wrap" style={{ animationDelay: `${entranceBaseDelay}ms` }}>
               <p className="survey-sheet__banner">{TAB_INFO[tab]}</p>
             </div>
 
             <div className="survey-sheet__list">
-              {surveys.map(survey => (
+              {surveys.map((survey, index) => (
                 <button
                   key={survey.id}
                   type="button"
                   className="survey-sheet__item"
+                  style={{ animationDelay: `${entranceBaseDelay + 60 + index * 50}ms` }}
                   onClick={() => closeWithAnimation(() => onSelect(survey))}
                 >
                   <span className="survey-sheet__item-badge">

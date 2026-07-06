@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconTabBadge from '../../assets/questionnaire/icon-tab-badge.svg'
+import iconTabBadgeDark from '../../assets/questionnaire/icon-tab-badge-dark.svg'
 import iconListBadge from '../../assets/questionnaire/icon-list-item-badge.svg'
 import iconChevron from '../../assets/reviews/icon-chevron-big.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
@@ -109,7 +110,11 @@ export function SurveySelectSheet({ onClose, onSelect }) {
               className={`survey-sheet__tab${tab === 'certified' ? ' survey-sheet__tab--active' : ''}`}
               onClick={() => changeTab('certified')}
             >
-              <img src={iconTabBadge} alt="" className="survey-sheet__tab-icon" />
+              <img
+                src={tab === 'certified' ? iconTabBadge : iconTabBadgeDark}
+                alt=""
+                className="survey-sheet__tab-icon"
+              />
               Certifié
             </button>
             <button

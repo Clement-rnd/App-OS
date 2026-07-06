@@ -175,7 +175,6 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  align-self: flex-start;
   width: 20px;
   height: 20px;
   border-radius: 53px;
@@ -183,6 +182,10 @@
   font-size: 10px;
   font-weight: 700;
   color: #ffffff;
+}
+
+.questionnaire__step > .questionnaire__step-badge {
+  align-self: flex-start;
 }
 
 .questionnaire__step-badge--done {

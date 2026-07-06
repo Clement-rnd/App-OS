@@ -6,8 +6,11 @@ import iconChevron from '../../assets/reviews/icon-chevron-big.svg'
 import './SurveySelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
-const TAB_EXIT_MS = 200
 const SHEET_ENTRANCE_MS = 380
+const EXIT_ITEM_BASE_DELAY = 40
+const EXIT_ITEM_STEP = 40
+const EXIT_DURATION_MS = 180
+const TAB_EXIT_MS = EXIT_ITEM_BASE_DELAY + EXIT_ITEM_STEP * 2 + EXIT_DURATION_MS + 20
 
 const CERTIFIED_SURVEYS = [
   { id: 'transaction', title: 'Transaction immobilière', subtitle: '10 questions - 3 fois certifié' },
@@ -120,7 +123,10 @@ export function SurveySelectSheet({ onClose, onSelect }) {
             key={tab}
             ref={contentRef}
           >
-            <div className="survey-sheet__banner-wrap" style={{ animationDelay: `${entranceBaseDelay}ms` }}>
+            <div
+              className="survey-sheet__banner-wrap"
+              style={{ animationDelay: `${isContentExiting ? 0 : entranceBaseDelay}ms` }}
+            >
               <p className="survey-sheet__banner">{TAB_INFO[tab]}</p>
             </div>
 
@@ -130,7 +136,11 @@ export function SurveySelectSheet({ onClose, onSelect }) {
                   key={survey.id}
                   type="button"
                   className="survey-sheet__item"
-                  style={{ animationDelay: `${entranceBaseDelay + 60 + index * 50}ms` }}
+                  style={{
+                    animationDelay: isContentExiting
+                      ? `${EXIT_ITEM_BASE_DELAY + index * EXIT_ITEM_STEP}ms`
+                      : `${entranceBaseDelay + 60 + index * 50}ms`,
+                  }}
                   onClick={() => closeWithAnimation(() => onSelect(survey))}
                 >
                   <span className="survey-sheet__item-badge">

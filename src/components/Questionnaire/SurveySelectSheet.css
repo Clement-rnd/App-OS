@@ -214,8 +214,12 @@
   min-height: 0;
 }
 
-.survey-sheet__tab-content--exiting {
-  animation: survey-sheet-content-fade-out 200ms ease-in both;
+.survey-sheet__tab-content--exiting .survey-sheet__banner-wrap,
+.survey-sheet__tab-content--exiting .survey-sheet__item {
+  animation-name: survey-sheet-content-fade-out;
+  animation-duration: 180ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
 }
 
 .survey-sheet__banner-wrap {

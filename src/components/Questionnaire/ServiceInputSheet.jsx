@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import iconClose from '../../assets/home/icon-detail-close.svg'
-import iconSendDisabled from '../../assets/questionnaire/icon-send-disabled.svg'
 import './ServiceInputSheet.css'
 
 const MAX_LENGTH = 80
@@ -56,7 +55,6 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
             onClick={handleSubmit}
           >
             Valider
-            <img src={iconSendDisabled} alt="" />
           </button>
           <div className="service-sheet__home-indicator-wrap" />
         </div>

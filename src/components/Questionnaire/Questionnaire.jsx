@@ -14,6 +14,7 @@ import iconFlagItaly from '../../assets/questionnaire/icon-flag-italy.svg'
 import { ServiceInputSheet } from './ServiceInputSheet'
 import { SurveySelectSheet } from './SurveySelectSheet'
 import { RecipientSelectSheet } from './RecipientSelectSheet'
+import { ConfirmLeaveModal } from './ConfirmLeaveModal'
 import './Questionnaire.css'
 
 const steps = [
@@ -252,9 +253,19 @@ export function Questionnaire({ onNavigate }) {
   const [isSurveySheetOpen, setSurveySheetOpen] = useState(false)
   const [recipients, setRecipients] = useState([])
   const [isRecipientSheetOpen, setRecipientSheetOpen] = useState(false)
+  const [isLeaveConfirmOpen, setLeaveConfirmOpen] = useState(false)
 
   const isComplete = Boolean(serviceAnswer) && Boolean(surveyAnswer) && recipients.length > 0
+  const hasProgress = Boolean(serviceAnswer) || Boolean(surveyAnswer) || recipients.length > 0
   const activeStepNumber = !serviceAnswer ? 1 : !surveyAnswer ? 2 : 3
+
+  const handleClose = () => {
+    if (hasProgress) {
+      setLeaveConfirmOpen(true)
+    } else {
+      onNavigate?.('home')
+    }
+  }
 
   const stepRefs = useRef([null, null, null])
   const prevStepRectsRef = useRef(null)
@@ -295,7 +306,7 @@ export function Questionnaire({ onNavigate }) {
             type="button"
             className="questionnaire__close-btn"
             aria-label="Fermer"
-            onClick={() => onNavigate?.('home')}
+            onClick={handleClose}
           >
             <img src={iconClose} alt="" />
           </button>
@@ -406,6 +417,13 @@ export function Questionnaire({ onNavigate }) {
             setRecipients(selected)
             setRecipientSheetOpen(false)
           }}
+        />
+      )}
+
+      {isLeaveConfirmOpen && (
+        <ConfirmLeaveModal
+          onStay={() => setLeaveConfirmOpen(false)}
+          onLeave={() => onNavigate?.('home')}
         />
       )}
     </div>

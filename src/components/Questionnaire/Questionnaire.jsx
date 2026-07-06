@@ -269,6 +269,10 @@ export function Questionnaire({ onNavigate }) {
   const isComplete = Boolean(serviceAnswer) && Boolean(surveyAnswer) && recipients.length > 0
   const hasProgress = Boolean(serviceAnswer) || Boolean(surveyAnswer) || recipients.length > 0
   const activeStepNumber = !serviceAnswer ? 1 : !surveyAnswer ? 2 : 3
+  const completedStepsCount = [Boolean(serviceAnswer), Boolean(surveyAnswer), recipients.length > 0].filter(
+    Boolean
+  ).length
+  const progressPercent = (completedStepsCount / steps.length) * 100
 
   const handleClose = () => {
     if (hasProgress) {
@@ -342,7 +346,7 @@ export function Questionnaire({ onNavigate }) {
           </button>
         </div>
         <div className="questionnaire__progress">
-          <div className="questionnaire__progress-fill" />
+          <div className="questionnaire__progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
       </header>
 

@@ -31,7 +31,13 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
     setTimeout(callback, CLOSE_ANIMATION_MS)
   }
 
-  const filtered = CONTACTS.filter(c => c.name.toLowerCase().includes(query.trim().toLowerCase()))
+  const normalizedQuery = query.trim().toLowerCase()
+  const normalizedPhoneQuery = normalizedQuery.replace(/\s+/g, '')
+  const filtered = CONTACTS.filter(
+    c =>
+      c.name.toLowerCase().includes(normalizedQuery) ||
+      c.phone.replace(/\s+/g, '').toLowerCase().includes(normalizedPhoneQuery)
+  )
   const selectedCount = selectedIds.size
 
   const toggleContact = id => {
@@ -99,13 +105,14 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
         </div>
 
         <div className="recipient-sheet__list">
-          {filtered.map(contact => {
+          {filtered.map((contact, index) => {
             const isSelected = selectedIds.has(contact.id)
             return (
               <button
                 key={contact.id}
                 type="button"
                 className={`recipient-sheet__item${isSelected ? ' recipient-sheet__item--selected' : ''}`}
+                style={{ animationDelay: `${60 + Math.min(index, 5) * 50}ms` }}
                 onClick={() => toggleContact(contact.id)}
               >
                 <span className="recipient-sheet__avatar">{contact.name[0]}</span>

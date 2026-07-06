@@ -11,6 +11,7 @@ import iconFlagFrance from '../../assets/questionnaire/icon-flag-france.svg'
 import iconFlagCanada from '../../assets/questionnaire/icon-flag-canada.svg'
 import iconFlagNetherlands from '../../assets/questionnaire/icon-flag-netherlands.svg'
 import iconFlagItaly from '../../assets/questionnaire/icon-flag-italy.svg'
+import iconAddRecipient from '../../assets/questionnaire/icon-add-recipient.svg'
 import { ServiceInputSheet } from './ServiceInputSheet'
 import { SurveySelectSheet } from './SurveySelectSheet'
 import { RecipientSelectSheet } from './RecipientSelectSheet'
@@ -193,6 +194,10 @@ function RecipientList({ recipients, onEdit }) {
           </button>
         </div>
       ))}
+      <button type="button" className="questionnaire__recipient-add-btn" onClick={onEdit}>
+        <img src={iconAddRecipient} alt="" />
+        Ajouter un autre destinataire
+      </button>
     </div>
   )
 }

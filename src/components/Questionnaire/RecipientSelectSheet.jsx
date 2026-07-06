@@ -3,6 +3,7 @@ import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconSearch from '../../assets/recipients/icon-search.svg'
 import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import iconCheckSelected from '../../assets/recipients/icon-check-selected.svg'
+import iconAddContact from '../../assets/recipients/icon-add-contact.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import './RecipientSelectSheet.css'
 
@@ -131,6 +132,9 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
               <img src={iconClearX} alt="" />
             </button>
           )}
+          <button type="button" className="recipient-sheet__add-contact-btn" aria-label="Ajouter un contact">
+            <img src={iconAddContact} alt="" />
+          </button>
         </div>
 
         <div className="recipient-sheet__list">

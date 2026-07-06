@@ -18,6 +18,12 @@
   background:
     radial-gradient(ellipse at 115% -10%, rgba(44, 149, 255, 0.6) 0%, transparent 55%),
     linear-gradient(90deg, #041b44 0%, #041b44 100%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0);
+  transition: box-shadow 200ms ease;
+}
+
+.questionnaire__header--scrolled {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .questionnaire__status-bar {

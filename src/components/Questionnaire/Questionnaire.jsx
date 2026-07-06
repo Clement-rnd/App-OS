@@ -254,6 +254,14 @@ export function Questionnaire({ onNavigate }) {
   const [recipients, setRecipients] = useState([])
   const [isRecipientSheetOpen, setRecipientSheetOpen] = useState(false)
   const [isLeaveConfirmOpen, setLeaveConfirmOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 0)
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const isComplete = Boolean(serviceAnswer) && Boolean(surveyAnswer) && recipients.length > 0
   const hasProgress = Boolean(serviceAnswer) || Boolean(surveyAnswer) || recipients.length > 0
@@ -298,7 +306,7 @@ export function Questionnaire({ onNavigate }) {
 
   return (
     <div className="questionnaire">
-      <header className="questionnaire__header">
+      <header className={`questionnaire__header${isScrolled ? ' questionnaire__header--scrolled' : ''}`}>
         <div className="questionnaire__status-bar" />
         <div className="questionnaire__appbar">
           <h1 className="questionnaire__title">Boostez vos avis !</h1>

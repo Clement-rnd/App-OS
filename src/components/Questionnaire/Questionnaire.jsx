@@ -15,6 +15,7 @@ import iconAddRecipient from '../../assets/questionnaire/icon-add-recipient.svg'
 import { ServiceInputSheet } from './ServiceInputSheet'
 import { SurveySelectSheet } from './SurveySelectSheet'
 import { RecipientSelectSheet } from './RecipientSelectSheet'
+import { EditRecipientSheet } from './EditRecipientSheet'
 import { ConfirmLeaveModal } from './ConfirmLeaveModal'
 import { ContactsPermissionModal } from './ContactsPermissionModal'
 import './Questionnaire.css'
@@ -179,7 +180,7 @@ function SurveyDetails({ survey, onChangeSurvey }) {
   )
 }
 
-function RecipientList({ recipients, onEdit }) {
+function RecipientList({ recipients, onEditRecipient, onAddMore }) {
   return (
     <div className="questionnaire__recipients">
       {recipients.map(recipient => (
@@ -189,12 +190,17 @@ function RecipientList({ recipients, onEdit }) {
             <span className="questionnaire__recipient-name">{recipient.name}</span>
             <span className="questionnaire__recipient-phone">{recipient.phone}</span>
           </span>
-          <button type="button" className="questionnaire__recipient-edit" aria-label="Modifier" onClick={onEdit}>
+          <button
+            type="button"
+            className="questionnaire__recipient-edit"
+            aria-label="Modifier"
+            onClick={() => onEditRecipient(recipient)}
+          >
             <img src={iconPencil} alt="" />
           </button>
         </div>
       ))}
-      <button type="button" className="questionnaire__recipient-add-btn" onClick={onEdit}>
+      <button type="button" className="questionnaire__recipient-add-btn" onClick={onAddMore}>
         <img src={iconAddRecipient} alt="" />
         Ajouter un autre destinataire
       </button>
@@ -261,6 +267,7 @@ export function Questionnaire({ onNavigate }) {
   const [isRecipientSheetOpen, setRecipientSheetOpen] = useState(false)
   const [isLeaveConfirmOpen, setLeaveConfirmOpen] = useState(false)
   const [isContactsPermissionOpen, setContactsPermissionOpen] = useState(false)
+  const [editingRecipient, setEditingRecipient] = useState(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const hasContactsAccessRef = useRef(false)
 
@@ -303,6 +310,16 @@ export function Questionnaire({ onNavigate }) {
 
   const handleDenyContacts = () => {
     setContactsPermissionOpen(false)
+  }
+
+  const handleSaveRecipient = updatedRecipient => {
+    setRecipients(prev => prev.map(r => (r.id === updatedRecipient.id ? updatedRecipient : r)))
+    setEditingRecipient(null)
+  }
+
+  const handleDeleteRecipient = recipientId => {
+    setRecipients(prev => prev.filter(r => r.id !== recipientId))
+    setEditingRecipient(null)
   }
 
   const stepRefs = useRef([null, null, null])
@@ -409,7 +426,9 @@ export function Questionnaire({ onNavigate }) {
           isActive={activeStepNumber === 3}
           onOpen={openRecipientSheet}
         >
-          {recipients.length > 0 && <RecipientList recipients={recipients} onEdit={openRecipientSheet} />}
+          {recipients.length > 0 && (
+            <RecipientList recipients={recipients} onEditRecipient={setEditingRecipient} onAddMore={openRecipientSheet} />
+          )}
         </StepCard>
       </div>
 
@@ -465,6 +484,15 @@ export function Questionnaire({ onNavigate }) {
 
       {isContactsPermissionOpen && (
         <ContactsPermissionModal onAllow={handleAllowContacts} onDeny={handleDenyContacts} />
+      )}
+
+      {editingRecipient && (
+        <EditRecipientSheet
+          recipient={editingRecipient}
+          onClose={() => setEditingRecipient(null)}
+          onSave={handleSaveRecipient}
+          onDelete={handleDeleteRecipient}
+        />
       )}
     </div>
   )

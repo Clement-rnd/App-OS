@@ -15,6 +15,7 @@ import { ServiceInputSheet } from './ServiceInputSheet'
 import { SurveySelectSheet } from './SurveySelectSheet'
 import { RecipientSelectSheet } from './RecipientSelectSheet'
 import { ConfirmLeaveModal } from './ConfirmLeaveModal'
+import { ContactsPermissionModal } from './ContactsPermissionModal'
 import './Questionnaire.css'
 
 const steps = [
@@ -254,7 +255,9 @@ export function Questionnaire({ onNavigate }) {
   const [recipients, setRecipients] = useState([])
   const [isRecipientSheetOpen, setRecipientSheetOpen] = useState(false)
   const [isLeaveConfirmOpen, setLeaveConfirmOpen] = useState(false)
+  const [isContactsPermissionOpen, setContactsPermissionOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const hasAskedContactsPermissionRef = useRef(false)
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0)
@@ -273,6 +276,24 @@ export function Questionnaire({ onNavigate }) {
     } else {
       onNavigate?.('home')
     }
+  }
+
+  const openRecipientSheet = () => {
+    if (!hasAskedContactsPermissionRef.current) {
+      setContactsPermissionOpen(true)
+    }
+    setRecipientSheetOpen(true)
+  }
+
+  const handleAllowContacts = () => {
+    hasAskedContactsPermissionRef.current = true
+    setContactsPermissionOpen(false)
+  }
+
+  const handleDenyContacts = () => {
+    hasAskedContactsPermissionRef.current = true
+    setContactsPermissionOpen(false)
+    setRecipientSheetOpen(false)
   }
 
   const stepRefs = useRef([null, null, null])
@@ -377,11 +398,9 @@ export function Questionnaire({ onNavigate }) {
           step={steps[2]}
           isCompleted={recipients.length > 0}
           isActive={activeStepNumber === 3}
-          onOpen={() => setRecipientSheetOpen(true)}
+          onOpen={openRecipientSheet}
         >
-          {recipients.length > 0 && (
-            <RecipientList recipients={recipients} onEdit={() => setRecipientSheetOpen(true)} />
-          )}
+          {recipients.length > 0 && <RecipientList recipients={recipients} onEdit={openRecipientSheet} />}
         </StepCard>
       </div>
 
@@ -433,6 +452,10 @@ export function Questionnaire({ onNavigate }) {
           onStay={() => setLeaveConfirmOpen(false)}
           onLeave={() => onNavigate?.('home')}
         />
+      )}
+
+      {isContactsPermissionOpen && (
+        <ContactsPermissionModal onAllow={handleAllowContacts} onDeny={handleDenyContacts} />
       )}
     </div>
   )

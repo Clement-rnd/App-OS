@@ -16,6 +16,7 @@ import { ServiceInputSheet } from './ServiceInputSheet'
 import { SurveySelectSheet } from './SurveySelectSheet'
 import { RecipientSelectSheet } from './RecipientSelectSheet'
 import { EditRecipientSheet } from './EditRecipientSheet'
+import { SendQuestionnaireSheet } from './SendQuestionnaireSheet'
 import { ConfirmLeaveModal } from './ConfirmLeaveModal'
 import { ContactsPermissionModal } from './ContactsPermissionModal'
 import './Questionnaire.css'
@@ -268,6 +269,7 @@ export function Questionnaire({ onNavigate }) {
   const [isLeaveConfirmOpen, setLeaveConfirmOpen] = useState(false)
   const [isContactsPermissionOpen, setContactsPermissionOpen] = useState(false)
   const [editingRecipient, setEditingRecipient] = useState(null)
+  const [isSendSheetOpen, setSendSheetOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const hasContactsAccessRef = useRef(false)
 
@@ -433,7 +435,12 @@ export function Questionnaire({ onNavigate }) {
       </div>
 
       <footer className="questionnaire__footer">
-        <button type="button" className="questionnaire__submit-btn" disabled={!isComplete}>
+        <button
+          type="button"
+          className="questionnaire__submit-btn"
+          disabled={!isComplete}
+          onClick={() => setSendSheetOpen(true)}
+        >
           Envoyer le sondage
           <img src={iconSendDisabled} alt="" />
         </button>
@@ -493,6 +500,10 @@ export function Questionnaire({ onNavigate }) {
           onSave={handleSaveRecipient}
           onDelete={handleDeleteRecipient}
         />
+      )}
+
+      {isSendSheetOpen && (
+        <SendQuestionnaireSheet recipients={recipients} onClose={() => setSendSheetOpen(false)} />
       )}
     </div>
   )

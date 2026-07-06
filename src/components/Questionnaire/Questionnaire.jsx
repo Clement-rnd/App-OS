@@ -95,7 +95,19 @@ function SurveyDetails({ survey, onChangeSurvey }) {
 
   return (
     <div className="questionnaire__survey-card">
-      <div className="questionnaire__survey-selected">
+      <div
+        className="questionnaire__survey-selected questionnaire__survey-selected--clickable"
+        onClick={onChangeSurvey}
+        role="button"
+        tabIndex={0}
+        aria-label="Changer d'enquête"
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onChangeSurvey()
+          }
+        }}
+      >
         <span className="questionnaire__survey-selected-badge">
           <img src={iconSurveyBadge} alt="" />
         </span>
@@ -103,14 +115,9 @@ function SurveyDetails({ survey, onChangeSurvey }) {
           <span className="questionnaire__survey-selected-title">{survey.title}</span>
           <span className="questionnaire__survey-selected-subtitle">{survey.subtitle}</span>
         </span>
-        <button
-          type="button"
-          className="questionnaire__survey-swap"
-          aria-label="Changer d'enquête"
-          onClick={onChangeSurvey}
-        >
+        <span className="questionnaire__survey-swap" aria-hidden="true">
           <img src={iconSurveySwap} alt="" />
-        </button>
+        </span>
       </div>
 
       <div ref={fieldRef} className={`questionnaire__field${isLanguageOpen ? ' questionnaire__field--focused' : ''}`}>

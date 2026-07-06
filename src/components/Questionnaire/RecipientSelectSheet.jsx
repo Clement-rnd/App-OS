@@ -9,15 +9,15 @@ const CLOSE_ANIMATION_MS = 220
 const MAX_RECIPIENTS = 5
 
 const CONTACTS = [
-  { id: 'annie', name: 'Annie Versaire', phone: '+33 595 8688' },
-  { id: 'anita', name: 'Anita Listing', phone: '+33 595 8688' },
-  { id: 'artie', name: 'Artie Choke', phone: '+33 595 8688' },
-  { id: 'beau', name: 'Beau Nanza', phone: '+33 595 8688' },
-  { id: 'bill', name: 'Bill DR.House', phone: '+33 595 8688' },
-  { id: 'justin', name: 'Justin Time', phone: '+33 595 8688' },
-  { id: 'lou', name: 'Lou Natic', phone: '+33 595 8688' },
-  { id: 'moe', name: 'Moe Lasses', phone: '+33 595 8688' },
-  { id: 'sue', name: 'Sue Fley', phone: '+33 595 8688' },
+  { id: 'annie', name: 'Annie Versaire', phone: '+33 6 12 34 56 78' },
+  { id: 'anita', name: 'Anita Listing', phone: '+33 6 23 45 67 89' },
+  { id: 'artie', name: 'Artie Choke', phone: '+33 6 34 56 78 90' },
+  { id: 'beau', name: 'Beau Nanza', phone: '+33 6 45 67 89 01' },
+  { id: 'bill', name: 'Bill DR.House', phone: '+33 6 56 78 90 12' },
+  { id: 'justin', name: 'Justin Time', phone: '+33 6 67 89 01 23' },
+  { id: 'lou', name: 'Lou Natic', phone: '+33 6 78 90 12 34' },
+  { id: 'moe', name: 'Moe Lasses', phone: '+33 6 89 01 23 45' },
+  { id: 'sue', name: 'Sue Fley', phone: '+33 6 90 12 34 56' },
 ]
 
 export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {

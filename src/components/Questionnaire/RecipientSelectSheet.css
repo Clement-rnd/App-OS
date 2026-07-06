@@ -178,10 +178,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  min-height: 50px;
   padding: 12px 16px 13px;
   border-bottom: 1px solid #dfe9ef;
   width: 100%;
   flex-shrink: 0;
+  box-sizing: border-box;
   animation: recipient-sheet-content-fade-in 280ms ease-out both;
 }
 

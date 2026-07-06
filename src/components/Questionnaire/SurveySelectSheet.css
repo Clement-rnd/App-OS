@@ -10,7 +10,7 @@
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.6);
-  animation: survey-sheet-fade-in 200ms ease-out;
+  animation: survey-sheet-fade-in 260ms ease-out;
 }
 
 .survey-sheet {
@@ -23,7 +23,7 @@
   border-radius: 20px 20px 0 0;
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
-  animation: survey-sheet-slide-up 220ms ease-out;
+  animation: survey-sheet-slide-up 380ms ease-out;
 }
 
 @keyframes survey-sheet-fade-in {
@@ -63,11 +63,11 @@
 }
 
 .survey-sheet-overlay--closing .survey-sheet-backdrop {
-  animation: survey-sheet-fade-out 220ms ease-in forwards;
+  animation: survey-sheet-fade-out 260ms ease-in forwards;
 }
 
 .survey-sheet-overlay--closing .survey-sheet {
-  animation: survey-sheet-slide-down 220ms ease-in forwards;
+  animation: survey-sheet-slide-down 380ms ease-in forwards;
 }
 
 .survey-sheet__handle-row {

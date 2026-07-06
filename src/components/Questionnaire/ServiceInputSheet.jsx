@@ -5,7 +5,7 @@ import './ServiceInputSheet.css'
 
 const MAX_LENGTH = 80
 const PLACEHOLDER = 'Exemple : Annonce exclusive : appartement de 2 chambres à Bordeaux'
-const CLOSE_ANIMATION_MS = 220
+const CLOSE_ANIMATION_MS = 380
 
 export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
   const [value, setValue] = useState(initialValue || '')

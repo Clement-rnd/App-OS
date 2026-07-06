@@ -10,7 +10,7 @@
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.6);
-  animation: recipient-sheet-fade-in 200ms ease-out;
+  animation: recipient-sheet-fade-in 260ms ease-out;
 }
 
 .recipient-sheet {
@@ -23,7 +23,7 @@
   border-radius: 20px 20px 0 0;
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
-  animation: recipient-sheet-slide-up 220ms ease-out;
+  animation: recipient-sheet-slide-up 380ms ease-out;
 }
 
 @keyframes recipient-sheet-fade-in {
@@ -63,11 +63,11 @@
 }
 
 .recipient-sheet-overlay--closing .recipient-sheet-backdrop {
-  animation: recipient-sheet-fade-out 220ms ease-in forwards;
+  animation: recipient-sheet-fade-out 260ms ease-in forwards;
 }
 
 .recipient-sheet-overlay--closing .recipient-sheet {
-  animation: recipient-sheet-slide-down 220ms ease-in forwards;
+  animation: recipient-sheet-slide-down 380ms ease-in forwards;
 }
 
 .recipient-sheet__handle-row {

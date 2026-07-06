@@ -5,7 +5,7 @@ import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import iconCheckSelected from '../../assets/recipients/icon-check-selected.svg'
 import './RecipientSelectSheet.css'
 
-const CLOSE_ANIMATION_MS = 220
+const CLOSE_ANIMATION_MS = 380
 const MAX_RECIPIENTS = 5
 
 const CONTACTS = [

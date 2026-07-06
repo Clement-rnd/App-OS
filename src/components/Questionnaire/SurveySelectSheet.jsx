@@ -5,7 +5,7 @@ import iconListBadge from '../../assets/questionnaire/icon-list-item-badge.svg'
 import iconChevron from '../../assets/reviews/icon-chevron-big.svg'
 import './SurveySelectSheet.css'
 
-const CLOSE_ANIMATION_MS = 220
+const CLOSE_ANIMATION_MS = 380
 
 const CERTIFIED_SURVEYS = [
   { id: 'transaction', title: 'Transaction immobilière', subtitle: '10 questions - 3 fois certifié' },

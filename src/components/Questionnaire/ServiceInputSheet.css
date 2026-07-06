@@ -10,7 +10,7 @@
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.6);
-  animation: service-sheet-fade-in 200ms ease-out;
+  animation: service-sheet-fade-in 260ms ease-out;
 }
 
 .service-sheet {
@@ -22,7 +22,7 @@
   border-radius: 20px 20px 0 0;
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
-  animation: service-sheet-slide-up 220ms ease-out;
+  animation: service-sheet-slide-up 380ms ease-out;
 }
 
 @keyframes service-sheet-fade-in {
@@ -62,11 +62,11 @@
 }
 
 .service-sheet-overlay--closing .service-sheet-backdrop {
-  animation: service-sheet-fade-out 220ms ease-in forwards;
+  animation: service-sheet-fade-out 260ms ease-in forwards;
 }
 
 .service-sheet-overlay--closing .service-sheet {
-  animation: service-sheet-slide-down 220ms ease-in forwards;
+  animation: service-sheet-slide-down 380ms ease-in forwards;
 }
 
 .service-sheet__appbar {

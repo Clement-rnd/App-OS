@@ -279,21 +279,22 @@ export function Questionnaire({ onNavigate }) {
   }
 
   const openRecipientSheet = () => {
-    if (!hasAskedContactsPermissionRef.current) {
+    if (hasAskedContactsPermissionRef.current) {
+      setRecipientSheetOpen(true)
+    } else {
       setContactsPermissionOpen(true)
     }
-    setRecipientSheetOpen(true)
   }
 
   const handleAllowContacts = () => {
     hasAskedContactsPermissionRef.current = true
     setContactsPermissionOpen(false)
+    setRecipientSheetOpen(true)
   }
 
   const handleDenyContacts = () => {
     hasAskedContactsPermissionRef.current = true
     setContactsPermissionOpen(false)
-    setRecipientSheetOpen(false)
   }
 
   const stepRefs = useRef([null, null, null])

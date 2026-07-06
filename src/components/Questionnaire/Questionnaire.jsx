@@ -257,7 +257,7 @@ export function Questionnaire({ onNavigate }) {
   const [isLeaveConfirmOpen, setLeaveConfirmOpen] = useState(false)
   const [isContactsPermissionOpen, setContactsPermissionOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const hasAskedContactsPermissionRef = useRef(false)
+  const hasContactsAccessRef = useRef(false)
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0)
@@ -283,7 +283,7 @@ export function Questionnaire({ onNavigate }) {
   }
 
   const openRecipientSheet = () => {
-    if (hasAskedContactsPermissionRef.current) {
+    if (hasContactsAccessRef.current) {
       setRecipientSheetOpen(true)
     } else {
       setContactsPermissionOpen(true)
@@ -291,13 +291,12 @@ export function Questionnaire({ onNavigate }) {
   }
 
   const handleAllowContacts = () => {
-    hasAskedContactsPermissionRef.current = true
+    hasContactsAccessRef.current = true
     setContactsPermissionOpen(false)
     setRecipientSheetOpen(true)
   }
 
   const handleDenyContacts = () => {
-    hasAskedContactsPermissionRef.current = true
     setContactsPermissionOpen(false)
   }
 

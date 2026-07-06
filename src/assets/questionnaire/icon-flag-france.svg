@@ -1,0 +1,31 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 29.7959 25.7959" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon/Flag/France" filter="url(#filter0_dd_0_3499)">
+<g clip-path="url(#clip0_0_3499)">
+<g id="Element">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M18.2313 0.632653H24.898V17.6327H18.2313V0.632653Z" fill="#F93939"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M4.89796 0.632653H11.5646V17.6327H4.89796V0.632653Z" fill="var(--fill-0, #1A47B8)"/>
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_dd_0_3499" x="0" y="0" width="29.7959" height="25.7959" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="3.26531"/>
+<feGaussianBlur stdDeviation="2.44898"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.258824 0 0 0 0 0.278431 0 0 0 0 0.298039 0 0 0 0.08 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_3499"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="0.204082"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.258824 0 0 0 0 0.278431 0 0 0 0 0.298039 0 0 0 0.32 0"/>
+<feBlend mode="normal" in2="effect1_dropShadow_0_3499" result="effect2_dropShadow_0_3499"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_0_3499" result="shape"/>
+</filter>
+<clipPath id="clip0_0_3499">
+<rect width="20" height="16" fill="white" transform="translate(4.89796 1.63265)"/>
+</clipPath>
+</defs>
+</svg>

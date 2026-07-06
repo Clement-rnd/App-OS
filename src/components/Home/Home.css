@@ -576,12 +576,24 @@
 }
 
 /* Pagination dots */
+@keyframes home-dots-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .home__reviews-dots {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   padding-top: 4px;
+  animation: home-dots-fade-up 400ms ease-out both;
 }
 
 .home__dot {

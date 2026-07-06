@@ -39,12 +39,19 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
   })
 
   const normalizedQuery = query.trim().toLowerCase()
-  const normalizedPhoneQuery = normalizedQuery.replace(/\s+/g, '')
-  const filtered = CONTACTS.filter(
-    c =>
-      c.name.toLowerCase().includes(normalizedQuery) ||
-      c.phone.replace(/\s+/g, '').toLowerCase().includes(normalizedPhoneQuery)
-  )
+  const queryDigits = query.replace(/\D/g, '')
+  // A French number typed with its leading 0 (e.g. "06 12 34 56 78") should still match
+  // the stored "+33 6 12 34 56 78" form, where the country code replaces that leading 0.
+  const queryDigitsWithCountryCode = queryDigits.startsWith('0') ? `33${queryDigits.slice(1)}` : null
+  const filtered = CONTACTS.filter(c => {
+    if (c.name.toLowerCase().includes(normalizedQuery)) return true
+    if (!queryDigits) return false
+    const phoneDigits = c.phone.replace(/\D/g, '')
+    return (
+      phoneDigits.includes(queryDigits) ||
+      (queryDigitsWithCountryCode !== null && phoneDigits.includes(queryDigitsWithCountryCode))
+    )
+  })
   const selectedCount = selectedIds.size
 
   const toggleContact = id => {

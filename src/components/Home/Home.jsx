@@ -261,7 +261,18 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
               </svg>
             </div>
           </div>
-          <div className="home__stat home__stat--tint">
+          <div
+            className="home__stat home__stat--tint home__stat--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onNavigate?.('chat')}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onNavigate?.('chat')
+              }
+            }}
+          >
             <p className="home__stat-label">Avis collectés</p>
             <div className="home__stat-value-row">
               <p className="home__stat-value home__stat-value--medium">527</p>

@@ -256,6 +256,10 @@
   justify-content: center;
 }
 
+.home__stat--clickable {
+  cursor: pointer;
+}
+
 .home__stat-label {
   font-size: 13px;
   font-weight: 600;

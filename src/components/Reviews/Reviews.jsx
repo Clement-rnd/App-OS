@@ -14,6 +14,7 @@ import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
 import { ShareReviewsSheet } from './ShareReviewsSheet'
+import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import './Reviews.css'
 
 const tabs = [
@@ -100,6 +101,8 @@ function ReviewCard({ review }) {
 
 export function Reviews({ onNavigate }) {
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
+  const [isCompanySheetOpen, setCompanySheetOpen] = useState(false)
+  const [selectedCompany, setSelectedCompany] = useState(COMPANIES[0])
 
   return (
     <div className="reviews">
@@ -121,13 +124,17 @@ export function Reviews({ onNavigate }) {
         </div>
 
         <div className="reviews__summary">
-          <div className="reviews__summary-row reviews__summary-row--border">
+          <button
+            type="button"
+            className="reviews__summary-row reviews__summary-row--border reviews__summary-row--clickable"
+            onClick={() => setCompanySheetOpen(true)}
+          >
             <p className="reviews__summary-label">votre entreprise</p>
             <div className="reviews__summary-value-row">
-              <span className="reviews__summary-value">Bastien Arfi Immobilier</span>
+              <span className="reviews__summary-value">{selectedCompany.name}</span>
               <img src={iconChevronBig} alt="" className="reviews__summary-chevron" />
             </div>
-          </div>
+          </button>
 
           <div className="reviews__summary-row reviews__summary-row--border">
             <p className="reviews__summary-label">Collaborateur</p>
@@ -199,6 +206,14 @@ export function Reviews({ onNavigate }) {
 
       {isShareSheetOpen && (
         <ShareReviewsSheet url="https://sofakingdomrealtors.com" onClose={() => setShareSheetOpen(false)} />
+      )}
+
+      {isCompanySheetOpen && (
+        <CompanySelectSheet
+          selectedId={selectedCompany.id}
+          onClose={() => setCompanySheetOpen(false)}
+          onSelect={setSelectedCompany}
+        />
       )}
     </div>
   )

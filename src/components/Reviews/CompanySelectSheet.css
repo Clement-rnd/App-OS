@@ -1,0 +1,230 @@
+.company-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+}
+
+.company-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: company-sheet-fade-in 260ms ease-out;
+}
+
+.company-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 90dvh;
+  background-color: #ffffff;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  animation: company-sheet-slide-up 380ms ease-out;
+  transition: transform 220ms ease-out;
+}
+
+.company-sheet--closing {
+  animation: company-sheet-slide-down 380ms ease-in forwards;
+}
+
+@keyframes company-sheet-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes company-sheet-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes company-sheet-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes company-sheet-slide-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.company-sheet-overlay--closing .company-sheet-backdrop {
+  animation: company-sheet-fade-out 260ms ease-in forwards;
+}
+
+.company-sheet__handle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  width: 100%;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.company-sheet__handle {
+  width: 60px;
+  height: 5px;
+  border-radius: 2.5px;
+  background-color: #dfe9ef;
+}
+
+.company-sheet__appbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  width: 100%;
+  flex-shrink: 0;
+  border-bottom: 1px solid #dfe9ef;
+  box-sizing: border-box;
+}
+
+.company-sheet__title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.15px;
+  color: #041b44;
+}
+
+.company-sheet__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 12px;
+  margin: -12px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.company-sheet__close img {
+  width: 20px;
+  height: 20px;
+}
+
+.company-sheet__content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow-y: auto;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.company-sheet__search-wrap {
+  padding: 16px;
+  background-color: #f0f6f9;
+}
+
+.company-sheet__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+.company-sheet__search img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.company-sheet__search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #041b44;
+}
+
+.company-sheet__search-input::placeholder {
+  color: #8ea1b2;
+}
+
+.company-sheet__list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.company-sheet__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 12px 13px;
+  border: none;
+  border-bottom: 1px solid #dfe9ef;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Poppins', sans-serif;
+}
+
+.company-sheet__item--selected {
+  background-color: rgba(44, 149, 255, 0.1);
+}
+
+.company-sheet__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 100px;
+  background-color: #f0f6f9;
+}
+
+.company-sheet__icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.company-sheet__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #041b44;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.company-sheet__check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}

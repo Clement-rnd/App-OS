@@ -96,6 +96,16 @@
   border-bottom: 1px solid rgba(44, 149, 255, 0.2);
 }
 
+.reviews__summary-row--clickable {
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .reviews__summary-label {
   font-size: 10px;
   font-weight: 600;

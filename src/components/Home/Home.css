@@ -72,8 +72,8 @@
 .home__header {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 12px 0;
+  gap: 4px;
+  padding: 0 0 12px;
   width: 100%;
 }
 

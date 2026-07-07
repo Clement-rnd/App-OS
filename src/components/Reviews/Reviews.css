@@ -491,6 +491,16 @@
   color: #43b6a3;
 }
 
+.reviews__chip--passive {
+  background-color: #fff3e0;
+  color: #ed6c02;
+}
+
+.reviews__chip--detractor {
+  background-color: #ffece7;
+  color: #fc6530;
+}
+
 .reviews__chip--muted {
   color: #8ea1b2;
   padding: 3px 8px 3px 4px;

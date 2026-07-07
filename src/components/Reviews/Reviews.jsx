@@ -17,10 +17,20 @@ import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
 import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
-import { FiltersSheet, DEFAULT_FILTERS, countActiveFilters } from './FiltersSheet'
+import { FiltersSheet, DEFAULT_FILTERS, EMPTY_FILTERS, countActiveFilters } from './FiltersSheet'
+import { reviewMatchesFilters } from './filterReviews'
+import { getNpsCategory } from '../../utils/nps'
 import './Reviews.css'
 
+const NPS_CHIP_CLASS = {
+  Promoteur: 'reviews__chip--promoter',
+  Passif: 'reviews__chip--passive',
+  Détracteur: 'reviews__chip--detractor',
+}
+
 function ReviewCard({ review }) {
+  const npsCategory = getNpsCategory(parseFloat(review.rating))
+
   return (
     <div className="reviews__card">
       <div className="reviews__card-title">
@@ -45,14 +55,16 @@ function ReviewCard({ review }) {
       </div>
 
       <div className="reviews__card-chips">
-        <span className="reviews__chip reviews__chip--promoter">Promoteur</span>
-        <span className="reviews__chip reviews__chip--muted">
-          <img src={logoIconSmall} alt="" />
-          Certifié OS
-        </span>
+        <span className={`reviews__chip ${NPS_CHIP_CLASS[npsCategory]}`}>{npsCategory}</span>
+        {review.certification === 'certifie-os' && (
+          <span className="reviews__chip reviews__chip--muted">
+            <img src={logoIconSmall} alt="" />
+            Certifié OS
+          </span>
+        )}
         <span className="reviews__chip reviews__chip--muted">
           <img src={iconGoogle} alt="" />
-          Partagé
+          {review.googleSharing === 'google-partage' ? 'Partagé' : 'Non partagé'}
         </span>
       </div>
 
@@ -90,6 +102,8 @@ export function Reviews({ onNavigate }) {
 
   const [isFiltersSheetOpen, setFiltersSheetOpen] = useState(false)
   const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FILTERS)
+  const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
+  const activeFilters = hasAppliedFilters ? appliedFilters : EMPTY_FILTERS
 
   useEffect(() => {
     if (selectedCompany.id === displayedCompany.id) return
@@ -114,10 +128,9 @@ export function Reviews({ onNavigate }) {
   }, [selectedCollaborator])
 
   const companyData = COMPANY_REVIEWS_DATA[selectedCompany.id]
-  const filteredReviews =
-    selectedCollaborator.id === 'all'
-      ? companyData.reviews
-      : companyData.reviews.filter(review => review.collaboratorId === selectedCollaborator.id)
+  const filteredReviews = companyData.reviews
+    .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
+    .filter(review => reviewMatchesFilters(review, activeFilters))
 
   const tabs = [
     { value: String(companyData.tabs.sansReponses), label: 'Sans Réponses' },
@@ -224,13 +237,13 @@ export function Reviews({ onNavigate }) {
           <div className="reviews__filters">
             <button
               type="button"
-              className={`reviews__filter-chip${countActiveFilters(appliedFilters) > 0 ? ' reviews__filter-chip--active' : ''}`}
+              className={`reviews__filter-chip${countActiveFilters(activeFilters) > 0 ? ' reviews__filter-chip--active' : ''}`}
               onClick={() => setFiltersSheetOpen(true)}
             >
               <img src={iconFunnel} alt="" />
               Filtres
-              {countActiveFilters(appliedFilters) > 0 && (
-                <span className="reviews__filter-badge">{countActiveFilters(appliedFilters)}</span>
+              {countActiveFilters(activeFilters) > 0 && (
+                <span className="reviews__filter-badge">{countActiveFilters(activeFilters)}</span>
               )}
             </button>
             <button type="button" className="reviews__filter-chip">
@@ -245,7 +258,7 @@ export function Reviews({ onNavigate }) {
           {filteredReviews.length > 0 ? (
             filteredReviews.map(review => <ReviewCard key={review.id} review={review} />)
           ) : (
-            <p className="reviews__empty">Aucun avis pour ce collaborateur.</p>
+            <p className="reviews__empty">Aucun avis ne correspond à ces critères.</p>
           )}
         </div>
       </div>
@@ -285,6 +298,7 @@ export function Reviews({ onNavigate }) {
           onClose={() => setFiltersSheetOpen(false)}
           onApply={filters => {
             setAppliedFilters(filters)
+            setHasAppliedFilters(true)
             setFiltersSheetOpen(false)
           }}
         />

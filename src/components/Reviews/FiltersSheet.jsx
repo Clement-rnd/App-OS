@@ -92,6 +92,17 @@ export const DEFAULT_FILTERS = {
   type: ['certifie-os', 'google-partage'],
   etat: [],
   periode: 'aujourdhui',
+  periodeRange: { start: '', end: '' },
+}
+
+export const EMPTY_FILTERS = {
+  source: [],
+  note: [],
+  nps: [],
+  type: [],
+  etat: [],
+  periode: null,
+  periodeRange: { start: '', end: '' },
 }
 
 export function countActiveFilters(filters) {
@@ -105,8 +116,8 @@ export function FiltersSheet({ initialFilters, onClose, onApply }) {
   useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)
   const [filters, setFilters] = useState(initialFilters)
-  const [customStart, setCustomStart] = useState('')
-  const [customEnd, setCustomEnd] = useState('')
+  const [customStart, setCustomStart] = useState(initialFilters.periodeRange?.start || '')
+  const [customEnd, setCustomEnd] = useState(initialFilters.periodeRange?.end || '')
   const isCustomRangeOpen = filters.periode === 'personnalise'
 
   const closeWithAnimation = callback => {
@@ -144,7 +155,8 @@ export function FiltersSheet({ initialFilters, onClose, onApply }) {
   }
 
   const handleApply = () => {
-    closeWithAnimation(() => onApply(filters))
+    const finalFilters = { ...filters, periodeRange: { start: customStart, end: customEnd } }
+    closeWithAnimation(() => onApply(finalFilters))
   }
 
   return (

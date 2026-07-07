@@ -15,6 +15,7 @@ import logoIconSmall from '../../assets/home/logo-icon-small.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
 import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
+import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
 import './Reviews.css'
 
 const tabs = [
@@ -99,7 +100,7 @@ function ReviewCard({ review }) {
   )
 }
 
-const COMPANY_NAME_EXIT_MS = 180
+const NAME_EXIT_MS = 180
 
 export function Reviews({ onNavigate }) {
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
@@ -109,16 +110,33 @@ export function Reviews({ onNavigate }) {
   const [isCompanyNameExiting, setCompanyNameExiting] = useState(false)
   const companyExitTimeoutRef = useRef(null)
 
+  const [isCollaboratorSheetOpen, setCollaboratorSheetOpen] = useState(false)
+  const [selectedCollaborator, setSelectedCollaborator] = useState(COLLABORATORS[0])
+  const [displayedCollaborator, setDisplayedCollaborator] = useState(COLLABORATORS[0])
+  const [isCollaboratorNameExiting, setCollaboratorNameExiting] = useState(false)
+  const collaboratorExitTimeoutRef = useRef(null)
+
   useEffect(() => {
     if (selectedCompany.id === displayedCompany.id) return
     setCompanyNameExiting(true)
     companyExitTimeoutRef.current = setTimeout(() => {
       setDisplayedCompany(selectedCompany)
       setCompanyNameExiting(false)
-    }, COMPANY_NAME_EXIT_MS)
+    }, NAME_EXIT_MS)
     return () => clearTimeout(companyExitTimeoutRef.current)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompany])
+
+  useEffect(() => {
+    if (selectedCollaborator.id === displayedCollaborator.id) return
+    setCollaboratorNameExiting(true)
+    collaboratorExitTimeoutRef.current = setTimeout(() => {
+      setDisplayedCollaborator(selectedCollaborator)
+      setCollaboratorNameExiting(false)
+    }, NAME_EXIT_MS)
+    return () => clearTimeout(collaboratorExitTimeoutRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCollaborator])
 
   return (
     <div className="reviews">
@@ -157,13 +175,22 @@ export function Reviews({ onNavigate }) {
             </div>
           </button>
 
-          <div className="reviews__summary-row reviews__summary-row--border">
+          <button
+            type="button"
+            className="reviews__summary-row reviews__summary-row--border reviews__summary-row--clickable"
+            onClick={() => setCollaboratorSheetOpen(true)}
+          >
             <p className="reviews__summary-label">Collaborateur</p>
             <div className="reviews__summary-value-row">
-              <span className="reviews__summary-value">Tous les collaborateurs</span>
+              <span
+                key={displayedCollaborator.id}
+                className={`reviews__summary-value${isCollaboratorNameExiting ? ' reviews__summary-value--exiting' : ''}`}
+              >
+                {displayedCollaborator.name}
+              </span>
               <img src={iconChevronBig} alt="" className="reviews__summary-chevron" />
             </div>
-          </div>
+          </button>
 
           <div className="reviews__kpis">
             <div className="reviews__kpi">
@@ -233,7 +260,21 @@ export function Reviews({ onNavigate }) {
         <CompanySelectSheet
           selectedId={selectedCompany.id}
           onClose={() => setCompanySheetOpen(false)}
-          onSelect={setSelectedCompany}
+          onSelect={company => {
+            setSelectedCompany(company)
+            setCompanySheetOpen(false)
+          }}
+        />
+      )}
+
+      {isCollaboratorSheetOpen && (
+        <CollaboratorSelectSheet
+          selectedId={selectedCollaborator.id}
+          onClose={() => setCollaboratorSheetOpen(false)}
+          onSelect={collaborator => {
+            setSelectedCollaborator(collaborator)
+            setCollaboratorSheetOpen(false)
+          }}
         />
       )}
     </div>

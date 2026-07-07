@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import iconBack from '../../assets/reviews/icon-back.svg'
 import iconShare from '../../assets/reviews/icon-share.svg'
 import iconChevronBig from '../../assets/reviews/icon-chevron-big.svg'
@@ -12,6 +13,7 @@ import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
+import { ShareReviewsSheet } from './ShareReviewsSheet'
 import './Reviews.css'
 
 const tabs = [
@@ -97,6 +99,8 @@ function ReviewCard({ review }) {
 }
 
 export function Reviews({ onNavigate }) {
+  const [isShareSheetOpen, setShareSheetOpen] = useState(false)
+
   return (
     <div className="reviews">
       <header className="reviews__header">
@@ -106,7 +110,12 @@ export function Reviews({ onNavigate }) {
             <img src={iconBack} alt="" />
           </button>
           <h1 className="reviews__title">Mes Avis</h1>
-          <button type="button" className="reviews__icon-btn reviews__icon-btn--share" aria-label="Partager">
+          <button
+            type="button"
+            className="reviews__icon-btn reviews__icon-btn--share"
+            aria-label="Partager"
+            onClick={() => setShareSheetOpen(true)}
+          >
             <img src={iconShare} alt="" />
           </button>
         </div>
@@ -187,6 +196,10 @@ export function Reviews({ onNavigate }) {
       </div>
 
       <BottomNav active="chat" onNavigate={onNavigate} badges={{ chat: 8 }} />
+
+      {isShareSheetOpen && (
+        <ShareReviewsSheet url="https://sofakingdomrealtors.com" onClose={() => setShareSheetOpen(false)} />
+      )}
     </div>
   )
 }

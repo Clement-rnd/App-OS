@@ -4,6 +4,7 @@ import iconSave from '../../assets/questionnaire/icon-save.svg'
 import iconPencil from '../../assets/home/icon-pencil.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { ColorPickerPopover } from './ColorPickerPopover'
 import './EditCompanySheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -16,9 +17,9 @@ export function EditCompanySheet({ company, onClose, onSave }) {
   const [logoUrl, setLogoUrl] = useState(company.logoUrl)
   const [coverUrl, setCoverUrl] = useState(company.coverUrl)
   const [brandColors, setBrandColors] = useState(company.brandColors.slice(0, MAX_BRAND_COLORS))
+  const [openColorIndex, setOpenColorIndex] = useState(null)
   const logoInputRef = useRef(null)
   const coverInputRef = useRef(null)
-  const colorInputRefs = useRef([])
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -131,19 +132,19 @@ export function EditCompanySheet({ company, onClose, onSave }) {
                     type="button"
                     className="edit-company-sheet__swatch"
                     style={{ backgroundColor: color }}
-                    onClick={() => colorInputRefs.current[index]?.click()}
+                    onClick={() => setOpenColorIndex(current => (current === index ? null : index))}
                     aria-label={`Modifier la couleur ${index + 1}`}
                   >
                     <img src={iconPencil} alt="" />
                   </button>
                   <span className="edit-company-sheet__swatch-hex">{color}</span>
-                  <input
-                    ref={el => (colorInputRefs.current[index] = el)}
-                    type="color"
-                    value={color}
-                    className="edit-company-sheet__color-input"
-                    onChange={e => handleColorChange(index, e.target.value)}
-                  />
+                  {openColorIndex === index && (
+                    <ColorPickerPopover
+                      color={color}
+                      onChange={value => handleColorChange(index, value)}
+                      onClose={() => setOpenColorIndex(null)}
+                    />
+                  )}
                 </div>
               ))}
             </div>

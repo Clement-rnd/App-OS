@@ -1,0 +1,160 @@
+.notif-row-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.notif-row-actions {
+  position: absolute;
+  inset: 0;
+  left: auto;
+  display: flex;
+  align-items: stretch;
+  width: 144px;
+}
+
+.notif-row-action {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.notif-row-action img {
+  width: 18px;
+  height: 18px;
+}
+
+.notif-row-action--read {
+  background-color: #2c95ff;
+}
+
+.notif-row-action--archive {
+  background-color: #8ea1b2;
+}
+
+.notif-row {
+  position: relative;
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  padding: 12px 16px 13px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dfe9ef;
+  box-sizing: border-box;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.notif-row--unread {
+  background-color: #ebf4ff;
+}
+
+.notif-row__avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 100px;
+  background-color: #ede7f6;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+  color: #4527a0;
+}
+
+.notif-row__avatar-badge {
+  position: absolute;
+  right: -1.5px;
+  bottom: -1.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 100px;
+  background-color: #2c95ff;
+  border: 2px solid #ffffff;
+  box-sizing: border-box;
+}
+
+.notif-row__avatar-badge img {
+  width: 11px;
+  height: 11px;
+}
+
+.notif-row__avatar-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.notif-row__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-row__message {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #041b44;
+  width: 100%;
+}
+
+.notif-row--unread .notif-row__message {
+  font-weight: 600;
+}
+
+.notif-row__meta {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.notif-row__time {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #b8c2cc;
+  white-space: nowrap;
+}
+
+.notif-row__reply-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border: 1px solid #041b44;
+  border-radius: 40px;
+  background: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16px;
+  color: #041b44;
+  white-space: nowrap;
+}
+
+.notif-row__reply-btn img {
+  width: 16px;
+  height: 16px;
+}
+

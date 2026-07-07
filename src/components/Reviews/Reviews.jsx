@@ -16,37 +16,8 @@ import { BottomNav } from '../BottomNav/BottomNav'
 import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
+import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
 import './Reviews.css'
-
-const tabs = [
-  { value: '12', label: 'Sans Réponses' },
-  { value: '2', label: 'Avis Négatifs' },
-  { value: '5', label: 'A Récupérer' },
-]
-
-const reviews = [
-  {
-    id: 1,
-    author: 'Jean David Lepinieux',
-    rating: '4.5',
-    date: '06/09/2026',
-    text: "Une expérience fantastique du début à la fin ! L'équipe était professionnelle, réactive et a vraiment compris ce que je voulais atteindre a...",
-  },
-  {
-    id: 2,
-    author: 'Jean David Lepinieux',
-    rating: '4.5',
-    date: '06/09/2026',
-    text: "Une expérience fantastique du début à la fin ! L'équipe était professionnelle, réactive et a vraiment compris ce que je voulais atteindre a...",
-  },
-  {
-    id: 3,
-    author: 'Jean David Lepinieux',
-    rating: '4.5',
-    date: '06/09/2026',
-    text: "Une expérience fantastique du début à la fin ! L'équipe était professionnelle, réactive et a vraiment compris ce que je voulais atteindre a...",
-  },
-]
 
 function ReviewCard({ review }) {
   return (
@@ -138,6 +109,18 @@ export function Reviews({ onNavigate }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCollaborator])
 
+  const companyData = COMPANY_REVIEWS_DATA[selectedCompany.id]
+  const filteredReviews =
+    selectedCollaborator.id === 'all'
+      ? companyData.reviews
+      : companyData.reviews.filter(review => review.collaboratorId === selectedCollaborator.id)
+
+  const tabs = [
+    { value: String(companyData.tabs.sansReponses), label: 'Sans Réponses' },
+    { value: String(companyData.tabs.negatifs), label: 'Avis Négatifs' },
+    { value: String(companyData.tabs.aRecuperer), label: 'A Récupérer' },
+  ]
+
   return (
     <div className="reviews">
       <header className="reviews__header">
@@ -200,9 +183,10 @@ export function Reviews({ onNavigate }) {
               </div>
               <div className="reviews__kpi-value-row">
                 <p className="reviews__kpi-value">
-                  4.5<span className="reviews__kpi-value-suffix">/5</span>
+                  {companyData.kpiOS.rating}
+                  <span className="reviews__kpi-value-suffix">/5</span>
                 </p>
-                <span className="reviews__kpi-badge">327 AVIS</span>
+                <span className="reviews__kpi-badge">{companyData.kpiOS.count} AVIS</span>
               </div>
             </div>
             <div className="reviews__kpi">
@@ -212,9 +196,10 @@ export function Reviews({ onNavigate }) {
               </div>
               <div className="reviews__kpi-value-row">
                 <p className="reviews__kpi-value">
-                  4.2<span className="reviews__kpi-value-suffix">/5</span>
+                  {companyData.kpiGoogle.rating}
+                  <span className="reviews__kpi-value-suffix">/5</span>
                 </p>
-                <span className="reviews__kpi-badge">200 AVIS</span>
+                <span className="reviews__kpi-badge">{companyData.kpiGoogle.count} AVIS</span>
               </div>
             </div>
           </div>
@@ -241,12 +226,16 @@ export function Reviews({ onNavigate }) {
               <img src={iconSort} alt="" />
               Plus récent
             </button>
-            <span className="reviews__results-count">15 résultats</span>
+            <span className="reviews__results-count">
+              {filteredReviews.length} résultat{filteredReviews.length !== 1 ? 's' : ''}
+            </span>
           </div>
 
-          {reviews.map(review => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
+          {filteredReviews.length > 0 ? (
+            filteredReviews.map(review => <ReviewCard key={review.id} review={review} />)
+          ) : (
+            <p className="reviews__empty">Aucun avis pour ce collaborateur.</p>
+          )}
         </div>
       </div>
 
@@ -262,6 +251,7 @@ export function Reviews({ onNavigate }) {
           onClose={() => setCompanySheetOpen(false)}
           onSelect={company => {
             setSelectedCompany(company)
+            setSelectedCollaborator(COLLABORATORS[0])
             setCompanySheetOpen(false)
           }}
         />

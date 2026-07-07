@@ -321,6 +321,16 @@
   white-space: nowrap;
 }
 
+.reviews__empty {
+  width: 100%;
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8ea1b2;
+  animation: reviews-fade-up 400ms ease-out both;
+}
+
 /* Review card */
 .reviews__list > .reviews__card {
   animation: reviews-fade-up 400ms ease-out both;

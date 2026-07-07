@@ -52,6 +52,17 @@
   white-space: nowrap;
 }
 
+@keyframes login-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Logo */
 .login__logo-section {
   display: flex;
@@ -61,6 +72,7 @@
   justify-content: center;
   padding: 40px 16px;
   width: 100%;
+  animation: login-fade-up 400ms ease-out both;
 }
 
 .login__logo {
@@ -95,6 +107,8 @@
   text-align: center;
   color: #ffffff;
   width: 100%;
+  animation: login-fade-up 400ms ease-out both;
+  animation-delay: 80ms;
 }
 
 .login__heading {
@@ -120,6 +134,8 @@
   padding-bottom: max(40px, env(safe-area-inset-bottom) + 16px);
   width: 100%;
   min-height: 0;
+  animation: login-fade-up 400ms ease-out both;
+  animation-delay: 160ms;
 }
 
 .login__field {

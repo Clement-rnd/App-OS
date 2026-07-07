@@ -486,10 +486,14 @@
 }
 
 .questionnaire__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: 8px;
   border: 1px solid #dfe9ef;
   border-radius: 8px;
   overflow: hidden;

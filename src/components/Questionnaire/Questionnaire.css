@@ -36,8 +36,10 @@
   grid-template-columns: 24px 1fr 24px;
   align-items: center;
   gap: 8px;
-  padding: 16px;
+  height: 72px;
+  padding: 0 16px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .questionnaire__title {

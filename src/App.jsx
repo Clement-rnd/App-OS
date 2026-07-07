@@ -6,11 +6,13 @@ import { ResetPassword } from './components/ResetPassword/ResetPassword'
 import { SelectCompany } from './components/SelectCompany/SelectCompany'
 import { Reviews } from './components/Reviews/Reviews'
 import { Questionnaire } from './components/Questionnaire/Questionnaire'
+import { Profile } from './components/Profile/Profile'
 
 const TAB_TO_PAGE = {
   home: 'home',
   chat: 'reviews',
   send: 'questionnaire',
+  user: 'profile',
 }
 
 function App() {
@@ -19,6 +21,10 @@ function App() {
   const handleNavigate = tab => {
     const target = TAB_TO_PAGE[tab]
     if (target) setPage(target)
+  }
+
+  if (page === 'profile') {
+    return <Profile onNavigate={handleNavigate} />
   }
 
   if (page === 'reviews') {

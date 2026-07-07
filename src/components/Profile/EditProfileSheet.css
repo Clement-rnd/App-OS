@@ -1,0 +1,224 @@
+.edit-profile-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+}
+
+.edit-profile-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  animation: edit-profile-sheet-fade-in 260ms ease-out;
+}
+
+.edit-profile-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 90dvh;
+  background-color: #ffffff;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  animation: edit-profile-sheet-slide-up 380ms ease-out;
+  transition: transform 220ms ease-out;
+}
+
+.edit-profile-sheet--closing {
+  animation: edit-profile-sheet-slide-down 380ms ease-in forwards;
+}
+
+@keyframes edit-profile-sheet-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes edit-profile-sheet-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes edit-profile-sheet-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes edit-profile-sheet-slide-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.edit-profile-sheet-overlay--closing .edit-profile-sheet-backdrop {
+  animation: edit-profile-sheet-fade-out 260ms ease-in forwards;
+}
+
+.edit-profile-sheet__handle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  width: 100%;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.edit-profile-sheet__handle {
+  width: 60px;
+  height: 5px;
+  border-radius: 2.5px;
+  background-color: #dfe9ef;
+}
+
+.edit-profile-sheet__appbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 8px;
+  width: 100%;
+  flex-shrink: 0;
+  border-bottom: 1px solid #dfe9ef;
+}
+
+.edit-profile-sheet__title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.edit-profile-sheet__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 12px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin: -12px -4px 0 0;
+}
+
+.edit-profile-sheet__close img {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes edit-profile-sheet-content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.edit-profile-sheet__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 16px 0;
+  overflow-y: auto;
+}
+
+.edit-profile-sheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  animation: edit-profile-sheet-content-fade-in 280ms ease-out both;
+}
+
+.edit-profile-sheet__label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #041b44;
+}
+
+.edit-profile-sheet__input {
+  width: 100%;
+  height: 48px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f7fafc;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #041b44;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.edit-profile-sheet__input::placeholder {
+  color: #8ea1b2;
+}
+
+.edit-profile-sheet__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 0;
+  width: 100%;
+  flex-shrink: 0;
+  background-color: #ffffff;
+}
+
+.edit-profile-sheet__hint {
+  width: 100%;
+  font-size: 10px;
+  font-weight: 500;
+  color: #8ea1b2;
+}
+
+.edit-profile-sheet__save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  border: 1px solid #041b44;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.edit-profile-sheet__save-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.edit-profile-sheet__home-indicator-wrap {
+  width: 100%;
+  padding-top: 8px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}

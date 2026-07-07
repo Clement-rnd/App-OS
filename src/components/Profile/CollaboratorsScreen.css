@@ -1,0 +1,157 @@
+.collaborators-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f0f6f9;
+  padding-bottom: 128px;
+}
+
+.collaborators-screen__status-bar {
+  height: env(safe-area-inset-top);
+  width: 100%;
+}
+
+.collaborators-screen__header {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dfe9ef;
+}
+
+.collaborators-screen__appbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 72px;
+  padding: 0 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.collaborators-screen__back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.collaborators-screen__back-btn img {
+  width: 24px;
+  height: 24px;
+}
+
+.collaborators-screen__title {
+  flex: 1;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.collaborators-screen__spacer {
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.collaborators-screen__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.collaborators-screen__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+.collaborators-screen__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 100px;
+  background-color: rgba(44, 149, 255, 0.1);
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c95ff;
+}
+
+.collaborators-screen__row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.collaborators-screen__row-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.collaborators-screen__row-email {
+  font-size: 12px;
+  font-weight: 400;
+  color: #8ea1b2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collaborators-screen__edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 8px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.collaborators-screen__edit-btn img {
+  width: 16px;
+  height: 16px;
+}
+
+.collaborators-screen__add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  margin-top: 8px;
+  border: 1px dashed #2c95ff;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c95ff;
+}
+
+.collaborators-screen__add-btn img {
+  width: 18px;
+  height: 18px;
+}

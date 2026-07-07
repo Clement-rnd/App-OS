@@ -246,8 +246,6 @@
   gap: 16px;
   width: 100%;
   padding: 0 16px 16px;
-  animation: reviews-fade-up 400ms ease-out both;
-  animation-delay: 140ms;
 }
 
 .reviews__filters {
@@ -255,6 +253,8 @@
   align-items: center;
   gap: 4px;
   width: 100%;
+  animation: reviews-fade-up 400ms ease-out both;
+  animation-delay: 140ms;
 }
 
 .reviews__filter-chip {
@@ -290,6 +290,26 @@
 }
 
 /* Review card */
+.reviews__list > .reviews__card {
+  animation: reviews-fade-up 400ms ease-out both;
+}
+
+.reviews__list > .reviews__card:nth-child(2) {
+  animation-delay: 180ms;
+}
+
+.reviews__list > .reviews__card:nth-child(3) {
+  animation-delay: 230ms;
+}
+
+.reviews__list > .reviews__card:nth-child(4) {
+  animation-delay: 280ms;
+}
+
+.reviews__list > .reviews__card:nth-child(n + 5) {
+  animation-delay: 330ms;
+}
+
 .reviews__card {
   display: flex;
   flex-direction: column;

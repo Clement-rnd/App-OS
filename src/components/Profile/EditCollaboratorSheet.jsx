@@ -3,6 +3,7 @@ import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconSave from '../../assets/questionnaire/icon-save.svg'
 import iconTrash from '../../assets/questionnaire/icon-trash.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { LanguageField } from './LanguageField'
 import './EditCollaboratorSheet.css'
 
@@ -10,6 +11,7 @@ const CLOSE_ANIMATION_MS = 380
 const SHEET_ENTRANCE_MS = 380
 
 export function EditCollaboratorSheet({ collaborator, isNew = false, onClose, onSave, onDelete }) {
+  useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)
   const [firstName, setFirstName] = useState(collaborator.firstName)
   const [lastName, setLastName] = useState(collaborator.lastName)

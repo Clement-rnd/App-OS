@@ -2,11 +2,13 @@ import { useState } from 'react'
 import iconOpenSite from '../../assets/reviews/icon-open-site.svg'
 import iconShareLink from '../../assets/reviews/icon-share-link.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './ShareReviewsSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
 
 export function ShareReviewsSheet({ url, onClose }) {
+  useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)
 
   const closeWithAnimation = callback => {

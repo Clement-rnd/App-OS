@@ -2,6 +2,7 @@ import { useState } from 'react'
 import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconSave from '../../assets/questionnaire/icon-save.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { LanguageField } from './LanguageField'
 import './EditProfileSheet.css'
 
@@ -9,6 +10,7 @@ const CLOSE_ANIMATION_MS = 380
 const SHEET_ENTRANCE_MS = 380
 
 export function EditProfileSheet({ user, onClose, onSave }) {
+  useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)
   const [firstName, setFirstName] = useState(user.firstName)
   const [lastName, setLastName] = useState(user.lastName)

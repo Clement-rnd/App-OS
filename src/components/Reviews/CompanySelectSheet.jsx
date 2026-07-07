@@ -4,6 +4,7 @@ import iconCompanySearch from '../../assets/reviews/icon-company-search.svg'
 import iconCompanyBuilding from '../../assets/reviews/icon-company-building.svg'
 import iconCompanyCheck from '../../assets/reviews/icon-company-check.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './CompanySelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -17,6 +18,7 @@ export const COMPANIES = [
 ]
 
 export function CompanySelectSheet({ selectedId, onClose, onSelect }) {
+  useLockBodyScroll()
   const [query, setQuery] = useState('')
   const [isClosing, setIsClosing] = useState(false)
 

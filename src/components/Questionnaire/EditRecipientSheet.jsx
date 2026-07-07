@@ -5,6 +5,7 @@ import iconDropdownChevron from '../../assets/questionnaire/icon-dropdown-chevro
 import iconSave from '../../assets/questionnaire/icon-save.svg'
 import iconTrash from '../../assets/questionnaire/icon-trash.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './EditRecipientSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -16,6 +17,7 @@ function splitName(fullName) {
 }
 
 export function EditRecipientSheet({ recipient, onClose, onSave, onDelete }) {
+  useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)
   const initialName = splitName(recipient.name)
   const [firstName, setFirstName] = useState(initialName.firstName)

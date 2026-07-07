@@ -1,6 +1,8 @@
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './SignUpModal.css'
 
 export function SignUpModal({ onClose }) {
+  useLockBodyScroll()
   return (
     <div className="sign-up-modal-overlay">
       <div className="sign-up-modal-backdrop" onClick={onClose} />

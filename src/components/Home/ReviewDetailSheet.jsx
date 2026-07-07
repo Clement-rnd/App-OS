@@ -3,6 +3,7 @@ import iconReply from '../../assets/home/icon-detail-reply.svg'
 import iconGoogle from '../../assets/home/icon-google.svg'
 import iconPencil from '../../assets/home/icon-pencil.svg'
 import { getNpsCategory } from '../../utils/nps'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { ReviewSummaryCard } from './ReviewSummaryCard'
 import './ReviewDetailSheet.css'
 
@@ -20,6 +21,7 @@ const NPS_BADGE_CLASS = {
 }
 
 export function ReviewDetailSheet({ review, onClose, onOpenRespond }) {
+  useLockBodyScroll()
   const npsCategory = getNpsCategory(parseFloat(review.rating))
 
   return (

@@ -3,6 +3,7 @@ import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconSave from '../../assets/questionnaire/icon-save.svg'
 import iconPencil from '../../assets/home/icon-pencil.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './EditCompanySheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -10,6 +11,7 @@ const SHEET_ENTRANCE_MS = 380
 const MAX_BRAND_COLORS = 2
 
 export function EditCompanySheet({ company, onClose, onSave }) {
+  useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)
   const [logoUrl, setLogoUrl] = useState(company.logoUrl)
   const [coverUrl, setCoverUrl] = useState(company.coverUrl)

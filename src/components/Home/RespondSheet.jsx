@@ -2,6 +2,7 @@ import { useState } from 'react'
 import iconClose from '../../assets/home/icon-detail-close.svg'
 import iconReply from '../../assets/home/icon-detail-reply.svg'
 import iconRegenerate from '../../assets/home/icon-regenerate.svg'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { ReviewSummaryCard } from './ReviewSummaryCard'
 import './RespondSheet.css'
 
@@ -15,6 +16,7 @@ const SUGGESTIONS = [
 ]
 
 export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
+  useLockBodyScroll()
   const firstName = review.author.trim().split(' ')[0]
   const isEditing = Boolean(review.response)
   const [suggestionIndex, setSuggestionIndex] = useState(0)

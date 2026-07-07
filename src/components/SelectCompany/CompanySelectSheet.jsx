@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './SelectCompany.css'
 
 function BuildingIcon() {
@@ -65,6 +66,7 @@ function BuildingIcon() {
 }
 
 export function CompanySelectSheet({ companies, selected, onSelect, onClose }) {
+  useLockBodyScroll()
   const [search, setSearch] = useState('')
 
   const filteredCompanies = companies.filter(company =>

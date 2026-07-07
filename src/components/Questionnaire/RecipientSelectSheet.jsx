@@ -5,6 +5,7 @@ import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import iconCheckSelected from '../../assets/recipients/icon-check-selected.svg'
 import iconAddContact from '../../assets/recipients/icon-add-contact.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './RecipientSelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -34,6 +35,7 @@ const CONTACTS = [
 ]
 
 export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
+  useLockBodyScroll()
   const [query, setQuery] = useState('')
   const [selectedIds, setSelectedIds] = useState(() => new Set((initialSelected || []).map(c => c.id)))
   const [isClosing, setIsClosing] = useState(false)

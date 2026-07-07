@@ -1,6 +1,8 @@
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './ConfirmLeaveModal.css'
 
 export function ConfirmLeaveModal({ onStay, onLeave }) {
+  useLockBodyScroll()
   return (
     <div className="confirm-leave-modal-overlay">
       <div className="confirm-leave-modal-backdrop" onClick={onStay} />

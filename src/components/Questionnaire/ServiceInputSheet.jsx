@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import iconClose from '../../assets/home/icon-detail-close.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './ServiceInputSheet.css'
 
 const MAX_LENGTH = 80
@@ -8,6 +9,7 @@ const PLACEHOLDER = 'Exemple : Annonce exclusive : appartement de 2 chambres à 
 const CLOSE_ANIMATION_MS = 380
 
 export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
+  useLockBodyScroll()
   const [value, setValue] = useState(initialValue || '')
   const [isClosing, setIsClosing] = useState(false)
   const isValid = value.trim().length > 0

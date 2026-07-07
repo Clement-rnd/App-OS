@@ -1,6 +1,8 @@
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './ContactsPermissionModal.css'
 
 export function ContactsPermissionModal({ onAllow, onDeny }) {
+  useLockBodyScroll()
   return (
     <div className="contacts-permission-modal-overlay">
       <div className="contacts-permission-modal-backdrop" onClick={onDeny} />

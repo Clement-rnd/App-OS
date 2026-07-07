@@ -10,6 +10,7 @@ import iconAutoSend from '../../assets/questionnaire/icon-auto-send.svg'
 import iconChevronRightSmall from '../../assets/questionnaire/icon-chevron-right-small.svg'
 import iconBack from '../../assets/questionnaire/icon-back.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './SendQuestionnaireSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -25,6 +26,7 @@ const DEFAULT_MESSAGE =
   'Salut ! Pourriez-vous prendre un moment pour partager vos retours ? Cela nous aide vraiment. Merci !\n\nURL'
 
 export function SendQuestionnaireSheet({ recipients, onClose }) {
+  useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedChannels, setSelectedChannels] = useState(() => new Set())

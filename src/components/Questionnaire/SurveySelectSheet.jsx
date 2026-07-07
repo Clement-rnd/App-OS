@@ -5,6 +5,7 @@ import iconTabBadgeDark from '../../assets/questionnaire/icon-tab-badge-dark.svg
 import iconListBadge from '../../assets/questionnaire/icon-list-item-badge.svg'
 import iconChevron from '../../assets/reviews/icon-chevron-big.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './SurveySelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -31,6 +32,7 @@ const TAB_INFO = {
 }
 
 export function SurveySelectSheet({ onClose, onSelect }) {
+  useLockBodyScroll()
   const [tab, setTab] = useState('certified')
   const [isClosing, setIsClosing] = useState(false)
   const [frameHeight, setFrameHeight] = useState(null)

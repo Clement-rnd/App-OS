@@ -112,6 +112,26 @@ export function countActiveFilters(filters) {
   }, 0)
 }
 
+export function getActiveFilterEntries(filters) {
+  const entries = []
+  FILTER_GROUPS.forEach(group => {
+    const value = filters[group.id]
+    const optionIds = group.multi ? value : value ? [value] : []
+    optionIds.forEach(optionId => {
+      const option = group.options.find(o => o.id === optionId)
+      if (option) entries.push({ groupId: group.id, optionId, multi: group.multi, label: option.label })
+    })
+  })
+  return entries
+}
+
+export function removeFilterEntry(filters, entry) {
+  if (entry.multi) {
+    return { ...filters, [entry.groupId]: filters[entry.groupId].filter(id => id !== entry.optionId) }
+  }
+  return { ...filters, [entry.groupId]: null }
+}
+
 export function FiltersSheet({ initialFilters, onClose, onApply }) {
   useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)

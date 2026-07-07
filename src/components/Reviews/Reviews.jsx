@@ -16,8 +16,20 @@ import { BottomNav } from '../BottomNav/BottomNav'
 import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
+import iconFunnelWhite from '../../assets/reviews/icon-funnel-white.svg'
+import iconSortWhite from '../../assets/reviews/icon-sort-white.svg'
+import iconPillClose from '../../assets/reviews/icon-pill-close.svg'
+import iconFabUp from '../../assets/reviews/icon-fab-up.svg'
+import iconFabFunnel from '../../assets/reviews/icon-fab-funnel.svg'
 import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
-import { FiltersSheet, DEFAULT_FILTERS, EMPTY_FILTERS, countActiveFilters } from './FiltersSheet'
+import {
+  FiltersSheet,
+  DEFAULT_FILTERS,
+  EMPTY_FILTERS,
+  countActiveFilters,
+  getActiveFilterEntries,
+  removeFilterEntry,
+} from './FiltersSheet'
 import { reviewMatchesFilters } from './filterReviews'
 import { getNpsCategory } from '../../utils/nps'
 import './Reviews.css'
@@ -104,6 +116,31 @@ export function Reviews({ onNavigate }) {
   const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FILTERS)
   const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
   const activeFilters = hasAppliedFilters ? appliedFilters : EMPTY_FILTERS
+  const activeFilterEntries = hasAppliedFilters ? getActiveFilterEntries(appliedFilters) : []
+
+  const topbarRef = useRef(null)
+  const sentinelRef = useRef(null)
+  const [isStuck, setIsStuck] = useState(false)
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    const topbar = topbarRef.current
+    if (!sentinel || !topbar) return
+    const observer = new IntersectionObserver(([entry]) => setIsStuck(!entry.isIntersecting), {
+      rootMargin: `-${topbar.getBoundingClientRect().height}px 0px 0px 0px`,
+      threshold: 0,
+    })
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
+
+  const removeActiveFilter = entry => {
+    setAppliedFilters(prev => removeFilterEntry(prev, entry))
+  }
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   useEffect(() => {
     if (selectedCompany.id === displayedCompany.id) return
@@ -140,7 +177,7 @@ export function Reviews({ onNavigate }) {
 
   return (
     <div className="reviews">
-      <header className="reviews__header">
+      <header className="reviews__topbar" ref={topbarRef}>
         <div className="reviews__status-bar" />
         <div className="reviews__appbar">
           <button type="button" className="reviews__icon-btn" aria-label="Retour" onClick={() => onNavigate?.('home')}>
@@ -156,8 +193,70 @@ export function Reviews({ onNavigate }) {
             <img src={iconShare} alt="" />
           </button>
         </div>
+      </header>
 
-        <div className="reviews__summary">
+      {isStuck && (
+        <div className="reviews__sticky-filters">
+          <div className="reviews__filters">
+            <button
+              type="button"
+              className={`reviews__filter-chip reviews__filter-chip--dark${
+                countActiveFilters(activeFilters) > 0 ? ' reviews__filter-chip--active' : ''
+              }`}
+              onClick={() => setFiltersSheetOpen(true)}
+            >
+              <img src={iconFunnelWhite} alt="" />
+              Filtres
+              {countActiveFilters(activeFilters) > 0 && (
+                <span className="reviews__filter-badge">{countActiveFilters(activeFilters)}</span>
+              )}
+            </button>
+            <button type="button" className="reviews__filter-chip reviews__filter-chip--dark">
+              <img src={iconSortWhite} alt="" />
+              Plus récent
+            </button>
+            <span className="reviews__results-count reviews__results-count--dark">
+              {filteredReviews.length} résultat{filteredReviews.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {activeFilterEntries.length > 0 && (
+            <div className="reviews__active-pills">
+              {activeFilterEntries.map(entry => (
+                <button
+                  key={`${entry.groupId}-${entry.optionId}`}
+                  type="button"
+                  className="reviews__active-pill"
+                  onClick={() => removeActiveFilter(entry)}
+                >
+                  {entry.label}
+                  <img src={iconPillClose} alt="" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {isStuck && (
+        <div className="reviews__fab">
+          <button type="button" className="reviews__fab-btn" onClick={scrollToTop} aria-label="Remonter en haut">
+            <img src={iconFabUp} alt="" />
+          </button>
+          <div className="reviews__fab-divider" />
+          <button
+            type="button"
+            className="reviews__fab-btn"
+            onClick={() => setFiltersSheetOpen(true)}
+            aria-label="Ouvrir les filtres"
+          >
+            <img src={iconFabFunnel} alt="" />
+            {countActiveFilters(activeFilters) > 0 && <span className="reviews__fab-dot" />}
+          </button>
+        </div>
+      )}
+
+      <div className="reviews__summary">
           <button
             type="button"
             className="reviews__summary-row reviews__summary-row--border reviews__summary-row--clickable"
@@ -221,8 +320,6 @@ export function Reviews({ onNavigate }) {
             </div>
           </div>
         </div>
-      </header>
-
       <div className="reviews__panel">
         <div className="reviews__tabs">
           {tabs.map(tab => (
@@ -234,7 +331,8 @@ export function Reviews({ onNavigate }) {
         </div>
 
         <div className="reviews__list">
-          <div className="reviews__filters">
+          <div ref={sentinelRef} className="reviews__sticky-sentinel" />
+          <div className={`reviews__filters${isStuck ? ' reviews__filters--hidden' : ''}`}>
             <button
               type="button"
               className={`reviews__filter-chip${countActiveFilters(activeFilters) > 0 ? ' reviews__filter-chip--active' : ''}`}

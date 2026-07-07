@@ -2,23 +2,35 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  overflow-x: hidden;
   font-family: 'Poppins', sans-serif;
+  padding-bottom: 128px;
+}
+
+/* Fixed viewport layer so the sticky topbar/filters bar never shows a seam
+   against the scrolling page behind them. */
+.reviews::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background:
     radial-gradient(ellipse at 120% 50%, rgba(0, 212, 146, 0.6) 0%, transparent 50%),
     radial-gradient(ellipse at -2% 36%, rgba(44, 149, 255, 0.3) 0%, transparent 50%),
     radial-gradient(ellipse at 105% -3%, rgba(44, 149, 255, 0.6) 0%, transparent 40%),
     linear-gradient(180deg, #000000 0%, #010711 20%, #020e22 40%, #041b44 100%);
-  padding-bottom: 128px;
 }
 
 /* Header */
-.reviews__header {
+.reviews__topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 0 16px 16px;
   width: 100%;
+  background: linear-gradient(180deg, #000000 0%, #041b44 100%);
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .reviews__status-bar {
@@ -76,7 +88,7 @@
 .reviews__summary {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  margin: 16px;
   border-radius: 20px;
   background-color: rgba(44, 149, 255, 0.2);
   backdrop-filter: blur(8px);
@@ -281,6 +293,11 @@
   padding: 0 16px 16px;
 }
 
+.reviews__sticky-sentinel {
+  height: 1px;
+  width: 100%;
+}
+
 .reviews__filters {
   display: flex;
   align-items: center;
@@ -288,6 +305,10 @@
   width: 100%;
   animation: reviews-fade-up 400ms ease-out both;
   animation-delay: 200ms;
+}
+
+.reviews__filters--hidden {
+  visibility: hidden;
 }
 
 .reviews__filter-chip {
@@ -343,6 +364,117 @@
   letter-spacing: 0.16px;
   color: #041b44;
   white-space: nowrap;
+}
+
+/* Sticky filters bar (shown pinned below the app bar once scrolled past the summary card) */
+.reviews__sticky-filters {
+  position: sticky;
+  top: calc(72px + env(safe-area-inset-top));
+  z-index: 29;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  background: linear-gradient(180deg, #000000 0%, #041b44 100%);
+  padding: 0 16px 16px;
+  box-sizing: border-box;
+}
+
+.reviews__sticky-filters .reviews__filters {
+  animation: none;
+}
+
+.reviews__filter-chip--dark {
+  border-color: rgba(44, 149, 255, 0.3);
+  background-color: rgba(44, 149, 255, 0.2);
+  color: #ffffff;
+}
+
+.reviews__filter-chip--dark img {
+  filter: none;
+}
+
+.reviews__filter-chip--dark.reviews__filter-chip--active {
+  background-color: rgba(44, 149, 255, 0.35);
+  border-color: rgba(44, 149, 255, 0.5);
+}
+
+.reviews__results-count--dark {
+  color: #ffffff;
+}
+
+.reviews__active-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+}
+
+.reviews__active-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 100px;
+  border: 1px solid rgba(44, 149, 255, 0.3);
+  background-color: rgba(44, 149, 255, 0.2);
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16px;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.reviews__active-pill img {
+  width: 16px;
+  height: 16px;
+}
+
+/* Floating scroll-to-top / filter shortcut */
+.reviews__fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  border-radius: 100px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+}
+
+.reviews__fab-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.reviews__fab-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.reviews__fab-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #e5e7eb;
+}
+
+.reviews__fab-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #102d69;
 }
 
 .reviews__empty {

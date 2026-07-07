@@ -66,6 +66,17 @@
   color: #ffffff;
 }
 
+@keyframes reviews-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Summary card */
 .reviews__summary {
   display: flex;
@@ -75,6 +86,7 @@
   background-color: rgba(44, 149, 255, 0.2);
   backdrop-filter: blur(8px);
   overflow: hidden;
+  animation: reviews-fade-up 400ms ease-out both;
 }
 
 .reviews__summary-row {
@@ -200,6 +212,8 @@
   align-items: stretch;
   padding: 12px;
   width: 100%;
+  animation: reviews-fade-up 400ms ease-out both;
+  animation-delay: 80ms;
 }
 
 .reviews__tab {
@@ -232,6 +246,8 @@
   gap: 16px;
   width: 100%;
   padding: 0 16px 16px;
+  animation: reviews-fade-up 400ms ease-out both;
+  animation-delay: 140ms;
 }
 
 .reviews__filters {

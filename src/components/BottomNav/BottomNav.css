@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 4px 0;
+  padding: 4px 0 0;
 }
 
 .bottom-nav__item {
@@ -24,7 +24,7 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 4px 4px 6px;
+  padding: 4px;
   background: none;
   border: none;
   cursor: pointer;
@@ -88,6 +88,5 @@
 
 .bottom-nav__home-indicator-wrap {
   width: 100%;
-  padding-top: 8px;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
 }

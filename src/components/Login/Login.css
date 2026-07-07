@@ -4,13 +4,22 @@
   gap: 12px;
   min-height: 100vh;
   min-height: 100dvh;
-  overflow-y: auto;
   font-family: 'Poppins', sans-serif;
+}
+
+/* Viewport-anchored gradient layer: covers the full screen even when iOS
+   under-measures dvh at launch, so no white body ever shows at the bottom. */
+.login::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background:
     radial-gradient(ellipse at 120% 65%, rgba(0, 212, 146, 0.6) 0%, transparent 50%),
     radial-gradient(ellipse at -2% 36%, rgba(44, 149, 255, 0.3) 0%, transparent 50%),
     radial-gradient(ellipse at 105% -3%, rgba(44, 149, 255, 0.6) 0%, transparent 40%),
     linear-gradient(180deg, #000000 0%, #010711 20%, #020e22 40%, #041b44 100%);
+  pointer-events: none;
 }
 
 /* Header */

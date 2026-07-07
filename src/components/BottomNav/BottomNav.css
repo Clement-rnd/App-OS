@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 2px 0 0;
+  padding: 1px 0 0;
 }
 
 .bottom-nav__item {
@@ -23,8 +23,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 3px 4px;
+  gap: 1px;
+  padding: 2px 4px;
   background: none;
   border: none;
   cursor: pointer;
@@ -36,19 +36,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
+  padding: 4px;
   border-radius: 100px;
 }
 
 .bottom-nav__icon-wrap svg {
-  width: 24px;
-  height: 24px;
+  width: 21px;
+  height: 21px;
   color: inherit;
 }
 
 .bottom-nav__label {
   font-family: 'Poppins', sans-serif;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 500;
   line-height: 1.2;
   color: inherit;
@@ -57,18 +57,18 @@
 
 .bottom-nav__badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 1px;
+  right: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 16px;
-  height: 16px;
+  min-width: 14px;
+  height: 14px;
   padding: 0 2px;
   border-radius: 10px;
   background-color: #d32f2f;
   color: #ffffff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   line-height: 1;
   box-sizing: border-box;

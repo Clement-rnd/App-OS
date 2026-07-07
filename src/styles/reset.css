@@ -8,6 +8,10 @@ html {
   height: 100%;
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
+  /* Stop iOS elastic/rubber-band overscroll app-wide: bouncing past the
+     top/bottom edge can momentarily reveal whatever's behind fixed/sticky
+     layers (this page's own background) instead of the app's content. */
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -17,6 +21,7 @@ body {
   color: var(--color-text);
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
 }
 
 #root {

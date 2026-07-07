@@ -4,20 +4,31 @@
   min-height: 100dvh;
   font-family: 'Poppins', sans-serif;
   padding-bottom: 128px;
+  /* Prevent iOS elastic/rubber-band overscroll: bouncing past the top or
+     bottom can momentarily reveal the page's own background behind the
+     fixed/sticky layers instead of our gradient. */
+  overscroll-behavior-y: none;
+  /* Shared by every layer that needs to render the exact same background
+     as the fixed page layer below (topbar, compact bar) — see
+     .reviews::before for why this can't be a gradient that "progresses"
+     over an element's own box. */
+  --reviews-bg-color: #041b44;
+  --reviews-bg-image:
+    radial-gradient(ellipse at 120% 50%, rgba(0, 212, 146, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at -2% 36%, rgba(44, 149, 255, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 105% -3%, rgba(44, 149, 255, 0.6) 0%, transparent 40%);
 }
 
 /* Fixed viewport layer so the sticky topbar/filters bar never shows a seam
-   against the scrolling page behind them. */
+   against the scrolling page behind them. The base is a FLAT #041b44 (not
+   a black-to-navy gradient) to match the Figma source exactly. */
 .reviews::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(ellipse at 120% 50%, rgba(0, 212, 146, 0.6) 0%, transparent 50%),
-    radial-gradient(ellipse at -2% 36%, rgba(44, 149, 255, 0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at 105% -3%, rgba(44, 149, 255, 0.6) 0%, transparent 40%),
-    linear-gradient(180deg, #000000 0%, #010711 20%, #020e22 40%, #041b44 100%);
+  background-color: var(--reviews-bg-color);
+  background-image: var(--reviews-bg-image);
 }
 
 /* Header */
@@ -28,7 +39,20 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  background: linear-gradient(180deg, #000000 0%, #041b44 100%);
+  /* Must stay opaque to mask review cards scrolling underneath it, but
+     Figma's topbar itself is transparent -- so instead of a separate
+     fill, render the exact same gradient as .reviews::before sized to the
+     FULL viewport (not this element's own small box) and anchored at the
+     top-left. Since a background is always clipped to its own element by
+     default, only the top slice is ever visible here -- and since the
+     topbar's top-left always coincides with the true viewport's top-left,
+     that slice lines up pixel-for-pixel with .reviews::before, with no
+     seam and no need for position:fixed/overflow tricks on this element. */
+  background-color: var(--reviews-bg-color);
+  background-image: var(--reviews-bg-image);
+  background-size: 100vw 100dvh;
+  background-position: 0 0;
+  background-repeat: no-repeat;
   padding: 0 16px;
   box-sizing: border-box;
 }
@@ -65,6 +89,18 @@
   height: 24px;
 }
 
+.reviews__icon-btn--share {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.reviews__icon-btn--hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
 .reviews__title {
   flex: 1;
   font-size: 20px;
@@ -82,6 +118,66 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Pinned header block: sticky right below the topbar, contains the
+   summary/KPIs/tabs/filters in "expanded" mode, or just the dark filters
+   bar in "compact" mode. Its height is driven by an inline style set from
+   JS so it can transition smoothly between the two variants. */
+.reviews__pinned {
+  position: sticky;
+  top: calc(72px + env(safe-area-inset-top));
+  z-index: 29;
+  overflow: hidden;
+  transition: height 320ms ease;
+  /* Opaque on its own (same pixel-matched technique as .reviews__topbar),
+     so whichever content is fading in/out inside it during a mode swap
+     never reveals review cards that have already scrolled up behind it. */
+  background-color: var(--reviews-bg-color);
+  background-image: var(--reviews-bg-image);
+  background-size: 100vw 100dvh;
+  background-position: 0 calc(-72px - env(safe-area-inset-top));
+  background-repeat: no-repeat;
+}
+
+.reviews__pinned-inner {
+  animation: reviews-pinned-fade-in 280ms ease-out both;
+}
+
+.reviews__pinned-inner--exiting {
+  animation: reviews-pinned-fade-out 220ms ease-out both;
+}
+
+@keyframes reviews-pinned-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reviews-pinned-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+
+.reviews__pinned-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Summary card */
@@ -243,7 +339,23 @@
   white-space: nowrap;
 }
 
-/* Panel */
+/* Dark compact bar shown once scrolled past the threshold. */
+.reviews__compact-bar {
+  width: 100%;
+  /* Same technique as .reviews__topbar: full-viewport-sized background,
+     but shifted up by exactly the topbar's height so the visible slice
+     continues seamlessly from where the topbar's own slice left off
+     (this element is always stuck right below the topbar). */
+  background-color: var(--reviews-bg-color);
+  background-image: var(--reviews-bg-image);
+  background-size: 100vw 100dvh;
+  background-position: 0 calc(-72px - env(safe-area-inset-top));
+  background-repeat: no-repeat;
+  padding: 12px 16px 16px;
+  box-sizing: border-box;
+}
+
+/* Panel (review cards only) */
 .reviews__panel {
   display: flex;
   flex-direction: column;
@@ -293,22 +405,26 @@
   padding: 0 16px 16px;
 }
 
-.reviews__sticky-sentinel {
-  height: 1px;
+.reviews__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
 }
 
-.reviews__filters {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
+/* Only the in-flow (light) filters row plays the page-load cascade --
+   scoped so the compact dark bar (mounted later, on scroll) doesn't
+   replay it every time it swaps in. */
+.reviews__list > .reviews__filters {
   animation: reviews-fade-up 400ms ease-out both;
   animation-delay: 200ms;
 }
 
-.reviews__filters--hidden {
-  visibility: hidden;
+.reviews__filters-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
 }
 
 .reviews__filter-chip {
@@ -356,6 +472,11 @@
   color: #041b44;
 }
 
+.reviews__filter-badge--dark {
+  background-color: #2c95ff;
+  color: #ffffff;
+}
+
 .reviews__results-count {
   flex: 1;
   text-align: right;
@@ -366,24 +487,6 @@
   white-space: nowrap;
 }
 
-/* Sticky filters bar (shown pinned below the app bar once scrolled past the summary card) */
-.reviews__sticky-filters {
-  position: sticky;
-  top: calc(72px + env(safe-area-inset-top));
-  z-index: 29;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  background: linear-gradient(180deg, #000000 0%, #041b44 100%);
-  padding: 0 16px 16px;
-  box-sizing: border-box;
-}
-
-.reviews__sticky-filters .reviews__filters {
-  animation: none;
-}
-
 .reviews__filter-chip--dark {
   border-color: rgba(44, 149, 255, 0.3);
   background-color: rgba(44, 149, 255, 0.2);
@@ -391,7 +494,9 @@
 }
 
 .reviews__filter-chip--dark img {
-  filter: none;
+  /* These icons are baked as semi-transparent black SVGs for the light
+     theme; force them white to be visible against the dark compact bar. */
+  filter: brightness(0) invert(1);
 }
 
 .reviews__filter-chip--dark.reviews__filter-chip--active {
@@ -443,6 +548,16 @@
   border-radius: 100px;
   background-color: #ffffff;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+  opacity: 0;
+  transform: translateY(8px) scale(0.9);
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.reviews__fab--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 .reviews__fab-btn {

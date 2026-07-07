@@ -134,8 +134,30 @@
   padding-bottom: max(40px, env(safe-area-inset-bottom) + 16px);
   width: 100%;
   min-height: 0;
+}
+
+.login__form > * {
   animation: login-fade-up 400ms ease-out both;
+}
+
+.login__form > *:nth-child(1) {
   animation-delay: 160ms;
+}
+
+.login__form > *:nth-child(2) {
+  animation-delay: 220ms;
+}
+
+.login__form > *:nth-child(3) {
+  animation-delay: 280ms;
+}
+
+.login__form > *:nth-child(4) {
+  animation-delay: 340ms;
+}
+
+.login__form > *:nth-child(5) {
+  animation-delay: 400ms;
 }
 
 .login__field {

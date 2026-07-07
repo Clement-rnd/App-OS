@@ -53,11 +53,6 @@
   height: 24px;
 }
 
-.reviews__icon-btn--share img {
-  filter: brightness(0) invert(1);
-  opacity: 0.85;
-}
-
 .reviews__title {
   flex: 1;
   font-size: 20px;

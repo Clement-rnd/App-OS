@@ -17,6 +17,7 @@ import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
 import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
+import { FiltersSheet, DEFAULT_FILTERS, countActiveFilters } from './FiltersSheet'
 import './Reviews.css'
 
 function ReviewCard({ review }) {
@@ -86,6 +87,9 @@ export function Reviews({ onNavigate }) {
   const [displayedCollaborator, setDisplayedCollaborator] = useState(COLLABORATORS[0])
   const [isCollaboratorNameExiting, setCollaboratorNameExiting] = useState(false)
   const collaboratorExitTimeoutRef = useRef(null)
+
+  const [isFiltersSheetOpen, setFiltersSheetOpen] = useState(false)
+  const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FILTERS)
 
   useEffect(() => {
     if (selectedCompany.id === displayedCompany.id) return
@@ -218,9 +222,16 @@ export function Reviews({ onNavigate }) {
 
         <div className="reviews__list">
           <div className="reviews__filters">
-            <button type="button" className="reviews__filter-chip">
+            <button
+              type="button"
+              className={`reviews__filter-chip${countActiveFilters(appliedFilters) > 0 ? ' reviews__filter-chip--active' : ''}`}
+              onClick={() => setFiltersSheetOpen(true)}
+            >
               <img src={iconFunnel} alt="" />
               Filtres
+              {countActiveFilters(appliedFilters) > 0 && (
+                <span className="reviews__filter-badge">{countActiveFilters(appliedFilters)}</span>
+              )}
             </button>
             <button type="button" className="reviews__filter-chip">
               <img src={iconSort} alt="" />
@@ -264,6 +275,17 @@ export function Reviews({ onNavigate }) {
           onSelect={collaborator => {
             setSelectedCollaborator(collaborator)
             setCollaboratorSheetOpen(false)
+          }}
+        />
+      )}
+
+      {isFiltersSheetOpen && (
+        <FiltersSheet
+          initialFilters={appliedFilters}
+          onClose={() => setFiltersSheetOpen(false)}
+          onApply={filters => {
+            setAppliedFilters(filters)
+            setFiltersSheetOpen(false)
           }}
         />
       )}

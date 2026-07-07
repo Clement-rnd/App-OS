@@ -124,6 +124,33 @@
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
+  animation: reviews-value-fade-up 250ms ease-out both;
+}
+
+@keyframes reviews-value-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reviews-value-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.reviews__summary-value--exiting {
+  animation: reviews-value-fade-out 180ms ease-out forwards;
 }
 
 .reviews__summary-chevron {

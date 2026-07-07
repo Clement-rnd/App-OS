@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import iconBack from '../../assets/reviews/icon-back.svg'
 import iconShare from '../../assets/reviews/icon-share.svg'
 import iconChevronBig from '../../assets/reviews/icon-chevron-big.svg'
@@ -99,10 +99,26 @@ function ReviewCard({ review }) {
   )
 }
 
+const COMPANY_NAME_EXIT_MS = 180
+
 export function Reviews({ onNavigate }) {
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
   const [isCompanySheetOpen, setCompanySheetOpen] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(COMPANIES[0])
+  const [displayedCompany, setDisplayedCompany] = useState(COMPANIES[0])
+  const [isCompanyNameExiting, setCompanyNameExiting] = useState(false)
+  const companyExitTimeoutRef = useRef(null)
+
+  useEffect(() => {
+    if (selectedCompany.id === displayedCompany.id) return
+    setCompanyNameExiting(true)
+    companyExitTimeoutRef.current = setTimeout(() => {
+      setDisplayedCompany(selectedCompany)
+      setCompanyNameExiting(false)
+    }, COMPANY_NAME_EXIT_MS)
+    return () => clearTimeout(companyExitTimeoutRef.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCompany])
 
   return (
     <div className="reviews">
@@ -131,7 +147,12 @@ export function Reviews({ onNavigate }) {
           >
             <p className="reviews__summary-label">votre entreprise</p>
             <div className="reviews__summary-value-row">
-              <span className="reviews__summary-value">{selectedCompany.name}</span>
+              <span
+                key={displayedCompany.id}
+                className={`reviews__summary-value${isCompanyNameExiting ? ' reviews__summary-value--exiting' : ''}`}
+              >
+                {displayedCompany.name}
+              </span>
               <img src={iconChevronBig} alt="" className="reviews__summary-chevron" />
             </div>
           </button>

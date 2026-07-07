@@ -59,28 +59,59 @@ const LANGUAGES = [
   { code: 'it-IT', label: 'Italien (Italie)', flag: iconFlagItaly },
 ]
 
+const CATEGORIES = [
+  { code: 'logement', label: 'Logement' },
+  { code: 'auto-ecole', label: 'Auto-école' },
+  { code: 'assurance', label: 'Assurance' },
+  { code: 'aide-personne', label: 'Aide à la personne' },
+]
+
 const DROPDOWN_CLOSE_ANIMATION_MS = 200
 
 function SurveyDetails({ survey, onChangeSurvey }) {
   const [language, setLanguage] = useState(LANGUAGES[0])
   const [isLanguageOpen, setLanguageOpen] = useState(false)
-  const [isDropdownClosing, setDropdownClosing] = useState(false)
-  const fieldRef = useRef(null)
+  const [isLanguageDropdownClosing, setLanguageDropdownClosing] = useState(false)
+  const languageFieldRef = useRef(null)
 
-  const closeDropdown = () => {
-    if (isDropdownClosing) return
-    setDropdownClosing(true)
+  const [category, setCategory] = useState(CATEGORIES[0])
+  const [isCategoryOpen, setCategoryOpen] = useState(false)
+  const [isCategoryDropdownClosing, setCategoryDropdownClosing] = useState(false)
+  const categoryFieldRef = useRef(null)
+
+  const closeLanguageDropdown = () => {
+    if (isLanguageDropdownClosing) return
+    setLanguageDropdownClosing(true)
     setTimeout(() => {
       setLanguageOpen(false)
-      setDropdownClosing(false)
+      setLanguageDropdownClosing(false)
     }, DROPDOWN_CLOSE_ANIMATION_MS)
   }
 
-  const toggleDropdown = () => {
+  const toggleLanguageDropdown = () => {
     if (isLanguageOpen) {
-      closeDropdown()
+      closeLanguageDropdown()
     } else {
+      setCategoryOpen(false)
       setLanguageOpen(true)
+    }
+  }
+
+  const closeCategoryDropdown = () => {
+    if (isCategoryDropdownClosing) return
+    setCategoryDropdownClosing(true)
+    setTimeout(() => {
+      setCategoryOpen(false)
+      setCategoryDropdownClosing(false)
+    }, DROPDOWN_CLOSE_ANIMATION_MS)
+  }
+
+  const toggleCategoryDropdown = () => {
+    if (isCategoryOpen) {
+      closeCategoryDropdown()
+    } else {
+      setLanguageOpen(false)
+      setCategoryOpen(true)
     }
   }
 
@@ -88,8 +119,8 @@ function SurveyDetails({ survey, onChangeSurvey }) {
     if (!isLanguageOpen) return
 
     const handlePointerDown = event => {
-      if (fieldRef.current && !fieldRef.current.contains(event.target)) {
-        closeDropdown()
+      if (languageFieldRef.current && !languageFieldRef.current.contains(event.target)) {
+        closeLanguageDropdown()
       }
     }
 
@@ -97,6 +128,20 @@ function SurveyDetails({ survey, onChangeSurvey }) {
     return () => document.removeEventListener('pointerdown', handlePointerDown)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLanguageOpen])
+
+  useEffect(() => {
+    if (!isCategoryOpen) return
+
+    const handlePointerDown = event => {
+      if (categoryFieldRef.current && !categoryFieldRef.current.contains(event.target)) {
+        closeCategoryDropdown()
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCategoryOpen])
 
   return (
     <div className="questionnaire__survey-card">
@@ -125,17 +170,20 @@ function SurveyDetails({ survey, onChangeSurvey }) {
         </span>
       </div>
 
-      <div ref={fieldRef} className={`questionnaire__field${isLanguageOpen ? ' questionnaire__field--focused' : ''}`}>
+      <div
+        ref={languageFieldRef}
+        className={`questionnaire__field${isLanguageOpen ? ' questionnaire__field--focused' : ''}`}
+      >
         <span className="questionnaire__field-label">Langue</span>
         <div
           className="questionnaire__field-row questionnaire__field-row--clickable"
-          onClick={toggleDropdown}
+          onClick={toggleLanguageDropdown}
           role="button"
           tabIndex={0}
           onKeyDown={e => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
-              toggleDropdown()
+              toggleLanguageDropdown()
             }
           }}
         >
@@ -146,7 +194,9 @@ function SurveyDetails({ survey, onChangeSurvey }) {
           </span>
         </div>
         {isLanguageOpen && (
-          <div className={`questionnaire__dropdown${isDropdownClosing ? ' questionnaire__dropdown--closing' : ''}`}>
+          <div
+            className={`questionnaire__dropdown${isLanguageDropdownClosing ? ' questionnaire__dropdown--closing' : ''}`}
+          >
             {LANGUAGES.map((lang, index) => (
               <button
                 key={lang.code}
@@ -157,7 +207,7 @@ function SurveyDetails({ survey, onChangeSurvey }) {
                 style={{ animationDelay: `${index * 40}ms` }}
                 onClick={() => {
                   setLanguage(lang)
-                  closeDropdown()
+                  closeLanguageDropdown()
                 }}
               >
                 <img src={lang.flag} alt="" />
@@ -168,14 +218,50 @@ function SurveyDetails({ survey, onChangeSurvey }) {
         )}
       </div>
 
-      <div className="questionnaire__field">
+      <div
+        ref={categoryFieldRef}
+        className={`questionnaire__field${isCategoryOpen ? ' questionnaire__field--focused' : ''}`}
+      >
         <span className="questionnaire__field-label">Catégorie</span>
-        <div className="questionnaire__field-row">
-          <span className="questionnaire__field-value">Logement</span>
-          <span className="questionnaire__field-chevron questionnaire__field-chevron--static">
+        <div
+          className="questionnaire__field-row questionnaire__field-row--clickable"
+          onClick={toggleCategoryDropdown}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              toggleCategoryDropdown()
+            }
+          }}
+        >
+          <span className="questionnaire__field-value">{category.label}</span>
+          <span className="questionnaire__field-chevron" aria-hidden="true">
             <img src={iconDropdownChevron} alt="" />
           </span>
         </div>
+        {isCategoryOpen && (
+          <div
+            className={`questionnaire__dropdown${isCategoryDropdownClosing ? ' questionnaire__dropdown--closing' : ''}`}
+          >
+            {CATEGORIES.map((cat, index) => (
+              <button
+                key={cat.code}
+                type="button"
+                className={`questionnaire__dropdown-item${
+                  cat.code === category.code ? ' questionnaire__dropdown-item--selected' : ''
+                }`}
+                style={{ animationDelay: `${index * 40}ms` }}
+                onClick={() => {
+                  setCategory(cat)
+                  closeCategoryDropdown()
+                }}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

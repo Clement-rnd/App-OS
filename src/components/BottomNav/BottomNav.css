@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 4px 0 0;
+  padding: 2px 0 0;
 }
 
 .bottom-nav__item {
@@ -24,7 +24,7 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 4px;
+  padding: 3px 4px;
   background: none;
   border: none;
   cursor: pointer;
@@ -36,7 +36,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
+  padding: 5px;
   border-radius: 100px;
 }
 

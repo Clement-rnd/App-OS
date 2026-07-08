@@ -35,9 +35,37 @@
 .reviews__topbar {
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 0;
+  z-index: 30;
   width: 100%;
   padding: 0 16px;
   box-sizing: border-box;
+}
+
+/* Only once the filters bar has actually scrolled up to dock against this
+   bar (see isFiltersStuck) do both need an opaque background -- before
+   that they're just floating over the dark summary area, where staying
+   transparent already blends in perfectly with .reviews::before beneath.
+   This box and .reviews__filters-sticky--stuck each render a slice of the
+   *same* 100vw x 100dvh gradient, offset by background-position so the two
+   slices continue one another with no seam (this one sits at viewport
+   (0, 0) once stuck, so position 0 0 shows the gradient's own origin,
+   matching .reviews::before exactly). background-attachment: fixed was
+   tried here first -- it ties the origin to the viewport in theory, but a
+   transformed/filtered ancestor can re-scope what "fixed" means and break
+   the alignment, so plain position math tied to this box's known, constant
+   offset is more robust. */
+.reviews__topbar--stuck {
+  background-color: var(--reviews-bg-color);
+  background-image: var(--reviews-bg-image);
+  background-size: 100vw 100dvh;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}
+
+.reviews__topbar--locked {
+  position: fixed;
 }
 
 .reviews__status-bar {
@@ -92,24 +120,42 @@
 }
 
 /* Filters bar: normal flow until it would scroll off the top, then sticks
-   there on its own via native CSS (no JS-driven measuring needed) — the
-   topbar and summary card above it scroll away like any other content.
-   Once stuck, its box always sits at the exact same viewport position as
-   .reviews__topbar (y: 0), so it reuses the same pixel-matched full-viewport
-   background slice as the topbar to blend seamlessly with .reviews::before
-   underneath it instead of showing a mismatched/flat seam. */
+   right below the (also sticky) topbar via native CSS -- the summary card
+   above it is the only part that scrolls away, fading out as it goes
+   (see .reviews__summary--hidden). Picks up an opaque background + shadow
+   only once docked against the topbar (.reviews__filters-sticky--stuck)
+   since that's the moment review cards start sliding underneath it and
+   need to be hidden -- before that it's still over the dark summary area
+   and transparent already blends in fine. */
 .reviews__filters-sticky {
   position: sticky;
-  top: 0;
+  top: calc(72px + env(safe-area-inset-top));
   z-index: 20;
   width: 100%;
+  padding: 12px 16px 16px;
+  box-sizing: border-box;
+  animation: reviews-fade-up 400ms ease-out both;
+  animation-delay: 100ms;
+  transition: box-shadow 200ms ease;
+}
+
+.reviews__filters-sticky--stuck {
   background-color: var(--reviews-bg-color);
   background-image: var(--reviews-bg-image);
   background-size: 100vw 100dvh;
-  background-position: 0 0;
+  /* This box sits at viewport y = 72px + safe-area-inset-top once stuck --
+     shift the same gradient up by that much within it so what shows here
+     is the slice that continues immediately after .reviews__topbar--stuck's,
+     instead of each box independently starting the gradient from its own
+     top-left corner (see the comment on .reviews__topbar--stuck). */
+  background-position: 0 calc(-1 * (72px + env(safe-area-inset-top)));
   background-repeat: no-repeat;
-  padding: 12px 16px 16px;
-  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reviews__filters-sticky--locked {
+  position: fixed;
+  top: calc(72px + env(safe-area-inset-top));
 }
 
 /* Summary card */
@@ -121,8 +167,24 @@
   background-color: rgba(44, 149, 255, 0.2);
   backdrop-filter: blur(8px);
   overflow: hidden;
-  animation: reviews-fade-up 400ms ease-out both;
+  /* backwards (not both): the entrance animation should only hold its
+     "from" state during the delay so it doesn't flash visible, but must
+     release opacity/transform back to the normal cascade once it finishes
+     -- otherwise the animation's filled end state (opacity: 1) permanently
+     wins over .reviews__summary--hidden's opacity: 0 below, since a fill
+     mode keeps outranking regular declarations for as long as it's in effect. */
+  animation: reviews-fade-up 400ms ease-out backwards;
   animation-delay: 60ms;
+  transition: opacity 260ms ease, transform 260ms ease;
+}
+
+/* Toggled on scroll (see the Reviews component) so the card fades away
+   smoothly as it scrolls under the sticky filters bar, instead of being
+   abruptly clipped the instant it crosses that boundary. */
+.reviews__summary--hidden {
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
 }
 
 .reviews__summary-row {
@@ -508,6 +570,10 @@
 /* Review card */
 .reviews__list > .reviews__card {
   animation: reviews-fade-up 400ms ease-out both;
+  /* Default for the first card, kept in the same +50ms cadence as the
+     nth-child overrides below -- without this it defaults to 0ms and pops
+     in before the summary/tabs above it, breaking the top-to-bottom order. */
+  animation-delay: 190ms;
 }
 
 .reviews__list > .reviews__card:nth-child(2) {

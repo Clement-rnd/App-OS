@@ -229,6 +229,69 @@ export function Reviews({ onNavigate }) {
   const [selectedReview, setSelectedReview] = useState(null)
   const [respondingReview, setRespondingReview] = useState(null)
 
+  const isAnySheetOpen =
+    isShareSheetOpen ||
+    isCompanySheetOpen ||
+    isCollaboratorSheetOpen ||
+    isFiltersSheetOpen ||
+    selectedReview != null ||
+    respondingReview != null
+
+  // useLockBodyScroll (used by every sheet) pins <body> via position:fixed
+  // while a sheet is open, which stops real scrolling -- position:sticky
+  // relies on that scrolling to stay pinned, so without a real scroll the
+  // topbar/filters bar would just render at their in-flow position instead
+  // of staying anchored to the viewport. Switch both to position:fixed for
+  // the duration so they stay put regardless of what the locked body is
+  // doing underneath them.
+  const [isScrolled, setScrolled] = useState(false)
+
+  // The filters bar only gets an opaque background + shadow once it has
+  // actually docked below the topbar (cards sliding underneath it, needing
+  // to be hidden) -- never while it's still in normal flow over the dark
+  // summary area, even if the page has already scrolled a little. There's
+  // no CSS way to query "is this sticky element currently stuck", so this
+  // compares its own top edge against the topbar's bottom edge each frame:
+  // once they touch, it has docked.
+  const [isFiltersStuck, setFiltersStuck] = useState(false)
+  const [filtersStickyHeight, setFiltersStickyHeight] = useState(null)
+  const topbarRef = useRef(null)
+  const filtersStickyRef = useRef(null)
+
+  // useLockBodyScroll (used by every sheet) pins <body> via position:fixed
+  // while a sheet is open, and setting that resets window.scrollY to 0 as
+  // a side effect (there's nothing left to actually scroll) -- which fires
+  // a real 'scroll' event our handler below would otherwise read as "back
+  // at the top", wrongly un-fading the summary card and un-sticking the
+  // filters bar behind the sheet. Freeze both while any sheet is open, and
+  // for a moment after it closes while the scroll position is restored.
+  const ignoreScrollUntilRef = useRef(0)
+
+  useEffect(() => {
+    ignoreScrollUntilRef.current = isAnySheetOpen ? Infinity : performance.now() + 500
+  }, [isAnySheetOpen])
+
+  useEffect(() => {
+    let ticking = false
+    const handleScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        ticking = false
+        if (performance.now() < ignoreScrollUntilRef.current) return
+        setScrolled(window.scrollY > 24)
+        if (topbarRef.current && filtersStickyRef.current) {
+          const filtersRect = filtersStickyRef.current.getBoundingClientRect()
+          setFiltersStuck(filtersRect.top <= topbarRef.current.getBoundingClientRect().bottom)
+          setFiltersStickyHeight(filtersRect.height)
+        }
+      })
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const removeActiveFilter = entry => {
     setAppliedFilters(prev => removeFilterEntry(prev, entry))
   }
@@ -337,7 +400,12 @@ export function Reviews({ onNavigate }) {
 
   return (
     <div className="reviews">
-      <header className="reviews__topbar">
+      <header
+        ref={topbarRef}
+        className={`reviews__topbar${isAnySheetOpen ? ' reviews__topbar--locked' : ''}${
+          isFiltersStuck ? ' reviews__topbar--stuck' : ''
+        }`}
+      >
         <div className="reviews__status-bar" />
         <div className="reviews__appbar">
           <button type="button" className="reviews__icon-btn" aria-label="Retour" onClick={() => onNavigate?.('home')}>
@@ -355,7 +423,15 @@ export function Reviews({ onNavigate }) {
         </div>
       </header>
 
-      <div className="reviews__summary">
+      {/* position:fixed (used while a sheet is open, see --locked above)
+          doesn't reserve space in the flow the way position:sticky does --
+          without this, everything below would jump up by the topbar's
+          height the instant a sheet opens, then jump back down on close. */}
+      {isAnySheetOpen && (
+        <div aria-hidden="true" style={{ height: `calc(72px + env(safe-area-inset-top))` }} />
+      )}
+
+      <div className={`reviews__summary${isScrolled ? ' reviews__summary--hidden' : ''}`}>
         <button
           type="button"
           className="reviews__summary-row reviews__summary-row--border reviews__summary-row--clickable"
@@ -420,9 +496,22 @@ export function Reviews({ onNavigate }) {
         </div>
       </div>
 
-      <div className="reviews__filters-sticky">
+      <div
+        ref={filtersStickyRef}
+        className={`reviews__filters-sticky${
+          isAnySheetOpen && isFiltersStuck ? ' reviews__filters-sticky--locked' : ''
+        }${isFiltersStuck ? ' reviews__filters-sticky--stuck' : ''}`}
+      >
         <FiltersRow dark {...sharedFiltersProps} />
       </div>
+
+      {/* Same reasoning as the topbar's spacer above -- only needed here
+          when this bar is *also* locked (i.e. it had already docked
+          before the sheet opened), since only then does switching it to
+          position:fixed pull it out of the flow. */}
+      {isAnySheetOpen && isFiltersStuck && filtersStickyHeight != null && (
+        <div aria-hidden="true" style={{ height: filtersStickyHeight }} />
+      )}
 
       <div className="reviews__panel">
         <div className="reviews__tabs">

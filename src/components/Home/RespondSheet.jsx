@@ -37,7 +37,9 @@ export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
   useLockBodyScroll()
   const firstName = review.author.trim().split(' ')[0]
   const isEditing = Boolean(review.response)
-  const [suggestionIndex, setSuggestionIndex] = useState(0)
+  // null = no suggestion generated yet; the AI box starts empty and only
+  // fills in once the user explicitly asks for one via "Générer".
+  const [suggestionIndex, setSuggestionIndex] = useState(null)
   const [replyText, setReplyText] = useState(review.response || '')
   const [regenPhase, setRegenPhase] = useState('idle') // 'idle' | 'exiting' | 'loading' | 'entering'
   const [skeletonLineWidths, setSkeletonLineWidths] = useState(FALLBACK_SKELETON_WIDTHS)
@@ -67,11 +69,25 @@ export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
     return () => observer.disconnect()
   }, [regenPhase, suggestionIndex])
 
-  const suggestion = SUGGESTIONS[suggestionIndex % SUGGESTIONS.length](firstName)
+  const hasSuggestion = suggestionIndex != null
+  const suggestion = hasSuggestion ? SUGGESTIONS[suggestionIndex % SUGGESTIONS.length](firstName) : ''
   const isValid = replyText.trim().length > 0
 
-  const handleRegenerate = () => {
+  const handleGenerate = () => {
     if (regenPhase !== 'idle') return
+
+    // First generation: nothing rendered yet to fade out or measure a
+    // skeleton from, so skip straight to the loading/thinking phase.
+    if (!hasSuggestion) {
+      setRegenPhase('loading')
+      regenTimeoutRef.current = setTimeout(() => {
+        setSuggestionIndex(0)
+        setRegenPhase('entering')
+        regenTimeoutRef.current = setTimeout(() => setRegenPhase('idle'), REGEN_ENTER_MS)
+      }, REGEN_LOADING_MS)
+      return
+    }
+
     // Match each skeleton bar to the *actual* width of the outgoing
     // text's corresponding wrapped line (not just its line count), so
     // swapping text -> skeleton doesn't change the shape at all, only
@@ -143,7 +159,7 @@ export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
                 <button
                   type="button"
                   className="respond-sheet__ai-regenerate"
-                  onClick={handleRegenerate}
+                  onClick={handleGenerate}
                   disabled={regenPhase !== 'idle'}
                 >
                   <img
@@ -151,13 +167,13 @@ export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
                     alt=""
                     className={regenPhase === 'loading' ? 'respond-sheet__ai-regenerate-icon--spinning' : ''}
                   />
-                  Régénérer
+                  {hasSuggestion ? 'Régénérer' : 'Générer'}
                 </button>
                 <button
                   type="button"
                   className="respond-sheet__ai-use"
                   onClick={() => setReplyText(suggestion)}
-                  disabled={regenPhase !== 'idle'}
+                  disabled={!hasSuggestion || regenPhase !== 'idle'}
                 >
                   Utiliser
                 </button>
@@ -174,6 +190,10 @@ export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
                       <div key={i} className="respond-sheet__ai-skeleton-line" style={{ width: `${width}%` }} />
                     ))}
                   </div>
+                ) : !hasSuggestion ? (
+                  <p className="respond-sheet__ai-text respond-sheet__ai-text--placeholder">
+                    Cliquez sur « Générer » pour obtenir une suggestion de réponse.
+                  </p>
                 ) : (
                   <p
                     ref={textRef}
@@ -182,14 +202,15 @@ export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
                       regenPhase === 'exiting' ? ' respond-sheet__ai-text--exiting' : ''
                     }`}
                   >
-                    {regenPhase !== 'exiting' && suggestionIndex > 0
-                      ? // Once a regeneration has happened, keep rendering as
-                        // spans permanently (even after the entrance animation
-                        // settles) instead of swapping back to a plain text
-                        // node -- that swap was a DOM structure change right
-                        // after the animation finished, causing a tiny reflow
-                        // jump. The spans are visually identical to plain text
-                        // once settled, so nothing is lost by keeping them.
+                    {regenPhase !== 'exiting'
+                      ? // Every suggestion arrives through the generate/regenerate
+                        // animation, so it's always rendered as per-word spans
+                        // (even once the entrance animation settles) instead of
+                        // swapping back to a plain text node -- that swap was a
+                        // DOM structure change right after the animation
+                        // finished, causing a tiny reflow jump. The spans are
+                        // visually identical to plain text once settled, so
+                        // nothing is lost by keeping them.
                         suggestion.split(' ').map((word, i) => (
                           // The space is a sibling text node, not inside the
                           // inline-block span -- a trailing space at the edge

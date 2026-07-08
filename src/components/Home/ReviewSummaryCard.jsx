@@ -40,10 +40,12 @@ export function ReviewSummaryCard({ review, showChips = false }) {
           <span className={`review-summary-card__chip ${NPS_CHIP_CLASS[npsCategory]}`}>
             {npsCategory}
           </span>
-          <span className="review-summary-card__chip review-summary-card__chip--muted">
-            <img src={logoIconSmall} alt="" />
-            Certifié OS
-          </span>
+          {review.certification !== 'standard-os' && (
+            <span className="review-summary-card__chip review-summary-card__chip--muted">
+              <img src={logoIconSmall} alt="" />
+              Certifié OS
+            </span>
+          )}
           <span className="review-summary-card__chip review-summary-card__chip--muted">
             <img src={iconGoogle} alt="" />
             {review.googleShared ? 'Partagé' : 'Non Partagé'}

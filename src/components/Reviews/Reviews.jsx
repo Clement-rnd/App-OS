@@ -29,7 +29,7 @@ import {
   removeFilterEntry,
 } from './FiltersSheet'
 import { reviewMatchesFilters, parseReviewDate } from './filterReviews'
-import { ReviewsDetailSheet } from './ReviewsDetailSheet'
+import { ReviewDetailSheet } from '../Home/ReviewDetailSheet'
 import { getNpsCategory } from '../../utils/nps'
 import './Reviews.css'
 
@@ -41,11 +41,44 @@ const NPS_CHIP_CLASS = {
   Détracteur: 'reviews__chip--detractor',
 }
 
+function ReplyBubbleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12.5058 3.78512C10.5024 3.65956 8.52201 4.2696 6.93648 5.5007C5.35095 6.7318 4.26931 8.4993 3.89461 10.4714C3.5199 12.4435 3.87792 14.4845 4.90143 16.2113C5.00625 16.3882 5.03388 16.6003 4.97788 16.7981L4.09948 19.9005L7.20193 19.0221L7.40625 19.7438L7.78866 19.0986C9.51549 20.1221 11.5565 20.4801 13.5286 20.1054C15.5007 19.7307 17.2682 18.649 18.4993 17.0635C19.7304 15.478 20.3404 13.4976 20.2149 11.4942C20.0893 9.49074 19.2368 7.60203 17.8174 6.1826C16.398 4.76318 14.5093 3.91067 12.5058 3.78512ZM7.30808 20.551C9.28697 21.6359 11.5849 22.0015 13.8086 21.579C16.1397 21.1361 18.2289 19.8576 19.6841 17.9835C21.1393 16.1093 21.8604 13.7685 21.7119 11.4004C21.5635 9.03225 20.5558 6.79974 18.8781 5.12194C17.2003 3.44415 14.9678 2.43646 12.5996 2.28805C10.2315 2.13964 7.89068 2.86072 6.01654 4.31591C4.14241 5.77111 2.86388 7.86034 2.42097 10.1914C1.99845 12.4151 2.36411 14.713 3.44897 16.6919L2.65409 19.4994C2.58005 19.755 2.57576 20.0257 2.64172 20.2836C2.70799 20.5426 2.84273 20.7791 3.03181 20.9682C3.2209 21.1573 3.45738 21.292 3.71644 21.3583C3.97429 21.4242 4.24507 21.42 4.50067 21.3459L7.30808 20.551Z"
+        fill="currentColor"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8.25 10.5C8.25 10.0858 8.58579 9.75 9 9.75H15C15.4142 9.75 15.75 10.0858 15.75 10.5C15.75 10.9142 15.4142 11.25 15 11.25H9C8.58579 11.25 8.25 10.9142 8.25 10.5Z"
+        fill="currentColor"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8.25 13.5C8.25 13.0858 8.58579 12.75 9 12.75H15C15.4142 12.75 15.75 13.0858 15.75 13.5C15.75 13.9142 15.4142 14.25 15 14.25H9C8.58579 14.25 8.25 13.9142 8.25 13.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
 function ReviewCard({ review, onOpenRespond, onOpenDetails }) {
   const npsCategory = getNpsCategory(parseFloat(review.rating))
 
   return (
-    <div className="reviews__card">
+    <div
+      className="reviews__card"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenDetails?.(review)}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') onOpenDetails?.(review)
+      }}
+    >
       <div className="reviews__card-title">
         <p className="reviews__card-author">{review.author}</p>
         <div className="reviews__card-score">
@@ -86,17 +119,17 @@ function ReviewCard({ review, onOpenRespond, onOpenDetails }) {
       <div className="reviews__card-actions">
         <button
           type="button"
-          className="reviews__card-action"
-          onClick={() => (review.response ? onOpenDetails?.(review) : onOpenRespond?.(review))}
+          className={`reviews__card-action${review.response ? ' reviews__card-action--responded' : ''}`}
+          onClick={e => {
+            e.stopPropagation()
+            if (review.response) onOpenDetails?.(review)
+            else onOpenRespond?.(review)
+          }}
         >
-          <img src={iconArrowReply} alt="" />
+          {review.response ? <ReplyBubbleIcon /> : <img src={iconArrowReply} alt="" />}
           {review.response ? 'Répondu' : 'Répondre'}
         </button>
-        <button
-          type="button"
-          className="reviews__card-action reviews__card-action--end"
-          onClick={() => onOpenDetails?.(review)}
-        >
+        <button type="button" className="reviews__card-action reviews__card-action--end">
           Détails
           <img src={iconChevronRight} alt="" />
         </button>
@@ -428,8 +461,8 @@ export function Reviews({ onNavigate }) {
       )}
 
       {selectedReview && (
-        <ReviewsDetailSheet
-          review={selectedReview}
+        <ReviewDetailSheet
+          review={{ ...selectedReview, googleShared: selectedReview.googleSharing === 'google-partage' }}
           onClose={() => setSelectedReview(null)}
           onOpenRespond={handleOpenRespond}
         />

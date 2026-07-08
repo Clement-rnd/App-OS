@@ -40,8 +40,8 @@ export function LanguageField({ value, onChange }) {
   }, [isOpen])
 
   return (
-    <div ref={fieldRef} className={`profile-lang-field${isOpen ? ' profile-lang-field--focused' : ''}`}>
-      <span className="profile-lang-field__label">Langue</span>
+    <div ref={fieldRef} className="profile-lang-field">
+      <label className="profile-lang-field__label">Langue</label>
       <div
         className="profile-lang-field__row"
         onClick={toggleDropdown}

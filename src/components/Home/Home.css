@@ -609,13 +609,18 @@
   color: #041b44;
 }
 
-.home__review-action img {
+.home__review-action img,
+.home__review-action svg {
   width: 16px;
   height: 16px;
 }
 
 .home__review-action--end {
   justify-content: flex-end;
+}
+
+.home__review-action--responded {
+  color: #2c95ff;
 }
 
 /* Pagination dots */

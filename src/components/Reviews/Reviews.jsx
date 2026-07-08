@@ -104,7 +104,8 @@ function ReviewCard({ review, onOpenDetails, onOpenRespond }) {
           className="reviews__card-action"
           onClick={e => {
             e.stopPropagation()
-            review.response ? onOpenDetails(review) : onOpenRespond(review)
+            if (review.response) onOpenDetails(review)
+            else onOpenRespond(review)
           }}
         >
           <img src={iconArrowReply} alt="" />

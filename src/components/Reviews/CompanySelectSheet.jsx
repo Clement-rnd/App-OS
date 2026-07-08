@@ -10,7 +10,7 @@ import './CompanySelectSheet.css'
 const CLOSE_ANIMATION_MS = 380
 
 export const COMPANIES = [
-  { id: 'bastien-arfi', name: 'Bastien Arfi Immobilier' },
+  { id: 'bastien-arfi', name: 'La Boite Immobilier' },
   { id: 'sofa-kingdom', name: 'Sofa Kingdom Realtors' },
   { id: 'tech-solutions', name: 'Tech Solutions Inc.' },
   { id: 'green-valley', name: 'Green Valley Properties' },

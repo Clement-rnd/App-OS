@@ -1,0 +1,23 @@
+.support-chat-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 96px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 100px;
+  border: none;
+  background-color: #041b44;
+  box-shadow:
+    0px 4px 12px rgba(4, 27, 68, 0.35),
+    0px 2px 4px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.support-chat-fab img {
+  width: 26px;
+  height: 26px;
+}

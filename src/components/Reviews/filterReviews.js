@@ -21,7 +21,7 @@ export function getNpsFilterId(rating) {
   return NPS_LABEL_TO_ID[getNpsCategory(parseFloat(rating))]
 }
 
-function parseReviewDate(dateStr) {
+export function parseReviewDate(dateStr) {
   const [day, month, year] = dateStr.split('/').map(Number)
   return new Date(year, month - 1, day)
 }

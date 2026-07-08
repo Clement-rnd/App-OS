@@ -18,28 +18,10 @@
 .profile__appbar {
   display: flex;
   align-items: center;
-  gap: 4px;
   height: 72px;
   padding: 0 16px;
   width: 100%;
   box-sizing: border-box;
-}
-
-.profile__back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  padding: 0;
-  border-radius: 100px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.profile__back-btn img {
-  width: 24px;
-  height: 24px;
 }
 
 .profile__title {
@@ -51,42 +33,16 @@
   white-space: nowrap;
 }
 
-.profile__role-toggle {
+.profile__hero {
   display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 999px;
-  background-color: rgba(255, 255, 255, 0.1);
-  flex-shrink: 0;
-}
-
-.profile__role-btn {
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 16px;
-  color: rgba(255, 255, 255, 0.7);
-  white-space: nowrap;
-}
-
-.profile__role-btn--active {
-  background-color: #ffffff;
-  color: #041b44;
-}
-
-.profile__company-banner-wrap {
+  flex-direction: column;
+  gap: 10px;
   padding: 0 16px 16px;
   width: 100%;
   box-sizing: border-box;
 }
 
-.profile__company-banner {
+.profile__user-card {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -95,72 +51,93 @@
   border-radius: 20px;
   background-color: rgba(44, 149, 255, 0.2);
   box-sizing: border-box;
-  cursor: pointer;
-  text-align: left;
 }
 
-.profile__company-banner-avatar {
+.profile__user-card-avatar {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   border-radius: 100px;
   background-color: rgba(44, 149, 255, 0.2);
 }
 
-.profile__company-banner-avatar img {
+.profile__user-card-avatar img {
   width: 20px;
   height: 20px;
 }
 
-.profile__company-banner-text {
+.profile__user-card-text {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   flex: 1;
   min-width: 0;
 }
 
-.profile__company-banner-name {
+.profile__user-card-name {
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.profile__company-banner-email {
+.profile__user-card-role {
   font-size: 12px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.profile__company-banner-swap {
-  display: flex;
+.profile__user-card-chip {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background-color: rgba(44, 149, 255, 0.25);
+  font-size: 10px;
+  font-weight: 500;
+  color: #7ec8ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.profile__company-banner-swap img {
-  width: 20px;
-  height: 20px;
+.profile__user-card-chip img {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
 }
 
 .profile__panel {
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 16px;
   width: 100%;
-  padding: 16px 16px 128px;
+  padding: 16px 0 128px;
   border-radius: 20px 20px 0 0;
   background-color: #f0f6f9;
+  box-sizing: border-box;
+}
+
+.profile__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 16px;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -177,8 +154,37 @@
   color: #8ea1b2;
 }
 
-.profile__section-title--sm {
-  font-size: 12px;
+.profile__section-title-count {
+  font-weight: 700;
+  color: #041b44;
+}
+
+.profile__section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.profile__see-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background-color: #041b44;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f7b600;
+  white-space: nowrap;
+}
+
+.profile__see-all-btn img {
+  width: 16px;
+  height: 16px;
 }
 
 .profile__card {
@@ -205,51 +211,6 @@
   gap: 10px;
   width: 100%;
   padding: 16px 0;
-}
-
-.profile__person-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  background-color: #f7fafc;
-  box-sizing: border-box;
-}
-
-.profile__avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  border-radius: 100px;
-  background-color: rgba(44, 149, 255, 0.1);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.15px;
-  color: #2c95ff;
-}
-
-.profile__person-text {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-}
-
-.profile__person-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #041b44;
-}
-
-.profile__person-role {
-  font-size: 12px;
-  font-weight: 500;
-  color: #8ea1b2;
 }
 
 .profile__field-list {
@@ -396,7 +357,13 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  padding: 12px 0;
+  padding: 12px 0 13px;
+  border-bottom: 1px solid #eef3f7;
+  box-sizing: border-box;
+}
+
+.profile__save-btn--company {
+  margin: 12px 0;
 }
 
 .profile__colors-list {
@@ -470,4 +437,55 @@
   font-size: 12px;
   font-weight: 400;
   color: #8ea1b2;
+}
+
+.profile__add-collaborator-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  margin: 12px 0;
+  border: 1px dashed #041b44;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.46px;
+  color: #041b44;
+}
+
+.profile__add-collaborator-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.profile__logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fc6530;
+}
+
+.profile__logout-btn:focus,
+.profile__logout-btn:focus-visible {
+  outline: none;
+}
+
+.profile__logout-btn img {
+  width: 18px;
+  height: 18px;
 }

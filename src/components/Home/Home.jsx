@@ -25,7 +25,7 @@ const initialReviews = [
     author: 'Jean David Lépineux',
     rating: '4.5',
     date: '06/09/2026',
-    text: "Une expérience fantastique du début à la fin ! L'équipe était professionel et m'ont aider à chaque étape du processus, je recommande vivement leurs services.",
+    text: "Une expérience fantastique du début à la fin ! L'équipe était professionnelle et m'a aidé à chaque étape du processus, je recommande vivement leurs services.",
     npsScore: 10,
     service: 'Vente de propriété',
     googleShared: false,
@@ -186,7 +186,7 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
     setReviews(list => list.map(r => (r.id === review.id ? updatedReview : r)))
     setRespondingReview(null)
     setSelectedReview(updatedReview)
-    setResponseAlertText(wasEditing ? 'Une reponse a ete modifiee' : 'Une reponse a ete envoye')
+    setResponseAlertText(wasEditing ? 'Une réponse a été modifiée' : 'Une réponse a été envoyée')
     setShowResponseAlert(true)
   }
 

@@ -62,7 +62,7 @@ export function ForgotPassword({ onBack, onSendLink, onResetPassword }) {
 
           <div className="forgot-password__actions">
             <button className="forgot-password__back-btn" type="button" onClick={onBack}>
-              Retour a la connexion
+              Retour à la connexion
             </button>
 
             <button

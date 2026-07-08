@@ -106,7 +106,7 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
               type="button"
               onClick={() => setShowSignUpModal(true)}
             >
-              Inscrivez Vous
+              Inscrivez-vous
             </button>
           </div>
         </div>

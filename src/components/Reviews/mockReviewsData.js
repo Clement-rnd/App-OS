@@ -9,7 +9,7 @@ export const COMPANY_REVIEWS_DATA = {
         author: 'Jean David Lepinieux',
         rating: '4.5',
         date: '06/09/2026',
-        text: "Une expérience fantastique du début à la fin ! L'équipe était professionnelle, réactive et a vraiment compris ce que je voulais atteindre a...",
+        text: "Une expérience fantastique du début à la fin ! L'équipe était professionnelle, réactive et a vraiment compris ce que je voulais atteindre...",
         collaboratorId: 'angela-belle',
         source: 'opinion-system',
         certification: 'certifie-os',

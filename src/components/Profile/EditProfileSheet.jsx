@@ -114,7 +114,7 @@ export function EditProfileSheet({ user, onClose, onSave }) {
         </div>
 
         <div className="edit-profile-sheet__footer">
-          <p className="edit-profile-sheet__hint">* Informations Requise</p>
+          <p className="edit-profile-sheet__hint">* Informations Requises</p>
           <button type="button" className="edit-profile-sheet__save-btn" onClick={handleSave}>
             Enregistrer
             <img src={iconSave} alt="" />

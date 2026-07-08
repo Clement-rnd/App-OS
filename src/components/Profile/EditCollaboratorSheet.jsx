@@ -121,7 +121,7 @@ export function EditCollaboratorSheet({ collaborator, isNew = false, onClose, on
         </div>
 
         <div className="edit-collaborator-sheet__footer">
-          <p className="edit-collaborator-sheet__hint">* Informations Requise</p>
+          <p className="edit-collaborator-sheet__hint">* Informations Requises</p>
           <button type="button" className="edit-collaborator-sheet__save-btn" onClick={handleSave}>
             Enregistrer
             <img src={iconSave} alt="" />

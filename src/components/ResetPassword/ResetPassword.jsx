@@ -79,7 +79,7 @@ export function ResetPassword({ onBack, onResetPassword }) {
         <div className="reset-password__text">
           <h1 className="reset-password__heading">Réinitialiser votre mot de passe</h1>
           <p className="reset-password__subtext">
-            Saisissez et confirmez votre noveau mot de passe ci-dessous.
+            Saisissez et confirmez votre nouveau mot de passe ci-dessous.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export function ResetPassword({ onBack, onResetPassword }) {
 
           <div className="reset-password__actions">
             <button className="reset-password__back-btn" type="button" onClick={onBack}>
-              Retour a la connexion
+              Retour à la connexion
             </button>
 
             <button

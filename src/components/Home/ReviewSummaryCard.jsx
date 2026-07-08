@@ -42,7 +42,7 @@ export function ReviewSummaryCard({ review, showChips = false }) {
           </span>
           <span className="review-summary-card__chip review-summary-card__chip--muted">
             <img src={logoIconSmall} alt="" />
-            Certifié OS
+            {review.certification === 'standard-os' ? 'Standard OS' : 'Certifié OS'}
           </span>
           <span className="review-summary-card__chip review-summary-card__chip--muted">
             <img src={iconGoogle} alt="" />

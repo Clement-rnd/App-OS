@@ -6,10 +6,10 @@ export function SignUpModal({ onClose }) {
   return (
     <div className="sign-up-modal-overlay">
       <div className="sign-up-modal-backdrop" onClick={onClose} />
-      <div className="sign-up-modal" role="dialog" aria-label="Inscrivez vous avec Opinion System">
+      <div className="sign-up-modal" role="dialog" aria-label="Inscrivez-vous avec Opinion System">
         <div className="sign-up-modal__header">
           <p className="sign-up-modal__title">
-            Inscrivez vous avec
+            Inscrivez-vous avec
             <br />
             Opinion System
           </p>

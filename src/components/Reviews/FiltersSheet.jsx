@@ -9,6 +9,7 @@ import iconFilterGoogleCertif from '../../assets/reviews/icon-filter-google-cert
 import iconFilterGoogleMuted from '../../assets/reviews/icon-filter-google-muted.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { Calendar } from './Calendar'
 import './FiltersSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -62,7 +63,7 @@ export const FILTER_GROUPS = [
   },
   {
     id: 'etat',
-    label: 'Etat',
+    label: 'État',
     multi: true,
     options: [
       { id: 'en-attente', label: 'En attente' },
@@ -84,16 +85,6 @@ export const FILTER_GROUPS = [
     ],
   },
 ]
-
-export const DEFAULT_FILTERS = {
-  source: ['opinion-system'],
-  note: ['positif'],
-  nps: ['promoteur'],
-  type: ['certifie-os', 'google-partage'],
-  etat: [],
-  periode: 'aujourdhui',
-  periodeRange: { start: '', end: '' },
-}
 
 export const EMPTY_FILTERS = {
   source: [],
@@ -132,13 +123,15 @@ export function removeFilterEntry(filters, entry) {
   return { ...filters, [entry.groupId]: null }
 }
 
-export function FiltersSheet({ initialFilters, onClose, onApply }) {
+export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
   useLockBodyScroll()
   const [isClosing, setIsClosing] = useState(false)
   const [filters, setFilters] = useState(initialFilters)
   const [customStart, setCustomStart] = useState(initialFilters.periodeRange?.start || '')
   const [customEnd, setCustomEnd] = useState(initialFilters.periodeRange?.end || '')
+  const [activeDateTab, setActiveDateTab] = useState('du')
   const isCustomRangeOpen = filters.periode === 'personnalise'
+  const isApplyDisabled = isCustomRangeOpen && (!customStart || !customEnd)
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -169,9 +162,13 @@ export function FiltersSheet({ initialFilters, onClose, onApply }) {
   }
 
   const handleReset = () => {
-    setFilters(DEFAULT_FILTERS)
+    setFilters(EMPTY_FILTERS)
     setCustomStart('')
     setCustomEnd('')
+    // Also clear the filters actually applied to the review list right
+    // away, so reset takes effect immediately instead of silently
+    // requiring a follow-up tap on "Appliquer les filtres" to stick.
+    onReset?.()
   }
 
   const handleApply = () => {
@@ -237,36 +234,26 @@ export function FiltersSheet({ initialFilters, onClose, onApply }) {
               </div>
 
               {group.id === 'periode' && isCustomRangeOpen && (
-                <div className="filters-sheet__custom-range">
-                  <div className="filters-sheet__custom-range-header">
-                    <span>Période personnalisée</span>
-                    <button
-                      type="button"
-                      className="filters-sheet__custom-range-close"
-                      onClick={closeCustomRange}
-                      aria-label="Fermer la sélection de dates"
-                    >
-                      <img src={iconFilterClose} alt="" />
-                    </button>
-                  </div>
-                  <div className="filters-sheet__custom-range-fields">
-                    <label className="filters-sheet__custom-range-field">
-                      <span>Du</span>
-                      <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} />
-                    </label>
-                    <label className="filters-sheet__custom-range-field">
-                      <span>Au</span>
-                      <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
-                    </label>
-                  </div>
-                </div>
+                <Calendar
+                  activeTab={activeDateTab}
+                  onTabChange={setActiveDateTab}
+                  startDate={customStart}
+                  endDate={customEnd}
+                  onSelectDate={iso => (activeDateTab === 'du' ? setCustomStart(iso) : setCustomEnd(iso))}
+                  onClose={closeCustomRange}
+                />
               )}
             </div>
           ))}
         </div>
 
         <div className="filters-sheet__footer">
-          <button type="button" className="filters-sheet__apply-btn" onClick={handleApply}>
+          <button
+            type="button"
+            className={`filters-sheet__apply-btn${isApplyDisabled ? ' filters-sheet__apply-btn--disabled' : ''}`}
+            onClick={handleApply}
+            disabled={isApplyDisabled}
+          >
             Appliquer les filtres
           </button>
           <div className="filters-sheet__home-indicator-wrap" />

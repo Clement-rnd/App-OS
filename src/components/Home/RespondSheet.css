@@ -1,7 +1,7 @@
 .respond-sheet-overlay {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 100;
   display: flex;
   align-items: flex-end;
 }
@@ -124,6 +124,14 @@
   background-color: rgba(44, 149, 255, 0.2);
 }
 
+/* Height is set inline (see RespondSheet.jsx) from the actual content's
+   measured size, so this transition animates it smoothly on every change
+   (skeleton <-> text, different line counts) instead of snapping. */
+.respond-sheet__ai-content {
+  overflow: hidden;
+  transition: height 260ms ease;
+}
+
 .respond-sheet__ai-label {
   font-size: 11px;
   font-weight: 600;
@@ -156,6 +164,31 @@
   height: 11px;
 }
 
+.respond-sheet__ai-regenerate:disabled,
+.respond-sheet__ai-use:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.respond-sheet__ai-regenerate-icon--spinning {
+  /* The icon's own arrowhead points counter-clockwise, so it has to spin
+     that way to look right. A single eased multi-turn spin (not a flat
+     linear loop) reads as a snappy "generating" flourish instead of a
+     mechanical constant rotation. */
+  animation: respond-sheet-spin 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes respond-sheet-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    /* Exactly two full turns (multiple of 360°) so it lands back on its
+       starting orientation instead of ending up rotated mid-turn. */
+    transform: rotate(-720deg);
+  }
+}
+
 .respond-sheet__ai-use {
   background: none;
   border: none;
@@ -174,6 +207,84 @@
   font-weight: 400;
   line-height: 18px;
   color: #4a5565;
+}
+
+.respond-sheet__ai-text--exiting {
+  animation: respond-sheet-ai-text-out 200ms ease-out both;
+}
+
+@keyframes respond-sheet-ai-text-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes respond-sheet-ai-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Each word fades/moves in on its own slight delay (set inline per word)
+   instead of the whole paragraph moving as one block -- a small,
+   deliberate difference from the block-level entrances used elsewhere. */
+.respond-sheet__ai-word {
+  display: inline-block;
+  opacity: 0;
+  animation: respond-sheet-ai-word-in 220ms ease-out both;
+}
+
+@keyframes respond-sheet-ai-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.respond-sheet__ai-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Matches .respond-sheet__ai-text's own padding so a skeleton with the
+     same line count occupies the same total height, not just a similar
+     one. Extra 8px at the bottom makes up for flex `gap` only adding
+     space *between* bars, whereas text line-height gives every line
+     (including the last) the same full allocation. */
+  padding: 8px 12px 16px;
+  animation: respond-sheet-ai-text-in 200ms ease-out both;
+}
+
+.respond-sheet__ai-skeleton-line {
+  height: 10px;
+  border-radius: 4px;
+  /* width is set inline per-line (see RespondSheet.jsx) so the count and
+     shape can match the outgoing text's own line count. */
+  background: linear-gradient(90deg, #e8eef2 25%, #f2f6f8 37%, #e8eef2 63%);
+  background-size: 400% 100%;
+  animation: respond-sheet-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes respond-sheet-skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Message */

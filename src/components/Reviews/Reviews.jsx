@@ -16,19 +16,20 @@ import { BottomNav } from '../BottomNav/BottomNav'
 import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
+import { ReviewDetailsSheet } from './ReviewDetailsSheet'
+import { RespondSheet } from '../Home/RespondSheet'
 import iconPillClose from '../../assets/reviews/icon-pill-close.svg'
 import iconFabUp from '../../assets/reviews/icon-fab-up.svg'
 import iconFabFunnel from '../../assets/reviews/icon-fab-funnel.svg'
 import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
 import {
   FiltersSheet,
-  DEFAULT_FILTERS,
   EMPTY_FILTERS,
   countActiveFilters,
   getActiveFilterEntries,
   removeFilterEntry,
 } from './FiltersSheet'
-import { reviewMatchesFilters } from './filterReviews'
+import { reviewMatchesFilters, getNpsFilterId } from './filterReviews'
 import { getNpsCategory } from '../../utils/nps'
 import './Reviews.css'
 
@@ -38,11 +39,35 @@ const NPS_CHIP_CLASS = {
   Détracteur: 'reviews__chip--detractor',
 }
 
-function ReviewCard({ review }) {
+// RespondSheet/ReviewSummaryCard are shared with Home, which models Google
+// sharing as a plain boolean (googleShared) instead of our string enum
+// (googleSharing). Adapt at the boundary rather than changing either
+// review data shape.
+function toRespondSheetReview(review) {
+  return { ...review, googleShared: review.googleSharing === 'google-partage' }
+}
+
+// Each tab is a shortcut onto the same etat/nps filter groups the Filtres
+// sheet already exposes (not a separate filter dimension), so tapping a
+// tab and picking the equivalent chips in the sheet stay in sync with each
+// other. Exclusive (radio-like): selecting one replaces whatever etat/nps
+// combination was active, since combining them freely would make two tabs
+// appear partially active at once.
+const TAB_DEFS = [
+  { label: 'Sans Réponses', etat: ['sans-reponse'], nps: [], tone: 'info' },
+  { label: 'Avis Négatifs', etat: [], nps: ['detracteur'], tone: 'danger' },
+  { label: 'À Récupérer', etat: ['sans-reponse'], nps: ['detracteur'], tone: 'warning' },
+]
+
+function sameFilterSet(a, b) {
+  return a.length === b.length && a.every(id => b.includes(id))
+}
+
+function ReviewCard({ review, onOpenDetails, onReply }) {
   const npsCategory = getNpsCategory(parseFloat(review.rating))
 
   return (
-    <div className="reviews__card">
+    <div className="reviews__card" onClick={() => onOpenDetails(review)}>
       <div className="reviews__card-title">
         <p className="reviews__card-author">{review.author}</p>
         <div className="reviews__card-score">
@@ -81,7 +106,14 @@ function ReviewCard({ review }) {
       <p className="reviews__card-text">{review.text}</p>
 
       <div className="reviews__card-actions">
-        <button type="button" className="reviews__card-action">
+        <button
+          type="button"
+          className="reviews__card-action"
+          onClick={e => {
+            e.stopPropagation()
+            onReply(review)
+          }}
+        >
           <img src={iconArrowReply} alt="" />
           Répondre
         </button>
@@ -152,6 +184,8 @@ function SummaryPinnedContent({
   isCollaboratorNameExiting,
   onOpenCollaboratorSheet,
   companyData,
+  activeSources,
+  onToggleSource,
 }) {
   return (
     <div className="reviews__summary">
@@ -190,7 +224,11 @@ function SummaryPinnedContent({
       </button>
 
       <div className="reviews__kpis">
-        <div className="reviews__kpi">
+        <button
+          type="button"
+          className={`reviews__kpi${activeSources.includes('opinion-system') ? ' reviews__kpi--active' : ''}`}
+          onClick={() => onToggleSource('opinion-system')}
+        >
           <div className="reviews__kpi-title">
             <img src={iconOsLogoColor} alt="" />
             <span>Opinion System</span>
@@ -202,8 +240,12 @@ function SummaryPinnedContent({
             </p>
             <span className="reviews__kpi-badge">{companyData.kpiOS.count} AVIS</span>
           </div>
-        </div>
-        <div className="reviews__kpi">
+        </button>
+        <button
+          type="button"
+          className={`reviews__kpi${activeSources.includes('google') ? ' reviews__kpi--active' : ''}`}
+          onClick={() => onToggleSource('google')}
+        >
           <div className="reviews__kpi-title">
             <img src={iconGoogleBadge} alt="" />
             <span>Google</span>
@@ -215,7 +257,7 @@ function SummaryPinnedContent({
             </p>
             <span className="reviews__kpi-badge">{companyData.kpiGoogle.count} AVIS</span>
           </div>
-        </div>
+        </button>
       </div>
     </div>
   )
@@ -246,18 +288,34 @@ const PINNED_HEIGHT_TRANSITION_MS = 320
 // so the ~540ms transition has time to finish before the user could
 // otherwise scroll far enough to see cards underneath it. Hysteresis
 // (enter past DOWN_RATIO of that height, only leave once back under
-// UP_RATIO of it) absorbs the scrollY clamp that happens when the pinned
-// block's own height shrinks (collapsing it can shorten the page, which
-// snaps scrollY down) so that side effect can't re-trigger a swap.
+// UP_RATIO of it) absorbs small scrollY clamps from the pinned block's
+// height changing -- but on short pages that isn't enough on its own
+// (see the guard in nextScrolled below).
 const SCROLL_DOWN_RATIO = 0.7
 const SCROLL_UP_RATIO = 0.4
 // Fallback used for the one frame before the summary card's real height
 // has been measured.
 const FALLBACK_EXPANDED_HEIGHT = 280
 
-function nextScrolled(prev, scrollY, expandedHeight) {
+function nextScrolled(prev, scrollY, expandedHeight, compactHeight) {
   const reference = expandedHeight ?? FALLBACK_EXPANDED_HEIGHT
-  if (!prev && scrollY > reference * SCROLL_DOWN_RATIO) return true
+  if (!prev && scrollY > reference * SCROLL_DOWN_RATIO) {
+    // Guard against short pages (few reviews): collapsing the pinned block
+    // shrinks the page by (expanded - compact) height. On a page with
+    // little scrollable content, that shrink can push the max scroll
+    // position below the UP threshold, so the browser's own scroll clamp
+    // immediately reads as "scrolled back near the top" and reverts --
+    // which then re-expands the page, undoing the clamp, so the very next
+    // scroll re-triggers compact again: an infinite bounce. Only actually
+    // collapse if there's enough real scrollable room to support it
+    // without the browser needing to clamp.
+    if (compactHeight != null) {
+      const heightDelta = reference - compactHeight
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+      if (maxScroll - heightDelta < reference * SCROLL_UP_RATIO + 20) return false
+    }
+    return true
+  }
   if (prev && scrollY < reference * SCROLL_UP_RATIO) return false
   return prev
 }
@@ -277,10 +335,21 @@ export function Reviews({ onNavigate }) {
   const collaboratorExitTimeoutRef = useRef(null)
 
   const [isFiltersSheetOpen, setFiltersSheetOpen] = useState(false)
-  const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FILTERS)
+  const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS)
   const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
   const activeFilters = hasAppliedFilters ? appliedFilters : EMPTY_FILTERS
   const activeFilterEntries = hasAppliedFilters ? getActiveFilterEntries(appliedFilters) : []
+
+  const [detailsReview, setDetailsReview] = useState(null)
+  const [replyReview, setReplyReview] = useState(null)
+
+  const isAnySheetOpen =
+    isShareSheetOpen ||
+    isCompanySheetOpen ||
+    isCollaboratorSheetOpen ||
+    isFiltersSheetOpen ||
+    detailsReview != null ||
+    replyReview != null
 
   // Scroll-driven pinned header: stays expanded (summary + KPIs) for small
   // scroll amounts, cards simply pass underneath it. Only once scrolling
@@ -294,17 +363,47 @@ export function Reviews({ onNavigate }) {
   const pinnedExitTimeoutRef = useRef(null)
   const ignoreScrollUntilRef = useRef(0)
 
+  // useLockBodyScroll (used by every sheet) pins the body via
+  // position:fixed while a sheet is open, which itself fires a native
+  // 'scroll' event as a side effect (not real user intent to scroll back
+  // up) and can desync our pinned/compact state. Suppress scroll tracking
+  // entirely while any sheet is open, and for a moment after it closes
+  // while the sheet's own close animation + scroll-position restore
+  // settle, so opening/closing a sheet can never change this state.
+  useEffect(() => {
+    ignoreScrollUntilRef.current = isAnySheetOpen ? Infinity : performance.now() + 500
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAnySheetOpen])
+
   const expandedMeasureRef = useRef(null)
   const compactMeasureRef = useRef(null)
   const [measuredHeights, setMeasuredHeights] = useState({ expanded: null, compact: null })
   const [pinnedHeight, setPinnedHeight] = useState(null)
-  // Mirrors measuredHeights.expanded for the scroll listener below, which
-  // is registered once ([] deps) and would otherwise read a stale value.
+  // Mirrors measuredHeights for the scroll listener below, which is
+  // registered once ([] deps) and would otherwise read stale values.
   const expandedHeightRef = useRef(null)
+  const compactHeightRef = useRef(null)
   expandedHeightRef.current = measuredHeights.expanded
+  compactHeightRef.current = measuredHeights.compact
 
   const removeActiveFilter = entry => {
     setAppliedFilters(prev => removeFilterEntry(prev, entry))
+  }
+
+  const applyFilters = nextFilters => {
+    setAppliedFilters(nextFilters)
+    setHasAppliedFilters(countActiveFilters(nextFilters) > 0)
+  }
+
+  const toggleSourceFilter = sourceId => {
+    const current = activeFilters.source
+    const nextSource = current.includes(sourceId) ? current.filter(id => id !== sourceId) : [...current, sourceId]
+    applyFilters({ ...activeFilters, source: nextSource })
+  }
+
+  const toggleTabFilter = tabDef => {
+    const isActive = sameFilterSet(activeFilters.etat, tabDef.etat) && sameFilterSet(activeFilters.nps, tabDef.nps)
+    applyFilters({ ...activeFilters, etat: isActive ? [] : tabDef.etat, nps: isActive ? [] : tabDef.nps })
   }
 
   const scrollToTop = () => {
@@ -338,11 +437,26 @@ export function Reviews({ onNavigate }) {
     .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
     .filter(review => reviewMatchesFilters(review, activeFilters))
 
-  const tabs = [
-    { value: String(companyData.tabs.sansReponses), label: 'Sans Réponses' },
-    { value: String(companyData.tabs.negatifs), label: 'Avis Négatifs' },
-    { value: String(companyData.tabs.aRecuperer), label: 'A Récupérer' },
-  ]
+  // Tab badge counts stay based on every OTHER active filter (source,
+  // collaborator, etc.) but ignore etat/nps specifically, since those are
+  // exactly what the tabs themselves control -- otherwise selecting a tab
+  // would change the numbers shown on the other two.
+  const tabCountReviews = companyData.reviews
+    .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
+    .filter(review => reviewMatchesFilters(review, { ...activeFilters, etat: [], nps: [] }))
+
+  const tabs = TAB_DEFS.map(tabDef => {
+    const count = tabCountReviews.filter(
+      review =>
+        (tabDef.etat.length === 0 || tabDef.etat.includes(review.status)) &&
+        (tabDef.nps.length === 0 || tabDef.nps.includes(getNpsFilterId(review.rating))),
+    ).length
+    return {
+      ...tabDef,
+      value: String(count),
+      isActive: sameFilterSet(activeFilters.etat, tabDef.etat) && sameFilterSet(activeFilters.nps, tabDef.nps),
+    }
+  })
 
   // Track scroll depth (rAF-throttled) with hysteresis to decide expanded
   // vs compact, ignoring scroll events for a short window right after we
@@ -357,7 +471,7 @@ export function Reviews({ onNavigate }) {
       requestAnimationFrame(() => {
         ticking = false
         if (performance.now() < ignoreScrollUntilRef.current) return
-        setScrolled(prev => nextScrolled(prev, window.scrollY, expandedHeightRef.current))
+        setScrolled(prev => nextScrolled(prev, window.scrollY, expandedHeightRef.current, compactHeightRef.current))
       })
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -411,7 +525,7 @@ export function Reviews({ onNavigate }) {
     // the gesture), scrolled would stay stuck. Force one re-check right as
     // the window closes so the state always resyncs with the real scrollY.
     const resyncTimeoutRef = setTimeout(() => {
-      setScrolled(prev => nextScrolled(prev, window.scrollY, expandedHeightRef.current))
+      setScrolled(prev => nextScrolled(prev, window.scrollY, expandedHeightRef.current, compactHeightRef.current))
     }, ignoreMs + 20)
     return () => {
       clearTimeout(pinnedExitTimeoutRef.current)
@@ -430,7 +544,7 @@ export function Reviews({ onNavigate }) {
 
   return (
     <div className="reviews">
-      <header className="reviews__topbar">
+      <header className={`reviews__topbar${isAnySheetOpen ? ' reviews__topbar--locked' : ''}`}>
         <div className="reviews__status-bar" />
         <div className="reviews__appbar">
           <button type="button" className="reviews__icon-btn" aria-label="Retour" onClick={() => onNavigate?.('home')}>
@@ -465,7 +579,10 @@ export function Reviews({ onNavigate }) {
         </button>
       </div>
 
-      <div className="reviews__pinned" style={pinnedHeight != null ? { height: pinnedHeight } : undefined}>
+      <div
+        className={`reviews__pinned${isAnySheetOpen ? ' reviews__pinned--locked' : ''}`}
+        style={pinnedHeight != null ? { height: pinnedHeight } : undefined}
+      >
         <div
           key={pinnedMode}
           className={`reviews__pinned-inner${isPinnedExiting ? ' reviews__pinned-inner--exiting' : ''}`}
@@ -479,6 +596,8 @@ export function Reviews({ onNavigate }) {
               isCollaboratorNameExiting={isCollaboratorNameExiting}
               onOpenCollaboratorSheet={() => setCollaboratorSheetOpen(true)}
               companyData={companyData}
+              activeSources={activeFilters.source}
+              onToggleSource={toggleSourceFilter}
             />
           ) : (
             <CompactPinnedContent {...sharedFiltersProps} />
@@ -496,6 +615,8 @@ export function Reviews({ onNavigate }) {
             isCollaboratorNameExiting={false}
             onOpenCollaboratorSheet={() => {}}
             companyData={companyData}
+            activeSources={activeFilters.source}
+            onToggleSource={() => {}}
           />
         </div>
         <div className="reviews__pinned-measure" aria-hidden="true" ref={compactMeasureRef}>
@@ -503,13 +624,29 @@ export function Reviews({ onNavigate }) {
         </div>
       </div>
 
+      {/* position:fixed (used while a sheet is open, see --locked above)
+          doesn't reserve space in the flow the way position:sticky does --
+          without this, switching modes would make the cards below jump up
+          to fill the gap, then jump back down when the sheet closes. */}
+      {isAnySheetOpen && (
+        <div
+          aria-hidden="true"
+          style={{ height: `calc(72px + env(safe-area-inset-top) + ${pinnedHeight ?? 0}px)` }}
+        />
+      )}
+
       <div className="reviews__panel">
         <div className="reviews__tabs">
           {tabs.map(tab => (
-            <div className="reviews__tab" key={tab.label}>
+            <button
+              type="button"
+              className={`reviews__tab${tab.isActive ? ` reviews__tab--active reviews__tab--active-${tab.tone}` : ''}`}
+              key={tab.label}
+              onClick={() => toggleTabFilter(tab)}
+            >
               <p className="reviews__tab-value">{tab.value}</p>
               <p className="reviews__tab-label">{tab.label}</p>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -517,7 +654,9 @@ export function Reviews({ onNavigate }) {
           <FiltersRow {...sharedFiltersProps} />
 
           {filteredReviews.length > 0 ? (
-            filteredReviews.map(review => <ReviewCard key={review.id} review={review} />)
+            filteredReviews.map(review => (
+              <ReviewCard key={review.id} review={review} onOpenDetails={setDetailsReview} onReply={setReplyReview} />
+            ))
           ) : (
             <p className="reviews__empty">Aucun avis ne correspond à ces critères.</p>
           )}
@@ -557,11 +696,34 @@ export function Reviews({ onNavigate }) {
         <FiltersSheet
           initialFilters={appliedFilters}
           onClose={() => setFiltersSheetOpen(false)}
+          onReset={() => {
+            setAppliedFilters(EMPTY_FILTERS)
+            setHasAppliedFilters(false)
+          }}
           onApply={filters => {
             setAppliedFilters(filters)
             setHasAppliedFilters(true)
             setFiltersSheetOpen(false)
           }}
+        />
+      )}
+
+      {detailsReview && (
+        <ReviewDetailsSheet
+          review={detailsReview}
+          onClose={() => setDetailsReview(null)}
+          onReply={review => {
+            setDetailsReview(null)
+            setReplyReview(review)
+          }}
+        />
+      )}
+
+      {replyReview && (
+        <RespondSheet
+          review={toRespondSheetReview(replyReview)}
+          onClose={() => setReplyReview(null)}
+          onSubmit={() => setReplyReview(null)}
         />
       )}
     </div>

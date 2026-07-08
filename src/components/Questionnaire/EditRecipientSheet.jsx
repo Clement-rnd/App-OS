@@ -131,7 +131,7 @@ export function EditRecipientSheet({ recipient, onClose, onSave, onDelete }) {
         </div>
 
         <div className="edit-recipient-sheet__footer">
-          <p className="edit-recipient-sheet__hint">* Informations Requise</p>
+          <p className="edit-recipient-sheet__hint">* Informations Requises</p>
           <button type="button" className="edit-recipient-sheet__save-btn" onClick={handleSave}>
             Enregistrer
             <img src={iconSave} alt="" />

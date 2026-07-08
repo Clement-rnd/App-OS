@@ -3,7 +3,6 @@
   flex-direction: column;
   min-height: 100dvh;
   font-family: 'Poppins', sans-serif;
-  padding-bottom: 128px;
   /* Prevent iOS elastic/rubber-band overscroll: bouncing past the top or
      bottom can momentarily reveal the page's own background behind the
      fixed/sticky layers instead of our gradient. */
@@ -55,6 +54,17 @@
   background-repeat: no-repeat;
   padding: 0 16px;
   box-sizing: border-box;
+}
+
+/* useLockBodyScroll (used by every sheet) pins <body> via position:fixed
+   with a negative top offset while a sheet is open. That stops real
+   scrolling, which is what position:sticky relies on to stay pinned --
+   without it, this element just renders at its natural document position,
+   which the body's negative offset then shifts off-screen. Switching to
+   position:fixed keeps it anchored to the true viewport regardless of
+   what the locked body is doing underneath it. */
+.reviews__topbar--locked {
+  position: fixed;
 }
 
 .reviews__status-bar {
@@ -128,6 +138,7 @@
   position: sticky;
   top: calc(72px + env(safe-area-inset-top));
   z-index: 29;
+  width: 100%;
   overflow: hidden;
   transition: height 320ms ease;
   /* Opaque on its own (same pixel-matched technique as .reviews__topbar),
@@ -138,6 +149,11 @@
   background-size: 100vw 100dvh;
   background-position: 0 calc(-72px - env(safe-area-inset-top));
   background-repeat: no-repeat;
+}
+
+/* Same fix as .reviews__topbar--locked -- see its comment for why. */
+.reviews__pinned--locked {
+  position: fixed;
 }
 
 .reviews__pinned-inner {
@@ -280,10 +296,20 @@
   gap: 8px;
   min-width: 0;
   padding: 16px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease;
 }
 
 .reviews__kpi:first-child {
   border-right: 1px solid rgba(44, 149, 255, 0.2);
+}
+
+.reviews__kpi--active {
+  background-color: rgba(44, 149, 255, 0.3);
 }
 
 .reviews__kpi-title {
@@ -367,6 +393,7 @@
 .reviews__tabs {
   display: flex;
   align-items: stretch;
+  gap: 8px;
   padding: 12px;
   width: 100%;
   animation: reviews-fade-up 400ms ease-out both;
@@ -380,7 +407,53 @@
   align-items: center;
   gap: 4px;
   padding: 12px 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
   text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+/* Each tab shortcuts a different etat/nps combination (see TAB_DEFS), so
+   its active state borrows that combination's own semantic color instead
+   of one generic accent -- e.g. "Avis Négatifs" (détracteur) turns the
+   same red used for the Détracteur NPS badge elsewhere in the app. */
+.reviews__tab--active .reviews__tab-value,
+.reviews__tab--active .reviews__tab-label {
+  font-weight: 700;
+}
+
+.reviews__tab--active-info {
+  background-color: rgba(44, 149, 255, 0.2);
+  border-color: #1c64b4;
+}
+
+.reviews__tab--active-info .reviews__tab-value,
+.reviews__tab--active-info .reviews__tab-label {
+  color: #2c95ff;
+}
+
+.reviews__tab--active-danger {
+  background-color: #ffece7;
+  border-color: #fc6530;
+}
+
+.reviews__tab--active-danger .reviews__tab-value,
+.reviews__tab--active-danger .reviews__tab-label {
+  color: #fc6530;
+}
+
+.reviews__tab--active-warning {
+  background-color: #fff8e3;
+  border-color: #f29003;
+}
+
+.reviews__tab--active-warning .reviews__tab-value,
+.reviews__tab--active-warning .reviews__tab-label {
+  color: #f29003;
 }
 
 .reviews__tab-value {
@@ -402,7 +475,12 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  padding: 0 16px 16px;
+  /* Bottom clearance for the fixed BottomNav + FAB lives here (inside the
+     white panel) instead of on .reviews, so that reserved space is still
+     white background continuing down to the nav, not a gap exposing the
+     dark page gradient behind it. Kept taller than the nav alone so the
+     FAB doesn't overlap (and block clicks on) the last card's actions. */
+  padding: 0 16px 128px;
 }
 
 .reviews__filters {
@@ -630,6 +708,7 @@
   border-radius: 16px;
   background-color: #ffffff;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .reviews__card-title {

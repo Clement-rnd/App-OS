@@ -115,7 +115,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
             <input
               type="text"
               className="recipient-sheet__search-input"
-              placeholder="Entrez un nom, un numero ou email"
+              placeholder="Entrez un nom, un numéro ou email"
               value={query}
               onChange={e => setQuery(e.target.value)}
             />

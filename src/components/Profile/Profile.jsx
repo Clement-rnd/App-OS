@@ -213,7 +213,7 @@ export function Profile({ onNavigate }) {
         {isManager && (
           <>
             <section className="profile__section">
-              <p className="profile__section-title">Informations Enreprises</p>
+              <p className="profile__section-title">Informations Entreprises</p>
               <div
                 className="profile__card profile__card--button"
                 role="button"

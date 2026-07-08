@@ -17,82 +17,10 @@ import { StarRating } from '../StarRating/StarRating'
 import { ReviewDetailSheet } from './ReviewDetailSheet'
 import { RespondSheet } from './RespondSheet'
 import { getNpsCategory } from '../../utils/nps'
+import { CANONICAL_REVIEWS } from '../../data/canonicalReviews'
 import './Home.css'
 
-const initialReviews = [
-  {
-    id: 1,
-    author: 'Jean David Lépineux',
-    rating: '4.5',
-    date: '06/09/2026',
-    text: "Une expérience fantastique du début à la fin ! L'équipe était professionel et m'ont aider à chaque étape du processus, je recommande vivement leurs services.",
-    npsScore: 10,
-    service: 'Vente de propriété',
-    googleShared: false,
-    ratings: { reception: 5, qualite: 4, communication: 5, delais: 4 },
-    response: null,
-  },
-  {
-    id: 2,
-    author: 'Amélie Rousseau',
-    rating: '3.5',
-    date: '05/09/2026',
-    text: "Service rapide et efficace, seul bémol le délai d'attente initial mais le résultat final était à la hauteur de nos attentes.",
-    npsScore: 6,
-    service: 'Location de propriété',
-    googleShared: true,
-    ratings: { reception: 4, qualite: 4, communication: 3, delais: 3 },
-    response: null,
-  },
-  {
-    id: 3,
-    author: 'Sophie Marchand',
-    rating: '5.0',
-    date: '04/09/2026',
-    text: 'Un accompagnement impeccable du début à la fin, je recommande vivement cette agence à tous ceux qui cherchent un service de qualité.',
-    npsScore: 10,
-    service: 'Vente de propriété',
-    googleShared: false,
-    ratings: { reception: 5, qualite: 5, communication: 5, delais: 5 },
-    response: null,
-  },
-  {
-    id: 4,
-    author: 'Marc Villeneuve',
-    rating: '4.0',
-    date: '02/09/2026',
-    text: "Bonne expérience globale, quelques délais de réponse mais l'équipe a su nous rassurer et répondre à toutes nos questions.",
-    npsScore: 7,
-    service: 'Estimation immobilière',
-    googleShared: false,
-    ratings: { reception: 4, qualite: 4, communication: 3, delais: 2 },
-    response: null,
-  },
-  {
-    id: 5,
-    author: 'Claire Dubois',
-    rating: '4.5',
-    date: '30/08/2026',
-    text: 'Très professionnel et à l’écoute de nos besoins, un grand merci pour leur réactivité et leur suivi personnalisé.',
-    npsScore: 9,
-    service: 'Vente de propriété',
-    googleShared: true,
-    ratings: { reception: 5, qualite: 4, communication: 4, delais: 4 },
-    response: null,
-  },
-  {
-    id: 6,
-    author: 'Chris P. Bacon',
-    rating: '2.0',
-    date: '06/09/2026',
-    text: 'Une expérience horrible du début à la fin. Personne ne répondait à mes messages et le suivi du dossier a été très mal géré.',
-    npsScore: 2,
-    service: 'Location de propriété',
-    googleShared: false,
-    ratings: { reception: 2, qualite: 1, communication: 1, delais: 2 },
-    response: null,
-  },
-]
+const initialReviews = CANONICAL_REVIEWS.map(review => ({ ...review, response: null }))
 
 const NPS_CHIP_CLASS = {
   Promoteur: 'home__chip--promoter',
@@ -166,7 +94,7 @@ function ReviewCard({ review, onOpenDetails, onOpenRespond }) {
 
 const REVIEW_CARD_STEP = 312 + 16 // card width + gap
 
-export function Home({ onNavigate, onOpenQuestionnaire }) {
+export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, unreadNotifCount = 0 }) {
   const reviewsScrollerRef = useRef(null)
   const [reviews, setReviews] = useState(initialReviews)
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)
@@ -216,9 +144,14 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
         <div className="home__status-bar" />
         <div className="home__appbar">
           <img className="home__logo" src={logoCompact} alt="Opinion System" />
-          <button className="home__notif-btn" type="button" aria-label="Notifications">
+          <button
+            className="home__notif-btn"
+            type="button"
+            aria-label="Notifications"
+            onClick={onOpenNotifications}
+          >
             <img src={iconBell} alt="" />
-            <span className="home__notif-badge">1</span>
+            {unreadNotifCount > 0 && <span className="home__notif-badge">{unreadNotifCount}</span>}
           </button>
         </div>
       </header>
@@ -226,9 +159,9 @@ export function Home({ onNavigate, onOpenQuestionnaire }) {
       <div className="home__content">
         <div className="home__greeting">
           <div className="home__greeting-text">
-            <p className="home__greeting-name">Annie Mation</p>
+            <p className="home__greeting-name">Olivier Dubois</p>
             <div className="home__greeting-company">
-              <span>Bastien Arfi Immobilier</span>
+              <span>La Boite Immobilier</span>
             </div>
           </div>
           <div className="home__reputation">

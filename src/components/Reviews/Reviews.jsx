@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import iconBack from '../../assets/reviews/icon-back.svg'
 import iconShare from '../../assets/reviews/icon-share.svg'
 import iconChevronBig from '../../assets/reviews/icon-chevron-big.svg'
@@ -12,13 +12,13 @@ import iconGoogle from '../../assets/home/icon-google.svg'
 import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
+import iconChevronDown from '../../assets/questionnaire/icon-dropdown-chevron.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
+import { RespondSheet } from '../Home/RespondSheet'
 import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
 import iconPillClose from '../../assets/reviews/icon-pill-close.svg'
-import iconFabUp from '../../assets/reviews/icon-fab-up.svg'
-import iconFabFunnel from '../../assets/reviews/icon-fab-funnel.svg'
 import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
 import {
   FiltersSheet,
@@ -28,9 +28,12 @@ import {
   getActiveFilterEntries,
   removeFilterEntry,
 } from './FiltersSheet'
-import { reviewMatchesFilters } from './filterReviews'
+import { reviewMatchesFilters, parseReviewDate } from './filterReviews'
+import { ReviewsDetailSheet } from './ReviewsDetailSheet'
 import { getNpsCategory } from '../../utils/nps'
 import './Reviews.css'
+
+const PAGE_SIZE = 10
 
 const NPS_CHIP_CLASS = {
   Promoteur: 'reviews__chip--promoter',
@@ -38,7 +41,7 @@ const NPS_CHIP_CLASS = {
   Détracteur: 'reviews__chip--detractor',
 }
 
-function ReviewCard({ review }) {
+function ReviewCard({ review, onOpenRespond, onOpenDetails }) {
   const npsCategory = getNpsCategory(parseFloat(review.rating))
 
   return (
@@ -81,11 +84,19 @@ function ReviewCard({ review }) {
       <p className="reviews__card-text">{review.text}</p>
 
       <div className="reviews__card-actions">
-        <button type="button" className="reviews__card-action">
+        <button
+          type="button"
+          className="reviews__card-action"
+          onClick={() => (review.response ? onOpenDetails?.(review) : onOpenRespond?.(review))}
+        >
           <img src={iconArrowReply} alt="" />
-          Répondre
+          {review.response ? 'Répondu' : 'Répondre'}
         </button>
-        <button type="button" className="reviews__card-action reviews__card-action--end">
+        <button
+          type="button"
+          className="reviews__card-action reviews__card-action--end"
+          onClick={() => onOpenDetails?.(review)}
+        >
           Détails
           <img src={iconChevronRight} alt="" />
         </button>
@@ -141,126 +152,7 @@ function FiltersRow({ dark, activeFilters, activeFilterEntries, removeActiveFilt
   )
 }
 
-// The part of the header that stays pinned right below the topbar while
-// scrolling a little: only the summary card + KPIs. Tabs and the filters
-// row are NOT pinned — they scroll away normally with the review cards.
-function SummaryPinnedContent({
-  displayedCompany,
-  isCompanyNameExiting,
-  onOpenCompanySheet,
-  displayedCollaborator,
-  isCollaboratorNameExiting,
-  onOpenCollaboratorSheet,
-  companyData,
-}) {
-  return (
-    <div className="reviews__summary">
-      <button
-        type="button"
-        className="reviews__summary-row reviews__summary-row--border reviews__summary-row--clickable"
-        onClick={onOpenCompanySheet}
-      >
-        <p className="reviews__summary-label">votre entreprise</p>
-        <div className="reviews__summary-value-row">
-          <span
-            key={displayedCompany.id}
-            className={`reviews__summary-value${isCompanyNameExiting ? ' reviews__summary-value--exiting' : ''}`}
-          >
-            {displayedCompany.name}
-          </span>
-          <img src={iconChevronBig} alt="" className="reviews__summary-chevron" />
-        </div>
-      </button>
-
-      <button
-        type="button"
-        className="reviews__summary-row reviews__summary-row--border reviews__summary-row--clickable"
-        onClick={onOpenCollaboratorSheet}
-      >
-        <p className="reviews__summary-label">Collaborateur</p>
-        <div className="reviews__summary-value-row">
-          <span
-            key={displayedCollaborator.id}
-            className={`reviews__summary-value${isCollaboratorNameExiting ? ' reviews__summary-value--exiting' : ''}`}
-          >
-            {displayedCollaborator.name}
-          </span>
-          <img src={iconChevronBig} alt="" className="reviews__summary-chevron" />
-        </div>
-      </button>
-
-      <div className="reviews__kpis">
-        <div className="reviews__kpi">
-          <div className="reviews__kpi-title">
-            <img src={iconOsLogoColor} alt="" />
-            <span>Opinion System</span>
-          </div>
-          <div className="reviews__kpi-value-row">
-            <p className="reviews__kpi-value">
-              {companyData.kpiOS.rating}
-              <span className="reviews__kpi-value-suffix">/5</span>
-            </p>
-            <span className="reviews__kpi-badge">{companyData.kpiOS.count} AVIS</span>
-          </div>
-        </div>
-        <div className="reviews__kpi">
-          <div className="reviews__kpi-title">
-            <img src={iconGoogleBadge} alt="" />
-            <span>Google</span>
-          </div>
-          <div className="reviews__kpi-value-row">
-            <p className="reviews__kpi-value">
-              {companyData.kpiGoogle.rating}
-              <span className="reviews__kpi-value-suffix">/5</span>
-            </p>
-            <span className="reviews__kpi-badge">{companyData.kpiGoogle.count} AVIS</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function CompactPinnedContent({ activeFilters, activeFilterEntries, removeActiveFilter, resultsCount, onOpenFilters }) {
-  return (
-    <div className="reviews__compact-bar">
-      <FiltersRow
-        dark
-        activeFilters={activeFilters}
-        activeFilterEntries={activeFilterEntries}
-        removeActiveFilter={removeActiveFilter}
-        resultsCount={resultsCount}
-        onOpenFilters={onOpenFilters}
-      />
-    </div>
-  )
-}
-
 const NAME_EXIT_MS = 180
-const PINNED_EXIT_MS = 220
-const PINNED_HEIGHT_TRANSITION_MS = 320
-// The trigger is tied to actual content, not a guessed distance: once
-// scrolling has pushed most of the way past the summary/KPI card's own
-// height, that's the natural moment to start swapping it for the compact
-// bar. Triggering at a fraction (not 100%) of that height leaves a buffer
-// so the ~540ms transition has time to finish before the user could
-// otherwise scroll far enough to see cards underneath it. Hysteresis
-// (enter past DOWN_RATIO of that height, only leave once back under
-// UP_RATIO of it) absorbs the scrollY clamp that happens when the pinned
-// block's own height shrinks (collapsing it can shorten the page, which
-// snaps scrollY down) so that side effect can't re-trigger a swap.
-const SCROLL_DOWN_RATIO = 0.7
-const SCROLL_UP_RATIO = 0.4
-// Fallback used for the one frame before the summary card's real height
-// has been measured.
-const FALLBACK_EXPANDED_HEIGHT = 280
-
-function nextScrolled(prev, scrollY, expandedHeight) {
-  const reference = expandedHeight ?? FALLBACK_EXPANDED_HEIGHT
-  if (!prev && scrollY > reference * SCROLL_DOWN_RATIO) return true
-  if (prev && scrollY < reference * SCROLL_UP_RATIO) return false
-  return prev
-}
 
 export function Reviews({ onNavigate }) {
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
@@ -282,33 +174,15 @@ export function Reviews({ onNavigate }) {
   const activeFilters = hasAppliedFilters ? appliedFilters : EMPTY_FILTERS
   const activeFilterEntries = hasAppliedFilters ? getActiveFilterEntries(appliedFilters) : []
 
-  // Scroll-driven pinned header: stays expanded (summary + KPIs) for small
-  // scroll amounts, cards simply pass underneath it. Only once scrolling
-  // has pushed past the summary card's own height does it swap to the
-  // compact dark filters bar, via a move+fade transition on the content
-  // plus a matching height transition on the container so nothing snaps
-  // into place.
-  const [scrolled, setScrolled] = useState(false)
-  const [pinnedMode, setPinnedMode] = useState('expanded')
-  const [isPinnedExiting, setPinnedExiting] = useState(false)
-  const pinnedExitTimeoutRef = useRef(null)
-  const ignoreScrollUntilRef = useRef(0)
-
-  const expandedMeasureRef = useRef(null)
-  const compactMeasureRef = useRef(null)
-  const [measuredHeights, setMeasuredHeights] = useState({ expanded: null, compact: null })
-  const [pinnedHeight, setPinnedHeight] = useState(null)
-  // Mirrors measuredHeights.expanded for the scroll listener below, which
-  // is registered once ([] deps) and would otherwise read a stale value.
-  const expandedHeightRef = useRef(null)
-  expandedHeightRef.current = measuredHeights.expanded
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [reviewsByCompany, setReviewsByCompany] = useState(() =>
+    Object.fromEntries(Object.entries(COMPANY_REVIEWS_DATA).map(([id, data]) => [id, data.reviews]))
+  )
+  const [selectedReview, setSelectedReview] = useState(null)
+  const [respondingReview, setRespondingReview] = useState(null)
 
   const removeActiveFilter = entry => {
     setAppliedFilters(prev => removeFilterEntry(prev, entry))
-  }
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   useEffect(() => {
@@ -334,91 +208,50 @@ export function Reviews({ onNavigate }) {
   }, [selectedCollaborator])
 
   const companyData = COMPANY_REVIEWS_DATA[selectedCompany.id]
-  const filteredReviews = companyData.reviews
+  const companyReviews = reviewsByCompany[selectedCompany.id]
+  const filteredReviews = companyReviews
     .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
     .filter(review => reviewMatchesFilters(review, activeFilters))
+    .slice()
+    .sort((a, b) => parseReviewDate(b.date) - parseReviewDate(a.date))
+
+  const visibleReviews = filteredReviews.slice(0, visibleCount)
+  const hasMore = filteredReviews.length > visibleCount
+
+  const handleLoadMore = () => setVisibleCount(count => count + PAGE_SIZE)
+
+  const handleOpenRespond = review => {
+    setSelectedReview(null)
+    setRespondingReview(review)
+  }
+
+  const handleOpenDetails = review => setSelectedReview(review)
+
+  const updateReviewResponse = (review, response) => {
+    setReviewsByCompany(data => ({
+      ...data,
+      [selectedCompany.id]: data[selectedCompany.id].map(r => (r.id === review.id ? { ...r, response } : r)),
+    }))
+    return { ...review, response }
+  }
+
+  const handleSubmitResponse = (review, responseText) => {
+    const updatedReview = updateReviewResponse(review, responseText)
+    setRespondingReview(null)
+    setSelectedReview(updatedReview)
+  }
+
+  const handleDeleteResponse = review => {
+    const updatedReview = updateReviewResponse(review, null)
+    setRespondingReview(null)
+    setSelectedReview(updatedReview)
+  }
 
   const tabs = [
     { value: String(companyData.tabs.sansReponses), label: 'Sans Réponses' },
     { value: String(companyData.tabs.negatifs), label: 'Avis Négatifs' },
     { value: String(companyData.tabs.aRecuperer), label: 'A Récupérer' },
   ]
-
-  // Track scroll depth (rAF-throttled) with hysteresis to decide expanded
-  // vs compact, ignoring scroll events for a short window right after we
-  // trigger our own height transition (that transition can shorten the
-  // page and cause the browser to clamp scrollY, which must not be read
-  // as user intent to scroll back up).
-  useEffect(() => {
-    let ticking = false
-    const handleScroll = () => {
-      if (ticking) return
-      ticking = true
-      requestAnimationFrame(() => {
-        ticking = false
-        if (performance.now() < ignoreScrollUntilRef.current) return
-        setScrolled(prev => nextScrolled(prev, window.scrollY, expandedHeightRef.current))
-      })
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Measure the real height of both variants so the container can animate
-  // between them instead of snapping when the content swaps.
-  useLayoutEffect(() => {
-    const measure = () => {
-      setMeasuredHeights({
-        expanded: expandedMeasureRef.current?.scrollHeight ?? null,
-        compact: compactMeasureRef.current?.scrollHeight ?? null,
-      })
-    }
-    measure()
-    const observer = new ResizeObserver(measure)
-    if (expandedMeasureRef.current) observer.observe(expandedMeasureRef.current)
-    if (compactMeasureRef.current) observer.observe(compactMeasureRef.current)
-    return () => observer.disconnect()
-  }, [companyData, activeFilterEntries.length, filteredReviews.length])
-
-  // Keep the committed height in sync with the currently displayed mode
-  // whenever it's not mid-transition (e.g. active filter pills changing).
-  useEffect(() => {
-    if (isPinnedExiting) return
-    const height = measuredHeights[pinnedMode]
-    if (height != null) setPinnedHeight(height)
-  }, [measuredHeights, pinnedMode, isPinnedExiting])
-
-  // Trigger the swap: fade the old content out FIRST, at its current
-  // height (so overflow:hidden never clips still-visible text while the
-  // container is also resizing underneath it — that combination is what
-  // caused the blurry/glitchy look). Only once the old content is fully
-  // gone and the new content mounts does the height-sync effect above
-  // animate the container to match, concurrent with the new content's
-  // own fade-in.
-  useEffect(() => {
-    const targetMode = scrolled ? 'compact' : 'expanded'
-    if (targetMode === pinnedMode) return
-    setPinnedExiting(true)
-    const ignoreMs = PINNED_EXIT_MS + PINNED_HEIGHT_TRANSITION_MS + 120
-    ignoreScrollUntilRef.current = performance.now() + ignoreMs
-    pinnedExitTimeoutRef.current = setTimeout(() => {
-      setPinnedMode(targetMode)
-      setPinnedExiting(false)
-    }, PINNED_EXIT_MS)
-    // A scroll event that lands inside the ignore window is dropped, and if
-    // no further scroll event ever arrives (e.g. that was the last event of
-    // the gesture), scrolled would stay stuck. Force one re-check right as
-    // the window closes so the state always resyncs with the real scrollY.
-    const resyncTimeoutRef = setTimeout(() => {
-      setScrolled(prev => nextScrolled(prev, window.scrollY, expandedHeightRef.current))
-    }, ignoreMs + 20)
-    return () => {
-      clearTimeout(pinnedExitTimeoutRef.current)
-      clearTimeout(resyncTimeoutRef)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scrolled])
 
   const sharedFiltersProps = {
     activeFilters,
@@ -439,68 +272,82 @@ export function Reviews({ onNavigate }) {
           <h1 className="reviews__title">Mes Avis</h1>
           <button
             type="button"
-            className={`reviews__icon-btn reviews__icon-btn--share${scrolled ? ' reviews__icon-btn--hidden' : ''}`}
+            className="reviews__icon-btn reviews__icon-btn--share"
             aria-label="Partager"
             onClick={() => setShareSheetOpen(true)}
-            tabIndex={scrolled ? -1 : 0}
           >
             <img src={iconShare} alt="" />
           </button>
         </div>
       </header>
 
-      <div className={`reviews__fab${scrolled ? ' reviews__fab--visible' : ''}`}>
-        <button type="button" className="reviews__fab-btn" onClick={scrollToTop} aria-label="Remonter en haut">
-          <img src={iconFabUp} alt="" />
-        </button>
-        <div className="reviews__fab-divider" />
+      <div className="reviews__summary">
         <button
           type="button"
-          className="reviews__fab-btn"
-          onClick={() => setFiltersSheetOpen(true)}
-          aria-label="Ouvrir les filtres"
+          className="reviews__summary-row reviews__summary-row--border reviews__summary-row--clickable"
+          onClick={() => setCompanySheetOpen(true)}
         >
-          <img src={iconFabFunnel} alt="" />
-          {countActiveFilters(activeFilters) > 0 && <span className="reviews__fab-dot" />}
+          <p className="reviews__summary-label">votre entreprise</p>
+          <div className="reviews__summary-value-row">
+            <span
+              key={displayedCompany.id}
+              className={`reviews__summary-value${isCompanyNameExiting ? ' reviews__summary-value--exiting' : ''}`}
+            >
+              {displayedCompany.name}
+            </span>
+            <img src={iconChevronBig} alt="" className="reviews__summary-chevron" />
+          </div>
         </button>
+
+        <button
+          type="button"
+          className="reviews__summary-row reviews__summary-row--border reviews__summary-row--clickable"
+          onClick={() => setCollaboratorSheetOpen(true)}
+        >
+          <p className="reviews__summary-label">Collaborateur</p>
+          <div className="reviews__summary-value-row">
+            <span
+              key={displayedCollaborator.id}
+              className={`reviews__summary-value${isCollaboratorNameExiting ? ' reviews__summary-value--exiting' : ''}`}
+            >
+              {displayedCollaborator.name}
+            </span>
+            <img src={iconChevronBig} alt="" className="reviews__summary-chevron" />
+          </div>
+        </button>
+
+        <div className="reviews__kpis">
+          <div className="reviews__kpi">
+            <div className="reviews__kpi-title">
+              <img src={iconOsLogoColor} alt="" />
+              <span>Opinion System</span>
+            </div>
+            <div className="reviews__kpi-value-row">
+              <p className="reviews__kpi-value">
+                {companyData.kpiOS.rating}
+                <span className="reviews__kpi-value-suffix">/5</span>
+              </p>
+              <span className="reviews__kpi-badge">{companyData.kpiOS.count} AVIS</span>
+            </div>
+          </div>
+          <div className="reviews__kpi">
+            <div className="reviews__kpi-title">
+              <img src={iconGoogleBadge} alt="" />
+              <span>Google</span>
+            </div>
+            <div className="reviews__kpi-value-row">
+              <p className="reviews__kpi-value">
+                {companyData.kpiGoogle.rating}
+                <span className="reviews__kpi-value-suffix">/5</span>
+              </p>
+              <span className="reviews__kpi-badge">{companyData.kpiGoogle.count} AVIS</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="reviews__pinned" style={pinnedHeight != null ? { height: pinnedHeight } : undefined}>
-        <div
-          key={pinnedMode}
-          className={`reviews__pinned-inner${isPinnedExiting ? ' reviews__pinned-inner--exiting' : ''}`}
-        >
-          {pinnedMode === 'expanded' ? (
-            <SummaryPinnedContent
-              displayedCompany={displayedCompany}
-              isCompanyNameExiting={isCompanyNameExiting}
-              onOpenCompanySheet={() => setCompanySheetOpen(true)}
-              displayedCollaborator={displayedCollaborator}
-              isCollaboratorNameExiting={isCollaboratorNameExiting}
-              onOpenCollaboratorSheet={() => setCollaboratorSheetOpen(true)}
-              companyData={companyData}
-            />
-          ) : (
-            <CompactPinnedContent {...sharedFiltersProps} />
-          )}
-        </div>
-
-        {/* Hidden measurement copies, kept in sync with real data so the
-            container's height transition always animates to an accurate target. */}
-        <div className="reviews__pinned-measure" aria-hidden="true" ref={expandedMeasureRef}>
-          <SummaryPinnedContent
-            displayedCompany={displayedCompany}
-            isCompanyNameExiting={false}
-            onOpenCompanySheet={() => {}}
-            displayedCollaborator={displayedCollaborator}
-            isCollaboratorNameExiting={false}
-            onOpenCollaboratorSheet={() => {}}
-            companyData={companyData}
-          />
-        </div>
-        <div className="reviews__pinned-measure" aria-hidden="true" ref={compactMeasureRef}>
-          <CompactPinnedContent {...sharedFiltersProps} />
-        </div>
+      <div className="reviews__filters-sticky">
+        <FiltersRow dark {...sharedFiltersProps} />
       </div>
 
       <div className="reviews__panel">
@@ -514,12 +361,24 @@ export function Reviews({ onNavigate }) {
         </div>
 
         <div className="reviews__list">
-          <FiltersRow {...sharedFiltersProps} />
-
-          {filteredReviews.length > 0 ? (
-            filteredReviews.map(review => <ReviewCard key={review.id} review={review} />)
+          {visibleReviews.length > 0 ? (
+            visibleReviews.map(review => (
+              <ReviewCard
+                key={review.id}
+                review={review}
+                onOpenRespond={handleOpenRespond}
+                onOpenDetails={handleOpenDetails}
+              />
+            ))
           ) : (
             <p className="reviews__empty">Aucun avis ne correspond à ces critères.</p>
+          )}
+
+          {hasMore && (
+            <button type="button" className="reviews__load-more" onClick={handleLoadMore}>
+              Charger plus
+              <img src={iconChevronDown} alt="" />
+            </button>
           )}
         </div>
       </div>
@@ -537,6 +396,7 @@ export function Reviews({ onNavigate }) {
           onSelect={company => {
             setSelectedCompany(company)
             setSelectedCollaborator(COLLABORATORS[0])
+            setVisibleCount(PAGE_SIZE)
             setCompanySheetOpen(false)
           }}
         />
@@ -548,6 +408,7 @@ export function Reviews({ onNavigate }) {
           onClose={() => setCollaboratorSheetOpen(false)}
           onSelect={collaborator => {
             setSelectedCollaborator(collaborator)
+            setVisibleCount(PAGE_SIZE)
             setCollaboratorSheetOpen(false)
           }}
         />
@@ -560,8 +421,26 @@ export function Reviews({ onNavigate }) {
           onApply={filters => {
             setAppliedFilters(filters)
             setHasAppliedFilters(true)
+            setVisibleCount(PAGE_SIZE)
             setFiltersSheetOpen(false)
           }}
+        />
+      )}
+
+      {selectedReview && (
+        <ReviewsDetailSheet
+          review={selectedReview}
+          onClose={() => setSelectedReview(null)}
+          onOpenRespond={handleOpenRespond}
+        />
+      )}
+
+      {respondingReview && (
+        <RespondSheet
+          review={{ ...respondingReview, googleShared: respondingReview.googleSharing === 'google-partage' }}
+          onClose={() => setRespondingReview(null)}
+          onSubmit={handleSubmitResponse}
+          onDelete={handleDeleteResponse}
         />
       )}
     </div>

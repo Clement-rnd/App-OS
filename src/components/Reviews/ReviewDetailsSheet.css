@@ -108,6 +108,23 @@
   color: #041b44;
 }
 
+.review-details-sheet__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.review-details-sheet__back img {
+  width: 20px;
+  height: 20px;
+}
+
 .review-details-sheet__close {
   display: flex;
   align-items: center;
@@ -132,6 +149,17 @@
   width: 100%;
   padding: 16px;
   overflow-y: auto;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+/* Toggled while switching between the "details" and "respond" views (see
+   ReviewDetailsSheet's withViewTransition) so the content fades out
+   smoothly before the new view's content replaces it in place, instead of
+   snapping straight to it -- and, for "respond", instead of opening a
+   second sheet on top of this one. */
+.review-details-sheet__content--exiting {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 /* Review card */
@@ -201,39 +229,6 @@
   font-size: 10px;
   font-weight: 500;
   color: #b8c2cc;
-}
-
-.review-details__stars {
-  display: flex;
-  align-items: center;
-}
-
-.review-details__star {
-  width: 14px;
-  height: 14px;
-}
-
-.review-details__star--half {
-  position: relative;
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-}
-
-.review-details__star-bg,
-.review-details__star-fg {
-  position: absolute;
-  inset: 0;
-  width: 14px;
-  height: 14px;
-}
-
-.review-details__star-bg {
-  filter: grayscale(1) brightness(1.6) opacity(0.7);
-}
-
-.review-details__star-fg {
-  clip-path: inset(0 50% 0 0);
 }
 
 .review-details__text {
@@ -409,6 +404,12 @@
 .review-details-sheet__reply-btn img {
   width: 18px;
   height: 18px;
+}
+
+.review-details-sheet__reply-btn--disabled {
+  background-color: #dfe9ef;
+  color: #8ea1b2;
+  cursor: not-allowed;
 }
 
 .review-details-sheet__share-btn {

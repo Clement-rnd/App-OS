@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import iconBack from '../../assets/reviews/icon-back.svg'
 import iconShare from '../../assets/reviews/icon-share.svg'
 import iconChevronBig from '../../assets/reviews/icon-chevron-big.svg'
 import iconOsLogoColor from '../../assets/reviews/icon-os-logo-color.svg'
@@ -7,14 +6,15 @@ import iconGoogleBadge from '../../assets/reviews/icon-google-badge.svg'
 import iconFunnel from '../../assets/reviews/icon-funnel.svg'
 import iconSort from '../../assets/reviews/icon-sort.svg'
 import iconReviewRating from '../../assets/home/icon-review-rating.svg'
-import iconStar from '../../assets/home/icon-star.svg'
 import iconGoogle from '../../assets/home/icon-google.svg'
 import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
 import iconChevronDown from '../../assets/questionnaire/icon-dropdown-chevron.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
+import { StarRating } from '../StarRating/StarRating'
 import { RespondSheet } from '../Home/RespondSheet'
+import { ResponseAlert } from '../ResponseAlert/ResponseAlert'
 import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
@@ -104,15 +104,7 @@ function ReviewCard({ review, onOpenDetails, onOpenRespond }) {
 
       <div className="reviews__card-meta">
         <span className="reviews__card-date">{review.date}</span>
-        <div className="reviews__card-stars">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <img key={i} src={iconStar} alt="" className="reviews__star" />
-          ))}
-          <span className="reviews__star reviews__star--half">
-            <img src={iconStar} alt="" className="reviews__star-bg" />
-            <img src={iconStar} alt="" className="reviews__star-fg" />
-          </span>
-        </div>
+        <StarRating rating={parseFloat(review.rating)} />
       </div>
 
       <div className="reviews__card-chips">
@@ -201,6 +193,8 @@ function FiltersRow({ dark, activeFilters, activeFilterEntries, removeActiveFilt
 }
 
 const NAME_EXIT_MS = 180
+// Matches the CSS transition duration on .reviews__list > .reviews__card.
+const LIST_EXIT_MS = 180
 
 export function Reviews({ onNavigate }) {
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
@@ -228,6 +222,7 @@ export function Reviews({ onNavigate }) {
   )
   const [selectedReview, setSelectedReview] = useState(null)
   const [respondingReview, setRespondingReview] = useState(null)
+  const [responseAlert, setResponseAlert] = useState(null)
 
   const isAnySheetOpen =
     isShareSheetOpen ||
@@ -292,14 +287,41 @@ export function Reviews({ onNavigate }) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Whenever a filter change would swap the visible review cards, fade the
+  // current ones out first instead of snapping straight to the new set --
+  // the mutation itself only runs after the exit transition finishes, so
+  // the cards that replace them mount/settle into an already-invisible
+  // list and fade back in cleanly (see .reviews__list--exiting).
+  const [isListExiting, setListExiting] = useState(false)
+  const listExitTimeoutRef = useRef(null)
+
+  useEffect(() => () => clearTimeout(listExitTimeoutRef.current), [])
+
+  const withListTransition = mutate => {
+    setListExiting(true)
+    clearTimeout(listExitTimeoutRef.current)
+    listExitTimeoutRef.current = setTimeout(() => {
+      mutate()
+      setListExiting(false)
+    }, LIST_EXIT_MS)
+  }
+
   const removeActiveFilter = entry => {
-    setAppliedFilters(prev => removeFilterEntry(prev, entry))
+    withListTransition(() => setAppliedFilters(prev => removeFilterEntry(prev, entry)))
   }
 
   const applyFilters = nextFilters => {
-    setAppliedFilters(nextFilters)
-    setHasAppliedFilters(countActiveFilters(nextFilters) > 0)
-    setVisibleCount(PAGE_SIZE)
+    withListTransition(() => {
+      setAppliedFilters(nextFilters)
+      setHasAppliedFilters(countActiveFilters(nextFilters) > 0)
+      setVisibleCount(PAGE_SIZE)
+    })
+  }
+
+  const toggleSourceFilter = sourceId => {
+    const current = activeFilters.source
+    const nextSource = current.includes(sourceId) ? current.filter(id => id !== sourceId) : [...current, sourceId]
+    applyFilters({ ...activeFilters, source: nextSource })
   }
 
   const toggleTabFilter = tabDef => {
@@ -331,6 +353,11 @@ export function Reviews({ onNavigate }) {
 
   const companyData = COMPANY_REVIEWS_DATA[selectedCompany.id]
   const companyReviews = reviewsByCompany[selectedCompany.id]
+  // Counted from the actual reviews, not companyData.kpiOS/kpiGoogle.count
+  // (static mock numbers that don't track the real review list) -- so the
+  // KPI badges always agree with "X résultats" and the tabs below them.
+  const osReviewCount = companyReviews.filter(review => review.source === 'opinion-system').length
+  const googleReviewCount = companyReviews.filter(review => review.source === 'google').length
   const filteredReviews = companyReviews
     .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
     .filter(review => reviewMatchesFilters(review, activeFilters))
@@ -358,9 +385,11 @@ export function Reviews({ onNavigate }) {
   }
 
   const handleSubmitResponse = (review, responseText) => {
+    const wasEditing = Boolean(review.response)
     const updatedReview = updateReviewResponse(review, responseText)
     setRespondingReview(null)
     setSelectedReview(updatedReview)
+    setResponseAlert(wasEditing ? 'Une réponse a été modifiée' : 'Une réponse a été envoyée')
   }
 
   const handleDeleteResponse = review => {
@@ -408,9 +437,6 @@ export function Reviews({ onNavigate }) {
       >
         <div className="reviews__status-bar" />
         <div className="reviews__appbar">
-          <button type="button" className="reviews__icon-btn" aria-label="Retour" onClick={() => onNavigate?.('home')}>
-            <img src={iconBack} alt="" />
-          </button>
           <h1 className="reviews__title">Mes Avis</h1>
           <button
             type="button"
@@ -467,7 +493,11 @@ export function Reviews({ onNavigate }) {
         </button>
 
         <div className="reviews__kpis">
-          <div className="reviews__kpi">
+          <button
+            type="button"
+            className={`reviews__kpi${activeFilters.source.includes('opinion-system') ? ' reviews__kpi--active' : ''}`}
+            onClick={() => toggleSourceFilter('opinion-system')}
+          >
             <div className="reviews__kpi-title">
               <img src={iconOsLogoColor} alt="" />
               <span>Opinion System</span>
@@ -477,10 +507,14 @@ export function Reviews({ onNavigate }) {
                 {companyData.kpiOS.rating}
                 <span className="reviews__kpi-value-suffix">/5</span>
               </p>
-              <span className="reviews__kpi-badge">{companyData.kpiOS.count} AVIS</span>
+              <span className="reviews__kpi-badge">{osReviewCount} AVIS</span>
             </div>
-          </div>
-          <div className="reviews__kpi">
+          </button>
+          <button
+            type="button"
+            className={`reviews__kpi${activeFilters.source.includes('google') ? ' reviews__kpi--active' : ''}`}
+            onClick={() => toggleSourceFilter('google')}
+          >
             <div className="reviews__kpi-title">
               <img src={iconGoogleBadge} alt="" />
               <span>Google</span>
@@ -490,9 +524,9 @@ export function Reviews({ onNavigate }) {
                 {companyData.kpiGoogle.rating}
                 <span className="reviews__kpi-value-suffix">/5</span>
               </p>
-              <span className="reviews__kpi-badge">{companyData.kpiGoogle.count} AVIS</span>
+              <span className="reviews__kpi-badge">{googleReviewCount} AVIS</span>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -528,7 +562,7 @@ export function Reviews({ onNavigate }) {
           ))}
         </div>
 
-        <div className="reviews__list">
+        <div className={`reviews__list${isListExiting ? ' reviews__list--exiting' : ''}`}>
           {visibleReviews.length > 0 ? (
             visibleReviews.map(review => (
               <ReviewCard
@@ -551,7 +585,7 @@ export function Reviews({ onNavigate }) {
         </div>
       </div>
 
-      <BottomNav active="chat" onNavigate={onNavigate} badges={{ chat: 8 }} />
+      <BottomNav active="chat" onNavigate={onNavigate} />
 
       {isShareSheetOpen && (
         <ShareReviewsSheet url="https://sofakingdomrealtors.com" onClose={() => setShareSheetOpen(false)} />
@@ -587,21 +621,30 @@ export function Reviews({ onNavigate }) {
           initialFilters={appliedFilters}
           onClose={() => setFiltersSheetOpen(false)}
           onReset={() => {
-            setAppliedFilters(EMPTY_FILTERS)
-            setHasAppliedFilters(false)
-            setVisibleCount(PAGE_SIZE)
+            withListTransition(() => {
+              setAppliedFilters(EMPTY_FILTERS)
+              setHasAppliedFilters(false)
+              setVisibleCount(PAGE_SIZE)
+            })
           }}
           onApply={filters => {
-            setAppliedFilters(filters)
-            setHasAppliedFilters(true)
-            setVisibleCount(PAGE_SIZE)
+            withListTransition(() => {
+              setAppliedFilters(filters)
+              setHasAppliedFilters(true)
+              setVisibleCount(PAGE_SIZE)
+            })
             setFiltersSheetOpen(false)
           }}
         />
       )}
 
       {selectedReview && (
-        <ReviewDetailsSheet review={selectedReview} onClose={() => setSelectedReview(null)} onReply={handleOpenRespond} />
+        <ReviewDetailsSheet
+          review={selectedReview}
+          onClose={() => setSelectedReview(null)}
+          onSubmit={handleSubmitResponse}
+          onDelete={handleDeleteResponse}
+        />
       )}
 
       {respondingReview && (
@@ -612,6 +655,8 @@ export function Reviews({ onNavigate }) {
           onDelete={handleDeleteResponse}
         />
       )}
+
+      {responseAlert && <ResponseAlert message={responseAlert} onClose={() => setResponseAlert(null)} />}
     </div>
   )
 }

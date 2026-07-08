@@ -274,10 +274,20 @@
   gap: 8px;
   min-width: 0;
   padding: 16px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease;
 }
 
 .reviews__kpi:first-child {
   border-right: 1px solid rgba(44, 149, 255, 0.2);
+}
+
+.reviews__kpi--active {
+  background-color: rgba(44, 149, 255, 0.3);
 }
 
 .reviews__kpi-title {
@@ -564,16 +574,35 @@
   font-size: 12px;
   font-weight: 500;
   color: #8ea1b2;
-  animation: reviews-fade-up 400ms ease-out both;
+  animation: reviews-fade-up 400ms ease-out backwards;
+  transition: opacity 180ms ease, transform 180ms ease;
 }
 
 /* Review card */
 .reviews__list > .reviews__card {
-  animation: reviews-fade-up 400ms ease-out both;
+  /* backwards (not both): needs to hold its "from" state during the
+     staggered delay below so it doesn't flash visible before its turn,
+     but must release opacity/transform back to the normal cascade once it
+     finishes -- otherwise the animation's filled end state permanently
+     wins over .reviews__list--exiting's opacity: 0 below (see the same
+     issue on .reviews__summary). */
+  animation: reviews-fade-up 400ms ease-out backwards;
   /* Default for the first card, kept in the same +50ms cadence as the
      nth-child overrides below -- without this it defaults to 0ms and pops
      in before the summary/tabs above it, breaking the top-to-bottom order. */
   animation-delay: 190ms;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+/* Toggled while a filter change is being applied (see the Reviews
+   component) so the current cards fade out smoothly first, instead of
+   instantly snapping to the newly-filtered set. The new set then fades
+   back in via this same transition (reused ones) or its own staggered
+   entrance animation above (freshly mounted ones). */
+.reviews__list--exiting > .reviews__card,
+.reviews__list--exiting > .reviews__empty {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 .reviews__list > .reviews__card:nth-child(2) {
@@ -645,39 +674,6 @@
   font-size: 10px;
   font-weight: 500;
   color: #b8c2cc;
-}
-
-.reviews__card-stars {
-  display: flex;
-  align-items: center;
-}
-
-.reviews__star {
-  width: 14px;
-  height: 14px;
-}
-
-.reviews__star--half {
-  position: relative;
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-}
-
-.reviews__star-bg,
-.reviews__star-fg {
-  position: absolute;
-  inset: 0;
-  width: 14px;
-  height: 14px;
-}
-
-.reviews__star-bg {
-  filter: grayscale(1) brightness(1.6) opacity(0.7);
-}
-
-.reviews__star-fg {
-  clip-path: inset(0 50% 0 0);
 }
 
 .reviews__card-chips {

@@ -9,7 +9,6 @@ import iconFilterGoogleCertif from '../../assets/reviews/icon-filter-google-cert
 import iconFilterGoogleMuted from '../../assets/reviews/icon-filter-google-muted.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
-import { Calendar } from './Calendar'
 import './FiltersSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -38,7 +37,6 @@ export const FILTER_GROUPS = [
     id: 'nps',
     label: 'Badge NPS',
     multi: true,
-    muted: true,
     options: [
       { id: 'promoteur', label: 'Promoteur' },
       { id: 'passif', label: 'Passif' },
@@ -129,7 +127,6 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
   const [filters, setFilters] = useState(initialFilters)
   const [customStart, setCustomStart] = useState(initialFilters.periodeRange?.start || '')
   const [customEnd, setCustomEnd] = useState(initialFilters.periodeRange?.end || '')
-  const [activeDateTab, setActiveDateTab] = useState('du')
   const isCustomRangeOpen = filters.periode === 'personnalise'
   const isApplyDisabled = isCustomRangeOpen && (!customStart || !customEnd)
 
@@ -221,9 +218,7 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
                     <button
                       key={option.id}
                       type="button"
-                      className={`filters-sheet__chip${isSelected ? ' filters-sheet__chip--selected' : ''}${
-                        group.muted && !isSelected ? ' filters-sheet__chip--muted' : ''
-                      }`}
+                      className={`filters-sheet__chip${isSelected ? ' filters-sheet__chip--selected' : ''}`}
                       onClick={() => toggleOption(group, option.id)}
                     >
                       {icon && <img src={icon} alt="" className="filters-sheet__chip-icon" />}
@@ -234,14 +229,29 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
               </div>
 
               {group.id === 'periode' && isCustomRangeOpen && (
-                <Calendar
-                  activeTab={activeDateTab}
-                  onTabChange={setActiveDateTab}
-                  startDate={customStart}
-                  endDate={customEnd}
-                  onSelectDate={iso => (activeDateTab === 'du' ? setCustomStart(iso) : setCustomEnd(iso))}
-                  onClose={closeCustomRange}
-                />
+                <div className="filters-sheet__custom-range">
+                  <div className="filters-sheet__custom-range-header">
+                    <span>Période personnalisée</span>
+                    <button
+                      type="button"
+                      className="filters-sheet__custom-range-close"
+                      onClick={closeCustomRange}
+                      aria-label="Fermer la sélection de dates"
+                    >
+                      <img src={iconFilterClose} alt="" />
+                    </button>
+                  </div>
+                  <div className="filters-sheet__custom-range-fields">
+                    <label className="filters-sheet__custom-range-field">
+                      <span>Du</span>
+                      <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} />
+                    </label>
+                    <label className="filters-sheet__custom-range-field">
+                      <span>Au</span>
+                      <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
+                    </label>
+                  </div>
+                </div>
               )}
             </div>
           ))}

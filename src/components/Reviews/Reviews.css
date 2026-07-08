@@ -3,7 +3,6 @@
   flex-direction: column;
   min-height: 100dvh;
   font-family: 'Poppins', sans-serif;
-  padding-bottom: 128px;
   /* Prevent iOS elastic/rubber-band overscroll: bouncing past the top or
      bottom can momentarily reveal the page's own background behind the
      fixed/sticky layers instead of our gradient. */
@@ -276,9 +275,12 @@
 .reviews__panel {
   display: flex;
   flex-direction: column;
+  flex: 1;
   width: 100%;
+  padding-bottom: 128px;
   border-radius: 20px 20px 0 0;
   background-color: #f0f6f9;
+  box-sizing: border-box;
 }
 
 .reviews__tabs {
@@ -687,13 +689,18 @@
   color: #041b44;
 }
 
-.reviews__card-action img {
+.reviews__card-action img,
+.reviews__card-action svg {
   width: 16px;
   height: 16px;
 }
 
 .reviews__card-action--end {
   justify-content: flex-end;
+}
+
+.reviews__card-action--responded {
+  color: #2c95ff;
 }
 
 .reviews__load-more {

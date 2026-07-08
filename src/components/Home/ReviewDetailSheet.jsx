@@ -69,7 +69,9 @@ export function ReviewDetailSheet({ review, onClose, onOpenRespond }) {
               <p className="review-detail-info__label review-detail-info__label--dark">
                 Type de questionnaire
               </p>
-              <span className="review-detail-chip">Certifié OS</span>
+              <span className="review-detail-chip">
+                {review.certification === 'standard-os' ? 'Standard OS' : 'Certifié OS'}
+              </span>
             </div>
             <div className="review-detail-info__row">
               <p className="review-detail-info__label">Score NPS</p>

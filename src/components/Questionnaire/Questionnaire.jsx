@@ -146,7 +146,7 @@ function SurveyDetails({ survey, onChangeSurvey }) {
   return (
     <div className="questionnaire__survey-card">
       <div className="questionnaire__field">
-        <span className="questionnaire__field-label">Type de questionnaire</span>
+        <span className="questionnaire__field-label">Questionnaire</span>
         <div
           className="questionnaire__survey-selected questionnaire__survey-selected--clickable"
           onClick={onChangeSurvey}

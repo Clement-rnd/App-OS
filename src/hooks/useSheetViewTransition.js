@@ -1,6 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 
 const EXIT_DURATION_MS = 130
+// Matches the CSS `transition: height 300ms ease` on .review-details__swap
+// / .review-details-sheet__footer-frame (and their Home equivalents).
+const HEIGHT_TRANSITION_MS = 300
 
 // One independently-sized region: measures its current height before a
 // swap and animates to the new one after, the same "lock -> remeasure a
@@ -13,8 +16,15 @@ const EXIT_DURATION_MS = 130
 function useHeightFrame() {
   const [height, setHeight] = useState(null)
   const innerRef = useRef(null)
+  const releaseTimeoutRef = useRef(null)
+
+  const release = () => {
+    clearTimeout(releaseTimeoutRef.current)
+    setHeight(null)
+  }
 
   const measure = () => {
+    clearTimeout(releaseTimeoutRef.current)
     const el = innerRef.current
     if (el) setHeight(el.getBoundingClientRect().height)
   }
@@ -23,13 +33,25 @@ function useHeightFrame() {
     const el = innerRef.current
     if (!el) return () => {}
     const newHeight = el.getBoundingClientRect().height
-    const raf = requestAnimationFrame(() => setHeight(newHeight))
-    return () => cancelAnimationFrame(raf)
+    const raf = requestAnimationFrame(() => {
+      setHeight(newHeight)
+      // `transitionend` (below) doesn't fire reliably on every mobile
+      // browser -- a real device seen getting stuck here left the height
+      // locked at a previous (taller) view's size forever, showing as a
+      // permanent blank gap under the shorter view's content. This is the
+      // fallback that guarantees release-to-auto happens regardless.
+      clearTimeout(releaseTimeoutRef.current)
+      releaseTimeoutRef.current = setTimeout(release, HEIGHT_TRANSITION_MS + 100)
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(releaseTimeoutRef.current)
+    }
   }
 
   const style = height !== null ? { height } : undefined
   const onTransitionEnd = e => {
-    if (e.target === e.currentTarget && e.propertyName === 'height') setHeight(null)
+    if (e.target === e.currentTarget && e.propertyName === 'height') release()
   }
 
   return { innerRef, style, onTransitionEnd, measure, pushNextFrame }

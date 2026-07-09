@@ -10,7 +10,7 @@ const ACTION_LABELS = {
   boost: 'Envoyer une demande',
 }
 
-export function NotificationRow({ notification, onMarkRead, onArchive, onAction }) {
+export function NotificationRow({ notification, onMarkRead, onArchive, onRowClick, animationDelay, isExiting }) {
   const { dragHandlers, translateX, isDragging, close } = useSwipeActions()
   const typeConfig = NOTIFICATION_TYPES[notification.type] || {}
   const needsAction = notification.actionable && !notification.actionCompleted
@@ -29,11 +29,7 @@ export function NotificationRow({ notification, onMarkRead, onArchive, onAction 
       close()
       return
     }
-    if (needsAction) {
-      onAction(notification)
-    } else if (notification.unread) {
-      onMarkRead(notification.id)
-    }
+    onRowClick(notification)
   }
 
   const handleRowKeyDown = e => {
@@ -44,7 +40,10 @@ export function NotificationRow({ notification, onMarkRead, onArchive, onAction 
   }
 
   return (
-    <div className="notif-row-wrap">
+    <div
+      className={`notif-row-wrap${isExiting ? ' notif-row-wrap--exiting' : ''}`}
+      style={{ animationDelay: isExiting ? '0ms' : `${animationDelay}ms` }}
+    >
       <div className="notif-row-actions">
         <button type="button" className="notif-row-action notif-row-action--read" onClick={handleMarkRead}>
           <img src={iconChecksWhite} alt="" />
@@ -90,7 +89,7 @@ export function NotificationRow({ notification, onMarkRead, onArchive, onAction 
                 className="notif-row__reply-btn"
                 onClick={e => {
                   e.stopPropagation()
-                  onAction(notification)
+                  onRowClick(notification)
                 }}
               >
                 {ACTION_LABELS[typeConfig.actionType] || 'Voir'}

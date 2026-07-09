@@ -3,6 +3,7 @@ import iconWarningBadge from '../../assets/notifications/icon-badge-warning.svg'
 import iconFlagBadge from '../../assets/notifications/icon-badge-flag.svg'
 import iconClockAvatar from '../../assets/notifications/icon-avatar-clock.svg'
 import iconRocketAvatar from '../../assets/notifications/icon-avatar-rocket.svg'
+import { COMPANY_REVIEWS_DATA } from '../Reviews/mockReviewsData'
 
 export const NOTIFICATION_TYPES = {
   newReview: {
@@ -31,46 +32,36 @@ export const NOTIFICATION_TYPES = {
 
 const TYPE_ORDER = ['newReview', 'negativeReview', 'avisARecuperer', 'expiringDate', 'boostReviews']
 
-const NEW_REVIEW_TEMPLATES = [
-  { actorInitial: 'J', message: 'Jean David Lépineux a laissé un nouvel avis 5 étoiles sur Vente de propriété' },
-  { actorInitial: 'C', message: 'Claire Fontaine a laissé un nouvel avis sur Estimation immobilière' },
-  { actorInitial: 'H', message: 'Hugo Girard a laissé un nouvel avis 4 étoiles sur Location de propriété' },
+// Notifications about a review point at an *actual* review from "Mes Avis"
+// (the default company's list, which is also Reviews.jsx's own default
+// `selectedCompany`) instead of inventing separate, disconnected review
+// data -- opening one for details, or responding to it, then acts on a
+// review that genuinely exists in the list instead of a phantom entity
+// with no reason to be there.
+const DEFAULT_COMPANY_REVIEWS = COMPANY_REVIEWS_DATA['bastien-arfi'].reviews
+const reviewById = id => DEFAULT_COMPANY_REVIEWS.find(review => review.id === id)
+
+function starsLabel(rating) {
+  const stars = Math.round(parseFloat(rating))
+  return `${stars} étoile${stars > 1 ? 's' : ''}`
+}
+
+// Promoter reviews, still "sans réponse" -- freshly-arrived-and-unanswered
+// is what makes a "new review" notification worth surfacing.
+const NEW_REVIEW_IDS = ['bastien-arfi-1', 'bastien-arfi-9', 'bastien-arfi-37']
+const NEW_REVIEW_MESSAGES = [
+  review => `${review.author} a laissé un nouvel avis ${starsLabel(review.rating)} sur ${review.service}`,
+  review => `${review.author} a laissé un nouvel avis sur ${review.service}`,
+  review => `${review.author} a laissé un nouvel avis ${starsLabel(review.rating)} sur ${review.service}`,
 ]
 
-const NEGATIVE_REVIEW_TEMPLATES = [
-  {
-    actorInitial: 'C',
-    author: 'Chris Bacon',
-    message: 'Chris Bacon a laissé un avis négatif — répondez rapidement',
-    rating: '1.5',
-    text: "Une expérience très décevante, personne n'a répondu à mes messages pendant plusieurs jours.",
-    npsScore: 1,
-    service: 'Location de propriété',
-    googleShared: false,
-    ratings: { reception: 1, qualite: 2, communication: 1, delais: 1 },
-  },
-  {
-    actorInitial: 'S',
-    author: 'Sophie Marchand',
-    message: 'Sophie Marchand a laissé un avis négatif sur Vente de propriété',
-    rating: '2.0',
-    text: "L'accompagnement était moyen, j'aimerais avoir un retour sur les points soulevés dans mon avis.",
-    npsScore: 3,
-    service: 'Vente de propriété',
-    googleShared: false,
-    ratings: { reception: 2, qualite: 2, communication: 2, delais: 2 },
-  },
-  {
-    actorInitial: 'M',
-    author: 'Marc Villeneuve',
-    message: 'Marc Villeneuve a laissé un avis négatif — une réponse est attendue',
-    rating: '1.0',
-    text: 'Communication difficile tout au long du processus, je ne recommande pas.',
-    npsScore: 0,
-    service: 'Estimation immobilière',
-    googleShared: false,
-    ratings: { reception: 1, qualite: 1, communication: 1, delais: 1 },
-  },
+// Détracteur reviews, still "sans réponse" -- these are the ones actually
+// needing a reply.
+const NEGATIVE_REVIEW_IDS = ['bastien-arfi-6', 'bastien-arfi-7', 'bastien-arfi-36']
+const NEGATIVE_REVIEW_MESSAGES = [
+  review => `${review.author} a laissé un avis négatif sur ${review.service}`,
+  review => `${review.author} a laissé un avis négatif — répondez rapidement`,
+  review => `${review.author} a laissé un avis négatif — une réponse est attendue`,
 ]
 
 const AVIS_A_RECUPERER_TEMPLATES = [
@@ -94,32 +85,33 @@ function buildActorInitialItem(template, group, time, unread) {
 function buildNotificationForType(type, index, group, time, unread) {
   switch (type) {
     case 'newReview': {
-      const template = NEW_REVIEW_TEMPLATES[index % NEW_REVIEW_TEMPLATES.length]
-      return { type, ...buildActorInitialItem(template, group, time, unread), actionable: false, actionCompleted: true, review: null }
-    }
-    case 'negativeReview': {
-      const template = NEGATIVE_REVIEW_TEMPLATES[index % NEGATIVE_REVIEW_TEMPLATES.length]
+      const review = reviewById(NEW_REVIEW_IDS[index % NEW_REVIEW_IDS.length])
+      const message = NEW_REVIEW_MESSAGES[index % NEW_REVIEW_MESSAGES.length](review)
       return {
         type,
-        actorInitial: template.actorInitial,
-        message: template.message,
+        actorInitial: review.author.charAt(0).toUpperCase(),
+        message,
+        group,
+        time,
+        unread,
+        actionable: false,
+        actionCompleted: true,
+        review,
+      }
+    }
+    case 'negativeReview': {
+      const review = reviewById(NEGATIVE_REVIEW_IDS[index % NEGATIVE_REVIEW_IDS.length])
+      const message = NEGATIVE_REVIEW_MESSAGES[index % NEGATIVE_REVIEW_MESSAGES.length](review)
+      return {
+        type,
+        actorInitial: review.author.charAt(0).toUpperCase(),
+        message,
         group,
         time,
         unread,
         actionable: true,
         actionCompleted: false,
-        review: {
-          id: `not-review-${type}-${index}`,
-          author: template.author,
-          rating: template.rating,
-          date: time,
-          text: template.text,
-          npsScore: template.npsScore,
-          service: template.service,
-          googleShared: template.googleShared,
-          ratings: template.ratings,
-          response: null,
-        },
+        review,
       }
     }
     case 'avisARecuperer': {

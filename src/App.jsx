@@ -9,6 +9,7 @@ import { Questionnaire } from './components/Questionnaire/Questionnaire'
 import { Profile } from './components/Profile/Profile'
 import { Notifications } from './components/Notifications/Notifications'
 import { initialNotifications } from './components/Notifications/notificationsData'
+import { RespondSheet } from './components/Home/RespondSheet'
 import { SupportChatFab } from './components/SupportChat/SupportChatFab'
 import { SupportChatWindow } from './components/SupportChat/SupportChatWindow'
 
@@ -25,10 +26,58 @@ function App() {
   const [page, setPage] = useState('login')
   const [notifications, setNotifications] = useState(initialNotifications)
   const [isSupportChatOpen, setIsSupportChatOpen] = useState(false)
+  // Set right before navigating to 'reviews' so it can pre-select a tab
+  // there (see handleOpenReviewsTab) -- cleared on every other navigation
+  // so it doesn't linger and reapply itself if the user leaves and comes
+  // back to "Mes Avis" through the bottom nav instead.
+  const [reviewsInitialTab, setReviewsInitialTab] = useState(null)
+  // Same deal as reviewsInitialTab, but for deep-linking straight to one
+  // review's details sheet (an already-answered negative-review
+  // notification) instead of just selecting a tab.
+  const [reviewsInitialReview, setReviewsInitialReview] = useState(null)
+  // A notification's own review, being responded to from *outside* Mes
+  // Avis -- rendered below as an overlay (like SupportChatWindow) instead
+  // of inside Notifications itself, since responding to a review isn't
+  // something that should visually happen "on top of" the notifications
+  // list: navigating to 'reviews' first, in the same click, means the
+  // sheet opens over Mes Avis instead.
+  const [respondingNotification, setRespondingNotification] = useState(null)
 
   const handleNavigate = tab => {
     const target = TAB_TO_PAGE[tab]
-    if (target) setPage(target)
+    if (target) {
+      setReviewsInitialTab(null)
+      setReviewsInitialReview(null)
+      setPage(target)
+    }
+  }
+
+  const handleOpenReviewsTab = tabLabel => {
+    setReviewsInitialTab(tabLabel)
+    setReviewsInitialReview(null)
+    setPage('reviews')
+  }
+
+  const handleOpenReviewDetails = review => {
+    setReviewsInitialReview(review)
+    setReviewsInitialTab(null)
+    setPage('reviews')
+  }
+
+  const handleRequestRespond = notification => {
+    setRespondingNotification(notification)
+    setPage('reviews')
+  }
+
+  const handleSubmitNotificationResponse = (review, responseText) => {
+    setNotifications(list =>
+      list.map(n =>
+        n.review?.id === review.id
+          ? { ...n, unread: false, actionCompleted: true, review: { ...n.review, response: responseText } }
+          : n
+      )
+    )
+    setRespondingNotification(null)
   }
 
   const renderPage = () => {
@@ -38,6 +87,9 @@ function App() {
           notifications={notifications}
           onChangeNotifications={setNotifications}
           onNavigate={handleNavigate}
+          onOpenReviewsTab={handleOpenReviewsTab}
+          onOpenReviewDetails={handleOpenReviewDetails}
+          onRequestRespond={handleRequestRespond}
         />
       )
     }
@@ -47,7 +99,9 @@ function App() {
     }
 
     if (page === 'reviews') {
-      return <Reviews onNavigate={handleNavigate} />
+      return (
+        <Reviews onNavigate={handleNavigate} initialTabLabel={reviewsInitialTab} initialSelectedReview={reviewsInitialReview} />
+      )
     }
 
     if (page === 'questionnaire') {
@@ -60,6 +114,7 @@ function App() {
           onNavigate={handleNavigate}
           onOpenQuestionnaire={() => setPage('questionnaire')}
           onOpenNotifications={() => setPage('notifications')}
+          onOpenReviewsTab={handleOpenReviewsTab}
           unreadNotifCount={notifications.filter(n => n.unread).length}
         />
       )
@@ -102,6 +157,17 @@ function App() {
           <SupportChatFab onClick={() => setIsSupportChatOpen(true)} hidden={isSupportChatOpen} />
           <SupportChatWindow isOpen={isSupportChatOpen} onClose={() => setIsSupportChatOpen(false)} />
         </>
+      )}
+
+      {respondingNotification && (
+        <RespondSheet
+          review={{
+            ...respondingNotification.review,
+            googleShared: respondingNotification.review.googleSharing === 'google-partage',
+          }}
+          onClose={() => setRespondingNotification(null)}
+          onSubmit={handleSubmitNotificationResponse}
+        />
       )}
     </>
   )

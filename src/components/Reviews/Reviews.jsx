@@ -30,6 +30,7 @@ import {
 } from './FiltersSheet'
 import { reviewMatchesFilters, parseReviewDate, getNpsFilterId } from './filterReviews'
 import { getNpsCategory } from '../../utils/nps'
+import { REVIEW_TAB_SANS_REPONSE, REVIEW_TAB_NEGATIFS, REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
 import './Reviews.css'
 
 const PAGE_SIZE = 10
@@ -47,9 +48,9 @@ const NPS_CHIP_CLASS = {
 // combination was active, since combining them freely would make two tabs
 // appear partially active at once.
 const TAB_DEFS = [
-  { label: 'Sans Réponses', etat: ['sans-reponse'], nps: [], tone: 'info' },
-  { label: 'Avis Négatifs', etat: [], nps: ['detracteur'], tone: 'danger' },
-  { label: 'À Récupérer', etat: ['sans-reponse'], nps: ['detracteur'], tone: 'warning' },
+  { label: REVIEW_TAB_SANS_REPONSE, etat: ['sans-reponse'], nps: [], tone: 'info' },
+  { label: REVIEW_TAB_NEGATIFS, etat: [], nps: ['detracteur'], tone: 'danger' },
+  { label: REVIEW_TAB_A_RECUPERER, etat: ['sans-reponse'], nps: ['detracteur'], tone: 'warning' },
 ]
 
 function sameFilterSet(a, b) {
@@ -196,7 +197,7 @@ const NAME_EXIT_MS = 180
 // Matches the CSS transition duration on .reviews__list > .reviews__card.
 const LIST_EXIT_MS = 180
 
-export function Reviews({ onNavigate }) {
+export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) {
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
   const [isCompanySheetOpen, setCompanySheetOpen] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(COMPANIES[0])
@@ -210,9 +211,18 @@ export function Reviews({ onNavigate }) {
   const [isCollaboratorNameExiting, setCollaboratorNameExiting] = useState(false)
   const collaboratorExitTimeoutRef = useRef(null)
 
+  // Home's stat tiles deep-link here with the matching tab's label (see
+  // App.jsx) so the tab it corresponds to is already selected on the very
+  // first render -- reviews.jsx fully remounts on every navigation (App.jsx
+  // renders one page at a time), so a lazy initializer is enough; no need
+  // for an effect that would otherwise flash the unfiltered list first.
+  const initialTabDef = initialTabLabel ? TAB_DEFS.find(tab => tab.label === initialTabLabel) : null
+
   const [isFiltersSheetOpen, setFiltersSheetOpen] = useState(false)
-  const [appliedFilters, setAppliedFilters] = useState(EMPTY_FILTERS)
-  const [hasAppliedFilters, setHasAppliedFilters] = useState(false)
+  const [appliedFilters, setAppliedFilters] = useState(() =>
+    initialTabDef ? { ...EMPTY_FILTERS, etat: initialTabDef.etat, nps: initialTabDef.nps } : EMPTY_FILTERS,
+  )
+  const [hasAppliedFilters, setHasAppliedFilters] = useState(() => Boolean(initialTabDef))
   const activeFilters = hasAppliedFilters ? appliedFilters : EMPTY_FILTERS
   const activeFilterEntries = hasAppliedFilters ? getActiveFilterEntries(appliedFilters) : []
 
@@ -220,7 +230,12 @@ export function Reviews({ onNavigate }) {
   const [reviewsByCompany, setReviewsByCompany] = useState(() =>
     Object.fromEntries(Object.entries(COMPANY_REVIEWS_DATA).map(([id, data]) => [id, data.reviews]))
   )
-  const [selectedReview, setSelectedReview] = useState(null)
+  // A notification (e.g. an already-answered negative review) can deep-link
+  // straight to that review's details sheet (see App.jsx's
+  // handleOpenReviewDetails) -- same lazy-initializer reasoning as
+  // initialTabDef above: this component remounts fresh on every
+  // navigation, so there's no flash of the list before the sheet opens.
+  const [selectedReview, setSelectedReview] = useState(() => initialSelectedReview || null)
   const [respondingReview, setRespondingReview] = useState(null)
   const [responseAlert, setResponseAlert] = useState(null)
 
@@ -377,11 +392,15 @@ export function Reviews({ onNavigate }) {
   const handleOpenDetails = review => setSelectedReview(review)
 
   const updateReviewResponse = (review, response) => {
+    // A response also settles the review's état -- back to "sans réponse"
+    // if the response is deleted, so the "Sans Réponses"/"À Récupérer" tabs
+    // and their counts pick it back up.
+    const status = response ? 'archive' : 'sans-reponse'
     setReviewsByCompany(data => ({
       ...data,
-      [selectedCompany.id]: data[selectedCompany.id].map(r => (r.id === review.id ? { ...r, response } : r)),
+      [selectedCompany.id]: data[selectedCompany.id].map(r => (r.id === review.id ? { ...r, response, status } : r)),
     }))
-    return { ...review, response }
+    return { ...review, response, status }
   }
 
   const handleSubmitResponse = (review, responseText) => {

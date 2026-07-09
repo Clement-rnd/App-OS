@@ -19,6 +19,7 @@ import { RespondSheet } from './RespondSheet'
 import { ResponseAlert } from '../ResponseAlert/ResponseAlert'
 import { getNpsCategory } from '../../utils/nps'
 import { CANONICAL_REVIEWS } from '../../data/canonicalReviews'
+import { REVIEW_TAB_SANS_REPONSE, REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
 import './Home.css'
 
 const initialReviews = CANONICAL_REVIEWS.map(review => ({ ...review, response: null }))
@@ -121,7 +122,7 @@ function ReviewCard({ review, onOpenDetails, onOpenRespond }) {
 
 const REVIEW_CARD_STEP = 312 + 16 // card width + gap
 
-export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, unreadNotifCount = 0 }) {
+export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onOpenReviewsTab, unreadNotifCount = 0 }) {
   const reviewsScrollerRef = useRef(null)
   const [reviews, setReviews] = useState(initialReviews)
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)
@@ -156,6 +157,8 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, unr
     const index = Math.round(scroller.scrollLeft / REVIEW_CARD_STEP)
     setActiveReviewIndex(Math.max(0, Math.min(index, reviews.length - 1)))
   }
+
+  const unansweredCount = reviews.filter(review => !review.response).length
 
   return (
     <div className="home">
@@ -231,14 +234,38 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, unr
               <img src={iconStatReviews} alt="" className="home__stat-icon" />
             </div>
           </div>
-          <div className="home__stat home__stat--light">
+          <div
+            className="home__stat home__stat--light home__stat--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpenReviewsTab?.(REVIEW_TAB_SANS_REPONSE)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onOpenReviewsTab?.(REVIEW_TAB_SANS_REPONSE)
+              }
+            }}
+          >
             <p className="home__stat-label home__stat-label--dark">Avis sans réponse</p>
             <div className="home__stat-value-row">
-              <p className="home__stat-value home__stat-value--medium home__stat-value--dark">17</p>
+              <p className="home__stat-value home__stat-value--medium home__stat-value--dark">
+                {String(unansweredCount).padStart(2, '0')}
+              </p>
               <img src={iconStatChevron} alt="" className="home__stat-icon" />
             </div>
           </div>
-          <div className="home__stat home__stat--light">
+          <div
+            className="home__stat home__stat--light home__stat--clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpenReviewsTab?.(REVIEW_TAB_A_RECUPERER)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onOpenReviewsTab?.(REVIEW_TAB_A_RECUPERER)
+              }
+            }}
+          >
             <p className="home__stat-label home__stat-label--dark">Avis à récupérer</p>
             <div className="home__stat-value-row">
               <p className="home__stat-value home__stat-value--medium home__stat-value--dark">06</p>

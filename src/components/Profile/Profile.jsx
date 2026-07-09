@@ -15,16 +15,16 @@ import './Profile.css'
 
 const initialManager = {
   id: 'u-1',
-  firstName: 'Olivier',
-  lastName: 'Dubois',
+  firstName: 'Marc',
+  lastName: 'Delacroix',
   role: 'Manager',
   language: 'fr-FR',
   phone: '+33 6 12 34 56 78',
-  email: 'olivier.dubois@lbi.fr',
+  email: 'marc.delacroix@lbi.fr',
 }
 
 const initialCompany = {
-  name: 'La Boite Immobilier',
+  name: 'La Boîte Immobilière',
   logoUrl: null,
   coverUrl: null,
   brandColors: ['#2c95ff', '#1cb68d'],

@@ -33,7 +33,7 @@ export function SelectCompany({ onContinue }) {
       </div>
 
       <div className="select-company__greeting">
-        <h1 className="select-company__heading">Bienvenue, Olivier</h1>
+        <h1 className="select-company__heading">Bienvenue, Marc</h1>
         <p className="select-company__subtext">Sélectionnez l'entreprise à laquelle vous souhaitez vous connecter</p>
       </div>
 

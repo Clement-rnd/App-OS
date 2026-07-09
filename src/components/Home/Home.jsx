@@ -181,9 +181,9 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
       <div className="home__content">
         <div className="home__greeting">
           <div className="home__greeting-text">
-            <p className="home__greeting-name">Olivier Dubois</p>
+            <p className="home__greeting-name">Marc Delacroix</p>
             <div className="home__greeting-company">
-              <span>La Boite Immobilier</span>
+              <span>La Boîte Immobilière</span>
             </div>
           </div>
           <div className="home__reputation">

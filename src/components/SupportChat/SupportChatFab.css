@@ -1,13 +1,16 @@
 .support-chat-fab {
   position: fixed;
   right: 16px;
-  bottom: 96px;
+  /* Bottom nav's own height (row ~67px) plus its safe-area-aware bottom
+     padding, plus a fixed 24px gap above it -- keeps the same clearance
+     on notched phones instead of shrinking as the safe-area inset grows. */
+  bottom: calc(67px + max(8px, env(safe-area-inset-bottom)) + 24px);
   z-index: 15;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 60px;
+  height: 60px;
   border-radius: 100px;
   border: none;
   background:
@@ -20,6 +23,6 @@
 }
 
 .support-chat-fab img {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
 }

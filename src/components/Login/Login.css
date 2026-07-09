@@ -13,7 +13,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  height: var(--app-height, 100dvh);
+  height: 100dvh;
   z-index: -1;
   background:
     radial-gradient(ellipse at 120% 65%, rgba(0, 212, 146, 0.6) 0%, transparent 50%),

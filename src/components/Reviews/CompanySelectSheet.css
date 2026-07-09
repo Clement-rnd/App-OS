@@ -1,7 +1,7 @@
 .company-sheet-overlay {
   position: fixed;
   inset: 0;
-  height: var(--app-height, 100dvh);
+  height: 100dvh;
   z-index: 100;
   display: flex;
   align-items: flex-end;

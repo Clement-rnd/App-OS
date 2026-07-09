@@ -145,35 +145,35 @@ function SurveyDetails({ survey, onChangeSurvey }) {
 
   return (
     <div className="questionnaire__survey-card">
-      <div
-        className="questionnaire__survey-selected questionnaire__survey-selected--clickable"
-        onClick={onChangeSurvey}
-        role="button"
-        tabIndex={0}
-        aria-label="Changer d'enquête"
-        onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            onChangeSurvey()
-          }
-        }}
-      >
-        <span className="questionnaire__survey-selected-badge">
-          <img src={iconSurveyBadge} alt="" />
-        </span>
-        <span className="questionnaire__survey-selected-text">
-          <span className="questionnaire__survey-selected-title">{survey.title}</span>
-          <span className="questionnaire__survey-selected-subtitle">{survey.subtitle}</span>
-        </span>
-        <span className="questionnaire__survey-swap" aria-hidden="true">
-          <img src={iconSurveySwap} alt="" />
-        </span>
+      <div className="questionnaire__field">
+        <span className="questionnaire__field-label">Type de questionnaire</span>
+        <div
+          className="questionnaire__survey-selected questionnaire__survey-selected--clickable"
+          onClick={onChangeSurvey}
+          role="button"
+          tabIndex={0}
+          aria-label="Changer d'enquête"
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              onChangeSurvey()
+            }
+          }}
+        >
+          <span className="questionnaire__survey-selected-badge">
+            <img src={iconSurveyBadge} alt="" />
+          </span>
+          <span className="questionnaire__survey-selected-text">
+            <span className="questionnaire__survey-selected-title">{survey.title}</span>
+            <span className="questionnaire__survey-selected-subtitle">{survey.subtitle}</span>
+          </span>
+          <span className="questionnaire__survey-swap" aria-hidden="true">
+            <img src={iconSurveySwap} alt="" />
+          </span>
+        </div>
       </div>
 
-      <div
-        ref={languageFieldRef}
-        className={`questionnaire__field${isLanguageOpen ? ' questionnaire__field--focused' : ''}`}
-      >
+      <div ref={languageFieldRef} className="questionnaire__field">
         <span className="questionnaire__field-label">Langue</span>
         <div
           className="questionnaire__field-row questionnaire__field-row--clickable"
@@ -218,10 +218,7 @@ function SurveyDetails({ survey, onChangeSurvey }) {
         )}
       </div>
 
-      <div
-        ref={categoryFieldRef}
-        className={`questionnaire__field${isCategoryOpen ? ' questionnaire__field--focused' : ''}`}
-      >
+      <div ref={categoryFieldRef} className="questionnaire__field">
         <span className="questionnaire__field-label">Catégorie</span>
         <div
           className="questionnaire__field-row questionnaire__field-row--clickable"

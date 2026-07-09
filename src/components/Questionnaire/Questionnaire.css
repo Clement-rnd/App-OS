@@ -386,27 +386,21 @@
   height: 16px;
 }
 
-/* Language / Category fields */
+/* Survey type / Language / Category fields -- same "label above a
+   borderless filled box" style as Profile's own fields (see
+   EditProfileSheet.css's __field/__label/__input and LanguageField.css),
+   instead of each screen inventing its own label treatment. */
 .questionnaire__field {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
 }
 
 .questionnaire__field-label {
-  position: absolute;
-  z-index: 1;
-  top: -8px;
-  left: 11px;
-  padding: 0 4px;
-  background-color: #ffffff;
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.15px;
+  font-size: 12px;
+  font-weight: 500;
   color: #041b44;
-}
-
-.questionnaire__field--focused .questionnaire__field-label {
-  color: #2196f3;
 }
 
 .questionnaire__field-row {
@@ -415,18 +409,16 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 5px 13px;
-  border: 1px solid #dfe9ef;
+  height: 48px;
+  padding: 12px;
+  border: none;
   border-radius: 8px;
+  background-color: #f7fafc;
   box-sizing: border-box;
 }
 
 .questionnaire__field-row--clickable {
   cursor: pointer;
-}
-
-.questionnaire__field--focused .questionnaire__field-row {
-  border-color: #2c95ff;
 }
 
 .questionnaire__field-flag {

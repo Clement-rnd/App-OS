@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BottomNav } from '../BottomNav/BottomNav'
 import iconBuilding from '../../assets/profile/icon-building.svg'
 import iconEditPencil from '../../assets/profile/icon-edit-pencil.svg'
 import iconAddPlus from '../../assets/profile/icon-add-plus.svg'
 import iconUserAvatar from '../../assets/profile/icon-user-avatar.svg'
 import iconChipBuilding from '../../assets/profile/icon-chip-building.svg'
-import iconChevronAmber from '../../assets/profile/icon-chevron-amber.svg'
 import iconLogout from '../../assets/profile/icon-logout.svg'
 import { EditProfileSheet } from './EditProfileSheet'
 import { EditCompanySheet } from './EditCompanySheet'
@@ -117,6 +116,14 @@ export function Profile({ onNavigate, onLogout }) {
   const [isCollaboratorsListOpen, setIsCollaboratorsListOpen] = useState(false)
   const [collaboratorSheetTarget, setCollaboratorSheetTarget] = useState(null)
   const [reopenListAfterCollaboratorEdit, setReopenListAfterCollaboratorEdit] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 0)
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleSaveProfile = updated => {
     setCurrentUser(updated)
@@ -158,27 +165,29 @@ export function Profile({ onNavigate, onLogout }) {
 
   return (
     <div className="profile">
-      <header className="profile__header">
-        <div className="profile__status-bar" />
-        <div className="profile__appbar">
-          <h1 className="profile__title">Mon Profil</h1>
-        </div>
-      </header>
+      <div className={`profile__sticky-top${isScrolled ? ' profile__sticky-top--scrolled' : ''}`}>
+        <header className="profile__header">
+          <div className="profile__status-bar" />
+          <div className="profile__appbar">
+            <h1 className="profile__title">Mon Compte</h1>
+          </div>
+        </header>
 
-      <div className="profile__hero">
-        <div className="profile__user-card">
-          <span className="profile__user-card-avatar">
-            <img src={iconUserAvatar} alt="" />
-          </span>
-          <div className="profile__user-card-text">
-            <p className="profile__user-card-name">
-              {currentUser.firstName} {currentUser.lastName}
-            </p>
-            <p className="profile__user-card-role">{currentUser.role}</p>
-            <span className="profile__user-card-chip">
-              <img src={iconChipBuilding} alt="" />
-              {company.name}
+        <div className="profile__hero">
+          <div className="profile__user-card">
+            <span className="profile__user-card-avatar">
+              <img src={iconUserAvatar} alt="" />
             </span>
+            <div className="profile__user-card-text">
+              <p className="profile__user-card-name">
+                {currentUser.firstName} {currentUser.lastName}
+              </p>
+              <p className="profile__user-card-role">{currentUser.role}</p>
+              <span className="profile__user-card-chip">
+                <img src={iconChipBuilding} alt="" />
+                {company.name}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -271,10 +280,6 @@ export function Profile({ onNavigate, onLogout }) {
               <p className="profile__section-title">
                 Mes Collaborateurs <span className="profile__section-title-count">({collaborators.length})</span>
               </p>
-              <button type="button" className="profile__see-all-btn" onClick={() => setIsCollaboratorsListOpen(true)}>
-                Voir tout
-                <img src={iconChevronAmber} alt="" />
-              </button>
             </div>
             <div className="profile__card">
               {collaborators.slice(0, 3).map((collaborator, index, arr) => (
@@ -293,6 +298,12 @@ export function Profile({ onNavigate, onLogout }) {
                   </div>
                 </div>
               ))}
+
+              <div className="profile__see-all-row">
+                <button type="button" className="profile__see-all-btn" onClick={() => setIsCollaboratorsListOpen(true)}>
+                  Voir tout
+                </button>
+              </div>
 
               <button type="button" className="profile__add-collaborator-btn" onClick={() => openAddCollaborator(false)}>
                 <img src={iconAddPlus} alt="" />

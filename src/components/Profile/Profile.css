@@ -3,11 +3,26 @@
   flex-direction: column;
   min-height: 100dvh;
   font-family: 'Poppins', sans-serif;
+}
+
+.profile__sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   background:
     radial-gradient(ellipse at 120% 65%, rgba(0, 212, 146, 0.6) 0%, transparent 50%),
     radial-gradient(ellipse at -2% 36%, rgba(44, 149, 255, 0.3) 0%, transparent 50%),
     radial-gradient(ellipse at 105% -3%, rgba(44, 149, 255, 0.6) 0%, transparent 40%),
     linear-gradient(180deg, #000000 0%, #010711 20%, #020e22 40%, #041b44 100%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0);
+  transition: box-shadow 200ms ease;
+}
+
+.profile__sticky-top--scrolled {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .profile__status-bar {
@@ -31,6 +46,7 @@
   letter-spacing: 0.15px;
   color: #ffffff;
   white-space: nowrap;
+  animation: profile-fade-up 400ms ease-out both;
 }
 
 .profile__hero {
@@ -39,6 +55,8 @@
   gap: 10px;
   padding: 0 16px 16px;
   width: 100%;
+  animation: profile-fade-up 400ms ease-out both;
+  animation-delay: 60ms;
   box-sizing: border-box;
 }
 
@@ -141,6 +159,37 @@
   box-sizing: border-box;
 }
 
+@keyframes profile-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile__content > * {
+  animation: profile-fade-up 400ms ease-out both;
+}
+
+.profile__content > *:nth-child(1) {
+  animation-delay: 140ms;
+}
+
+.profile__content > *:nth-child(2) {
+  animation-delay: 220ms;
+}
+
+.profile__content > *:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.profile__content > *:nth-child(4) {
+  animation-delay: 380ms;
+}
+
 .profile__section {
   display: flex;
   flex-direction: column;
@@ -166,25 +215,26 @@
   width: 100%;
 }
 
+.profile__see-all-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-top: 12px;
+}
+
 .profile__see-all-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 14px;
+  gap: 2px;
+  padding: 0;
   border: none;
-  border-radius: 999px;
-  background-color: #041b44;
+  background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   font-size: 13px;
-  font-weight: 700;
-  color: #f7b600;
+  font-weight: 600;
+  color: #041b44;
   white-space: nowrap;
-}
-
-.profile__see-all-btn img {
-  width: 16px;
-  height: 16px;
 }
 
 .profile__card {

@@ -72,7 +72,7 @@ const TABS = [
   { key: 'home', label: 'Accueil', Icon: HouseIcon },
   { key: 'chat', label: 'Mes Avis', Icon: ChatIcon },
   { key: 'send', label: 'Récolter', Icon: SendIcon },
-  { key: 'user', label: 'Mon Profil', Icon: UserIcon },
+  { key: 'user', label: 'Mon Compte', Icon: UserIcon },
 ]
 
 export function BottomNav({ active, onNavigate, badges = {} }) {

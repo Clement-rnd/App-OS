@@ -11,18 +11,31 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
   const [showSignUpModal, setShowSignUpModal] = useState(false)
 
   useEffect(() => {
-    // Login is the one screen reached on a cold PWA launch rather than by
-    // client-side navigation, so it's the only one exposed to iOS Safari's
-    // dvh-under-measures-at-launch quirk (every other page mounts well after
-    // the viewport has already settled). A real scroll is what corrects it
-    // per the original fix's diagnosis -- nudge one imperceptibly so the
-    // browser recomputes its real viewport metrics without waiting on the
-    // user to touch the screen first.
-    const id = requestAnimationFrame(() => {
-      window.scrollTo(0, 1)
-      window.scrollTo(0, 0)
-    })
-    return () => cancelAnimationFrame(id)
+    // The white bar under this page in the installed iOS PWA is the document
+    // canvas showing through: iOS under-measures the layout viewport at cold
+    // launch, and EVERY element in the page -- including a position: fixed;
+    // inset: 0 layer -- is clipped to that under-measured height, so no
+    // in-page layer can ever cover the gap below it. The canvas is the one
+    // surface the browser always paints to the physical screen edges, and
+    // its color comes from <html> (falling back to <body>'s white). Painting
+    // the canvas the gradient's own bottom color while Login is mounted
+    // makes the gap indistinguishable from the background, however the
+    // viewport resolves. Scoped to Login because light-themed pages rely on
+    // the white canvas the same way (their gap blends into white).
+    // Body must go transparent at the same time: once <html> has its own
+    // background, body's white stops propagating to the canvas and would
+    // instead paint inside its own box -- above the z-index: -1 gradient
+    // layer, blanking the whole page.
+    const html = document.documentElement
+    const { body } = document
+    const previousHtml = html.style.backgroundColor
+    const previousBody = body.style.backgroundColor
+    html.style.backgroundColor = '#041b44'
+    body.style.backgroundColor = 'transparent'
+    return () => {
+      html.style.backgroundColor = previousHtml
+      body.style.backgroundColor = previousBody
+    }
   }, [])
 
   const isIdentifiantValid = identifiant.trim().length > 0

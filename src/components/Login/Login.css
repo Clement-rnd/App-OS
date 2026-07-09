@@ -8,11 +8,24 @@
 }
 
 /* Viewport-anchored gradient layer: covers the full screen even when iOS
-   under-measures dvh at launch, so no white body ever shows at the bottom. */
+   under-measures the layout viewport at launch. Sized with large-viewport
+   units instead of inset: 0 -- a box tied to the layout viewport (which is
+   what inset: 0 tracks) stops short of the physical screen bottom until a
+   scroll forces a remeasure, leaving a visible band under the gradient.
+   lvh/lvw are the stable "largest possible viewport" measurements, so this
+   layer always reaches the real screen edges and the gradient's percentage
+   stops resolve against the same box on every launch. Fixed elements are
+   positioned by the layout viewport but not clipped to it, so the overflow
+   below its (mis)measured bottom edge still paints. */
 .login::before {
   content: '';
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  width: 100lvw;
+  height: 100lvh;
   z-index: -1;
   background:
     radial-gradient(ellipse at 120% 65%, rgba(0, 212, 146, 0.6) 0%, transparent 50%),

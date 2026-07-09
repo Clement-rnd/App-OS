@@ -331,6 +331,17 @@
   color: #b8c2cc;
 }
 
+/* Stands in for the textarea only while "Utiliser" is revealing the
+   suggestion (see RespondFields' handleUseSuggestion) -- a real <textarea>'s
+   value can't be animated per word, so this div (word spans reusing
+   .respond-sheet__ai-word, same cascade as the AI box's own entrance)
+   plays the reveal, then hands back off to the real, now-filled textarea. */
+.respond-sheet__textarea--reveal {
+  box-sizing: border-box;
+  overflow-y: auto;
+  line-height: 18px;
+}
+
 /* Footer */
 .respond-sheet__footer {
   display: flex;

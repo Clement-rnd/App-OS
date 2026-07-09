@@ -42,11 +42,22 @@ export function RespondFields({ review, replyText, onReplyTextChange }) {
   const [regenPhase, setRegenPhase] = useState('idle') // 'idle' | 'exiting' | 'loading' | 'entering'
   const [skeletonLineWidths, setSkeletonLineWidths] = useState(FALLBACK_SKELETON_WIDTHS)
   const [aiContentHeight, setAiContentHeight] = useState(null)
+  // Whether "Utiliser" is currently typing the suggestion into the reply
+  // textarea (see handleUseSuggestion) -- disables the fields it'd race
+  // with while it's revealing.
+  const [isUsingSuggestion, setIsUsingSuggestion] = useState(false)
   const regenTimeoutRef = useRef(null)
+  const useTimeoutRef = useRef(null)
   const textRef = useRef(null)
   const aiContentRef = useRef(null)
 
-  useEffect(() => () => clearTimeout(regenTimeoutRef.current), [])
+  useEffect(
+    () => () => {
+      clearTimeout(regenTimeoutRef.current)
+      clearTimeout(useTimeoutRef.current)
+    },
+    [],
+  )
 
   // Animate the AI box's height smoothly whenever its content's natural
   // size changes (skeleton <-> text, different line counts, etc.) instead
@@ -126,6 +137,22 @@ export function RespondFields({ review, replyText, onReplyTextChange }) {
     }, REGEN_EXIT_MS)
   }
 
+  // Reveals the suggestion into the reply textarea word by word, reusing
+  // the exact same per-word cascade (.respond-sheet__ai-word, same
+  // stagger/duration) as the AI box's own entrance -- see the
+  // "respond-sheet__textarea--reveal" render below -- instead of a plain
+  // textarea whose value can't be animated per word. Once every word has
+  // settled, swap back to the real (now filled-in) textarea.
+  const handleUseSuggestion = () => {
+    if (!hasSuggestion || isUsingSuggestion) return
+    setIsUsingSuggestion(true)
+    const revealMs = (suggestion.split(' ').length - 1) * WORD_STAGGER_MS + WORD_ANIMATION_MS
+    useTimeoutRef.current = setTimeout(() => {
+      onReplyTextChange(suggestion)
+      setIsUsingSuggestion(false)
+    }, revealMs)
+  }
+
   return (
     <>
       <div className="respond-sheet__ai">
@@ -136,7 +163,7 @@ export function RespondFields({ review, replyText, onReplyTextChange }) {
               type="button"
               className="respond-sheet__ai-regenerate"
               onClick={handleGenerate}
-              disabled={regenPhase !== 'idle'}
+              disabled={regenPhase !== 'idle' || isUsingSuggestion}
             >
               <img
                 src={iconRegenerate}
@@ -148,8 +175,8 @@ export function RespondFields({ review, replyText, onReplyTextChange }) {
             <button
               type="button"
               className="respond-sheet__ai-use"
-              onClick={() => onReplyTextChange(suggestion)}
-              disabled={!hasSuggestion || regenPhase !== 'idle'}
+              onClick={handleUseSuggestion}
+              disabled={!hasSuggestion || regenPhase !== 'idle' || isUsingSuggestion}
             >
               Utiliser
             </button>
@@ -202,12 +229,24 @@ export function RespondFields({ review, replyText, onReplyTextChange }) {
 
       <div className="respond-sheet__message">
         <p className="respond-sheet__message-label">Votre Réponse</p>
-        <textarea
-          className="respond-sheet__textarea"
-          placeholder="Écrivez votre réponse..."
-          value={replyText}
-          onChange={e => onReplyTextChange(e.target.value)}
-        />
+        {isUsingSuggestion ? (
+          <div className="respond-sheet__textarea respond-sheet__textarea--reveal" aria-hidden="true">
+            {suggestion.split(' ').map((word, i) => (
+              <span key={i}>
+                <span className="respond-sheet__ai-word" style={{ animationDelay: `${i * WORD_STAGGER_MS}ms` }}>
+                  {word}
+                </span>{' '}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <textarea
+            className="respond-sheet__textarea"
+            placeholder="Écrivez votre réponse..."
+            value={replyText}
+            onChange={e => onReplyTextChange(e.target.value)}
+          />
+        )}
       </div>
     </>
   )

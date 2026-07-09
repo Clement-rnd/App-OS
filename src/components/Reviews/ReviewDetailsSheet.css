@@ -100,6 +100,22 @@
   box-sizing: border-box;
 }
 
+.review-details-sheet__appbar-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+  animation: review-details-content-fade-in 280ms ease-out both;
+}
+
+.review-details-sheet__appbar-main--exiting {
+  animation-name: review-details-content-fade-out;
+  animation-duration: 130ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
 .review-details-sheet__title {
   flex: 1;
   font-size: 16px;
@@ -149,17 +165,91 @@
   width: 100%;
   padding: 16px;
   overflow-y: auto;
-  transition: opacity 180ms ease, transform 180ms ease;
 }
 
-/* Toggled while switching between the "details" and "respond" views (see
-   ReviewDetailsSheet's withViewTransition) so the content fades out
-   smoothly before the new view's content replaces it in place, instead of
-   snapping straight to it -- and, for "respond", instead of opening a
-   second sheet on top of this one. */
-.review-details-sheet__content--exiting {
-  opacity: 0;
-  transform: translateY(8px);
+/* Wraps only the part of the sheet that actually differs between the
+   "details" and "respond" views (see ReviewDetailsSheet's
+   withViewTransition / useSheetViewTransition) -- the review card above it
+   never changes, so it's excluded and stays put instead of fading with
+   everything else. Its height is driven by JS (swapStyle/onSwapTransitionEnd)
+   to match the two views' differing content heights, so the sheet resizes
+   smoothly instead of jumping; `overflow: hidden` keeps the incoming/
+   outgoing content clipped to that animated height rather than spilling
+   out of it. */
+.review-details__swap {
+  width: 100%;
+  overflow: hidden;
+  transition: height 300ms ease;
+}
+
+.review-details__swap-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Each direct child plays the entrance keyframe on mount -- the swap-inner
+   is keyed on `view`, so switching views always remounts it fresh, and each
+   child cascades in with its own nth-child delay below. While --exiting is
+   toggled (before that remount, see withViewTransition), the *same*
+   still-mounted children switch to the exit keyframe instead of unmounting
+   immediately, so the outgoing view fades/slides out in place first --
+   deliberately NOT staggered and capped to EXIT_DURATION_MS in
+   useSheetViewTransition.js (the nth-child override below zeroes the
+   entrance delay back out): the frame's height stays pinned to the
+   outgoing size for the whole exit, so a lingering exit would read as the
+   sheet getting stuck before it resizes, not as a flourish. */
+.review-details__swap-inner > * {
+  animation: review-details-content-fade-in 280ms ease-out both;
+}
+
+.review-details__swap-inner--exiting > * {
+  animation-name: review-details-content-fade-out;
+  animation-duration: 130ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+.review-details__swap-inner > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.review-details__swap-inner > *:nth-child(3) {
+  animation-delay: 180ms;
+}
+
+.review-details__swap-inner > *:nth-child(4) {
+  animation-delay: 270ms;
+}
+
+.review-details__swap-inner--exiting > *:nth-child(1),
+.review-details__swap-inner--exiting > *:nth-child(2),
+.review-details__swap-inner--exiting > *:nth-child(3),
+.review-details__swap-inner--exiting > *:nth-child(4) {
+  animation-delay: 0ms;
+}
+
+@keyframes review-details-content-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes review-details-content-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 }
 
 /* Review card */
@@ -237,6 +327,56 @@
   font-weight: 400;
   line-height: 1.43;
   letter-spacing: 0.17px;
+  color: #041b44;
+}
+
+/* Your response */
+.review-details__response {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 12.5px 20px 12.5px 23.75px;
+  border-left: 3.75px solid #2c95ff;
+  background-color: #f0f9ff;
+  box-sizing: border-box;
+}
+
+.review-details__response-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.review-details__response-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2c95ff;
+}
+
+.review-details__response-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 4px;
+  margin: -4px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.review-details__response-edit img {
+  width: 14px;
+  height: 14px;
+}
+
+.review-details__response-text {
+  padding-top: 5px;
+  font-size: 10px;
+  font-weight: 500;
   color: #041b44;
 }
 
@@ -375,13 +515,49 @@
 .review-details-sheet__footer {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px 0;
   width: 100%;
+  padding: 12px 16px 0;
   flex-shrink: 0;
   border-top: 1px solid #eeeeee;
   background-color: #ffffff;
+}
+
+/* Its own button count differs between views too (e.g. "Supprimer la
+   réponse" only shows once a response exists) -- driven by JS the same way
+   as .review-details__swap, so that change resizes smoothly instead of
+   snapping the footer's (and so the whole sheet's) height. */
+.review-details-sheet__footer-frame {
+  width: 100%;
+  overflow: hidden;
+  transition: height 300ms ease;
+}
+
+.review-details-sheet__footer-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.review-details-sheet__footer-buttons > * {
+  animation: review-details-content-fade-in 280ms ease-out both;
+}
+
+.review-details-sheet__footer-buttons--exiting > * {
+  animation-name: review-details-content-fade-out;
+  animation-duration: 130ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+.review-details-sheet__footer-buttons > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.review-details-sheet__footer-buttons--exiting > *:nth-child(1),
+.review-details-sheet__footer-buttons--exiting > *:nth-child(2) {
+  animation-delay: 0ms;
 }
 
 .review-details-sheet__reply-btn {

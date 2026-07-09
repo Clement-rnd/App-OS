@@ -155,8 +155,9 @@ export function Notifications({
     switch (notification.type) {
       case 'negativeReview':
       case 'newReview':
-        // Both carry an actual review (see notificationsData.js) -- open
-        // its details sheet directly instead of just landing on the
+      case 'googleShareConfirmed':
+        // All three carry an actual review (see notificationsData.js) --
+        // open its details sheet directly instead of just landing on the
         // unfiltered list ("negativeReview" only reaches here once already
         // answered; needsAction was handled above).
         onOpenReviewDetails?.(notification.review)

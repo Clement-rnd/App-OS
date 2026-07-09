@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 90dvh;
+  max-height: 75dvh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
@@ -614,4 +614,146 @@
   width: 100%;
   padding-top: 8px;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+/* "Rappel envoyé le ..." pending state -- same slot as
+   .review-details__info-value--icon but text-only, in the app's
+   established warning-tone orange instead of the default navy. */
+.review-details__info-value--pending {
+  color: #f29003;
+}
+
+/* Google boost sheet */
+.review-details__google-boost-intro {
+  padding: 12px;
+  border-radius: 10px;
+  background-color: #f0f6f9;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #041b44;
+}
+
+.review-details__google-boost-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.review-details__google-boost-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8ea1b2;
+}
+
+.review-details__google-boost-recipient {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #dfe9ef;
+  box-sizing: border-box;
+}
+
+.review-details__google-boost-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 100px;
+  background-color: rgba(44, 149, 255, 0.12);
+  font-size: 14px;
+  font-weight: 700;
+  color: #2c95ff;
+}
+
+.review-details__google-boost-recipient-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-details__google-boost-recipient-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.review-details__google-boost-recipient-contact {
+  font-size: 11px;
+  font-weight: 400;
+  color: #8ea1b2;
+}
+
+.review-details__google-boost-textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 12px;
+  border: 1px solid #dfe9ef;
+  border-radius: 10px;
+  resize: vertical;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #041b44;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.review-details__google-boost-url {
+  font-size: 11px;
+  font-weight: 400;
+  color: #8ea1b2;
+}
+
+.review-details__google-boost-channels {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.review-details__google-boost-channel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #041b44;
+}
+
+.review-details__google-boost-channel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 100px;
+  background-color: #ffd500;
+  color: #102d69;
+}
+
+.review-details__google-boost-channel-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.review-details__google-boost-channel--disabled {
+  cursor: not-allowed;
+  color: #8ea1b2;
+}
+
+.review-details__google-boost-channel-icon--disabled {
+  background-color: #f0f6f9;
+  color: #8ea1b2;
 }

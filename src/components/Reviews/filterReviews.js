@@ -2,7 +2,7 @@ import { getNpsCategory } from '../../utils/nps'
 
 // Anchor "today" to the most recent date in the mock review data (06/09/2026)
 // instead of the real device clock, so période filters stay meaningful for this demo dataset.
-const TODAY = new Date(2026, 8, 6)
+export const TODAY = new Date(2026, 8, 6)
 
 const NPS_LABEL_TO_ID = {
   Promoteur: 'promoteur',
@@ -24,6 +24,11 @@ export function getNpsFilterId(rating) {
 export function parseReviewDate(dateStr) {
   const [day, month, year] = dateStr.split('/').map(Number)
   return new Date(year, month - 1, day)
+}
+
+export function getDaysUntil(dateStr) {
+  const target = parseReviewDate(dateStr)
+  return Math.round((target - TODAY) / (1000 * 60 * 60 * 24))
 }
 
 function isSameDay(a, b) {

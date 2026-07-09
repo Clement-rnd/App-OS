@@ -54,7 +54,9 @@
   align-items: flex-start;
   gap: 8px;
   padding: 8px 16px;
-  background-color: #041b44;
+  background:
+    radial-gradient(ellipse at 115% -10%, rgba(44, 149, 255, 0.6) 0%, transparent 55%),
+    linear-gradient(90deg, #041b44 0%, #041b44 100%);
   border-radius: 20px 20px 0 0;
 }
 

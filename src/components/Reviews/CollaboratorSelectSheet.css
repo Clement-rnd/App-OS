@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 90dvh;
+  max-height: 75dvh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
@@ -128,15 +128,20 @@
 
 .collaborator-sheet__content {
   display: flex;
+  flex: 1;
   flex-direction: column;
   width: 100%;
+  min-height: 0;
   overflow-y: auto;
   padding-bottom: max(16px, env(safe-area-inset-bottom));
 }
 
 .collaborator-sheet__search-wrap {
   padding: 16px;
+  width: 100%;
   background-color: #f0f6f9;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .collaborator-sheet__search {
@@ -212,12 +217,26 @@
   height: 24px;
 }
 
-.collaborator-sheet__name {
+.collaborator-sheet__text {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.collaborator-sheet__name {
   font-size: 14px;
   font-weight: 500;
   color: #041b44;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collaborator-sheet__email {
+  font-size: 11px;
+  font-weight: 400;
+  color: #8ea1b2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

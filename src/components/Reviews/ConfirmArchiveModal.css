@@ -1,21 +1,22 @@
-.contacts-permission-modal-overlay {
+.confirm-archive-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  height: 100dvh;
+  z-index: 110;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
 }
 
-.contacts-permission-modal-backdrop {
+.confirm-archive-modal-backdrop {
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.6);
-  animation: contacts-permission-modal-fade-in 200ms ease-out;
+  animation: confirm-archive-modal-fade-in 200ms ease-out;
 }
 
-.contacts-permission-modal {
+.confirm-archive-modal {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -25,10 +26,10 @@
   background-color: #ffffff;
   border-radius: 20px;
   font-family: 'Poppins', sans-serif;
-  animation: contacts-permission-modal-pop-in 200ms ease-out;
+  animation: confirm-archive-modal-pop-in 200ms ease-out;
 }
 
-@keyframes contacts-permission-modal-fade-in {
+@keyframes confirm-archive-modal-fade-in {
   from {
     opacity: 0;
   }
@@ -37,7 +38,7 @@
   }
 }
 
-@keyframes contacts-permission-modal-pop-in {
+@keyframes confirm-archive-modal-pop-in {
   from {
     opacity: 0;
     transform: scale(0.96);
@@ -48,26 +49,25 @@
   }
 }
 
-.contacts-permission-modal__header {
+.confirm-archive-modal__header {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 8px 16px;
+  padding: 20px 16px;
   background:
     radial-gradient(ellipse at 115% -10%, rgba(44, 149, 255, 0.6) 0%, transparent 55%),
     linear-gradient(90deg, #041b44 0%, #041b44 100%);
 }
 
-.contacts-permission-modal__title {
-  padding: 8px 0;
+.confirm-archive-modal__title {
   font-size: 16px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.6;
   color: #ffffff;
   text-align: center;
 }
 
-.contacts-permission-modal__actions {
+.confirm-archive-modal__actions {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -76,7 +76,7 @@
   padding: 24px 16px;
 }
 
-.contacts-permission-modal__allow-btn {
+.confirm-archive-modal__confirm-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,7 +92,7 @@
   color: #2c95ff;
 }
 
-.contacts-permission-modal__deny-btn {
+.confirm-archive-modal__cancel-btn {
   display: flex;
   align-items: center;
   justify-content: center;

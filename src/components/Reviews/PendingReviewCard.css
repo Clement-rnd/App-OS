@@ -1,0 +1,158 @@
+.pending-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+.pending-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.pending-card__author {
+  font-size: 14px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.pending-card__menu-anchor {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pending-card__menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  margin: -4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.pending-card__menu-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.pending-card__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 4px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow:
+    0px 8px 20px rgba(0, 0, 0, 0.14),
+    0px 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.pending-card__menu-item {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #041b44;
+  white-space: nowrap;
+}
+
+.pending-card__menu-item:hover {
+  background-color: #f7fafc;
+}
+
+.pending-card__menu-item--danger {
+  color: #fc6530;
+}
+
+.pending-card__service-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.pending-card__service {
+  font-size: 12px;
+  font-weight: 400;
+  color: #8ea1b2;
+}
+
+.pending-card__cert {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8ea1b2;
+}
+
+.pending-card__cert img {
+  width: 14px;
+  height: 14px;
+}
+
+.pending-card__expiry {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #f29003;
+}
+
+.pending-card__expiry img {
+  width: 14px;
+  height: 14px;
+}
+
+.pending-card__meta {
+  padding-top: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #8ea1b2;
+}
+
+.pending-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+}
+
+.pending-card__resend-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #f29003;
+  border-radius: 100px;
+  background: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f29003;
+}
+
+.pending-card__resend-btn svg {
+  width: 14px;
+  height: 14px;
+}

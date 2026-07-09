@@ -82,9 +82,12 @@ export function CollaboratorsListSheet({ collaborators, onClose, onEditCollabora
                 <span className="collaborators-list-sheet__avatar">
                   <img src={iconAvatarUser} alt="" />
                 </span>
-                <p className="collaborators-list-sheet__row-name">
-                  {collaborator.firstName} {collaborator.lastName}
-                </p>
+                <span className="collaborators-list-sheet__row-text">
+                  <p className="collaborators-list-sheet__row-name">
+                    {collaborator.firstName} {collaborator.lastName}
+                  </p>
+                  <p className="collaborators-list-sheet__row-email">{collaborator.email}</p>
+                </span>
                 <button
                   type="button"
                   className="collaborators-list-sheet__edit-btn"

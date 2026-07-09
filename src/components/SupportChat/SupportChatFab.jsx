@@ -1,4 +1,4 @@
-import iconFabChat from '../../assets/support-chat/icon-fab-chat.svg'
+import iconFabAi from '../../assets/support-chat/icon-fab-ai.svg'
 import './SupportChatFab.css'
 
 export function SupportChatFab({ onClick, hidden = false }) {
@@ -6,7 +6,7 @@ export function SupportChatFab({ onClick, hidden = false }) {
 
   return (
     <button type="button" className="support-chat-fab" onClick={onClick} aria-label="Ouvrir l'assistant support">
-      <img src={iconFabChat} alt="" />
+      <img src={iconFabAi} alt="" />
     </button>
   )
 }

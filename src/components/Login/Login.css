@@ -247,11 +247,9 @@
 }
 
 .login__btn-wrapper {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: flex-end;
   width: 100%;
 }
 
@@ -281,6 +279,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  margin-top: auto;
 }
 
 .login__footer-text {

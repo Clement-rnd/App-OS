@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import iconBack from '../../assets/support-chat/icon-back.svg'
 import iconClose from '../../assets/support-chat/icon-close.svg'
 import iconAssistantAvatar from '../../assets/support-chat/icon-assistant-avatar.svg'
 import iconAttach from '../../assets/support-chat/icon-attach.svg'
@@ -62,9 +61,6 @@ export function SupportChatWindow({ isOpen, onClose }) {
       <div className="support-chat-backdrop" onClick={onClose} />
       <div className="support-chat-panel" role="dialog" aria-label="Assistant support">
         <div className="support-chat-panel__header">
-          <button type="button" className="support-chat-panel__icon-btn" aria-label="Retour" onClick={onClose}>
-            <img src={iconBack} alt="" />
-          </button>
           <span className="support-chat-panel__avatar">
             <img src={iconAssistantAvatar} alt="" />
           </span>

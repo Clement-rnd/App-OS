@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import iconSheetClose from '../../assets/reviews/icon-sheet-close.svg'
 import iconCompanySearch from '../../assets/reviews/icon-company-search.svg'
 import iconCompanyBuilding from '../../assets/reviews/icon-company-building.svg'
 import iconCompanyCheck from '../../assets/reviews/icon-company-check.svg'
@@ -11,10 +10,10 @@ const CLOSE_ANIMATION_MS = 380
 
 export const COMPANIES = [
   { id: 'bastien-arfi', name: 'La Boite Immobilier' },
-  { id: 'sofa-kingdom', name: 'Sofa Kingdom Realtors' },
-  { id: 'tech-solutions', name: 'Tech Solutions Inc.' },
-  { id: 'green-valley', name: 'Green Valley Properties' },
-  { id: 'urban-nest', name: 'Urban Nest Realty' },
+  { id: 'sofa-kingdom', name: 'Cabinet Moreau Immobilier' },
+  { id: 'tech-solutions', name: 'Agence Bellevue Immobilier' },
+  { id: 'green-valley', name: 'Résidences du Vallon' },
+  { id: 'urban-nest', name: 'Citadine Immobilier' },
 ]
 
 export function CompanySelectSheet({ selectedId, onClose, onSelect }) {
@@ -55,14 +54,6 @@ export function CompanySelectSheet({ selectedId, onClose, onSelect }) {
 
         <div className="company-sheet__appbar">
           <p className="company-sheet__title">Sélectionner une entreprise</p>
-          <button
-            type="button"
-            className="company-sheet__close"
-            onClick={() => closeWithAnimation(onClose)}
-            aria-label="Fermer"
-          >
-            <img src={iconSheetClose} alt="" />
-          </button>
         </div>
 
         <div className="company-sheet__content">

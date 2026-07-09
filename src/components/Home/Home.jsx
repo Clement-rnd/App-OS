@@ -268,7 +268,7 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
           >
             <p className="home__stat-label home__stat-label--dark">Avis à récupérer</p>
             <div className="home__stat-value-row">
-              <p className="home__stat-value home__stat-value--medium home__stat-value--dark">06</p>
+              <p className="home__stat-value home__stat-value--medium home__stat-value--dark">05</p>
               <img src={iconStatChevron} alt="" className="home__stat-icon" />
             </div>
           </div>

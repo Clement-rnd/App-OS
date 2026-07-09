@@ -11,6 +11,7 @@ import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
 import iconChevronDown from '../../assets/questionnaire/icon-dropdown-chevron.svg'
+import iconFabUp from '../../assets/reviews/icon-fab-up.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
 import { StarRating } from '../StarRating/StarRating'
 import { RespondSheet } from '../Home/RespondSheet'
@@ -19,8 +20,13 @@ import { ShareReviewsSheet } from './ShareReviewsSheet'
 import { CompanySelectSheet, COMPANIES } from './CompanySelectSheet'
 import { CollaboratorSelectSheet, COLLABORATORS } from './CollaboratorSelectSheet'
 import { ReviewDetailsSheet } from './ReviewDetailsSheet'
+import { PendingReviewCard } from './PendingReviewCard'
+import { ResendQuestionnaireSheet } from './ResendQuestionnaireSheet'
+import { ConfirmArchiveModal } from './ConfirmArchiveModal'
 import iconPillClose from '../../assets/reviews/icon-pill-close.svg'
 import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
+import { COMPANY_PENDING_REVIEWS } from './mockPendingReviews'
+import { buildGoogleShareConfirmedNotification } from '../Notifications/notificationsData'
 import {
   FiltersSheet,
   EMPTY_FILTERS,
@@ -28,12 +34,19 @@ import {
   getActiveFilterEntries,
   removeFilterEntry,
 } from './FiltersSheet'
-import { reviewMatchesFilters, parseReviewDate, getNpsFilterId } from './filterReviews'
+import { reviewMatchesFilters, parseReviewDate, getNpsFilterId, getDaysUntil } from './filterReviews'
 import { getNpsCategory } from '../../utils/nps'
 import { REVIEW_TAB_SANS_REPONSE, REVIEW_TAB_NEGATIFS, REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
 import './Reviews.css'
 
 const PAGE_SIZE = 10
+// Matches filterReviews.js's TODAY anchor -- used to stamp a relance date
+// when a pending questionnaire is resent.
+const TODAY_STR = '06/09/2026'
+// Simulates the delay before "OS" confirms a Google-boost reminder was
+// accepted -- long enough to read as a real async step, short enough that
+// the owner is still likely on this page to see the notification land.
+const GOOGLE_BOOST_CONFIRM_MS = 6000
 
 const NPS_CHIP_CLASS = {
   Promoteur: 'reviews__chip--promoter',
@@ -50,7 +63,11 @@ const NPS_CHIP_CLASS = {
 const TAB_DEFS = [
   { label: REVIEW_TAB_SANS_REPONSE, etat: ['sans-reponse'], nps: [], tone: 'info' },
   { label: REVIEW_TAB_NEGATIFS, etat: [], nps: ['detracteur'], tone: 'danger' },
-  { label: REVIEW_TAB_A_RECUPERER, etat: ['sans-reponse'], nps: ['detracteur'], tone: 'warning' },
+  // Not a filter shortcut like the two above -- questionnaires that were
+  // sent but never answered aren't reviews at all yet (see
+  // COMPANY_PENDING_REVIEWS), so this tab switches the whole list to a
+  // different data source and card type instead of filtering the same one.
+  { label: REVIEW_TAB_A_RECUPERER, tone: 'warning', isPending: true },
 ]
 
 function sameFilterSet(a, b) {
@@ -146,7 +163,16 @@ function ReviewCard({ review, onOpenDetails, onOpenRespond }) {
   )
 }
 
-function FiltersRow({ dark, activeFilters, activeFilterEntries, removeActiveFilter, resultsCount, onOpenFilters }) {
+function FiltersRow({
+  dark,
+  activeFilters,
+  activeFilterEntries,
+  removeActiveFilter,
+  resultsCount,
+  onOpenFilters,
+  stuck,
+  onScrollTop,
+}) {
   return (
     <div className={`reviews__filters${dark ? ' reviews__filters--dark' : ''}`}>
       <div className="reviews__filters-row">
@@ -169,9 +195,21 @@ function FiltersRow({ dark, activeFilters, activeFilterEntries, removeActiveFilt
           <img src={iconSort} alt="" />
           Plus récent
         </button>
-        <span className={`reviews__results-count${dark ? ' reviews__results-count--dark' : ''}`}>
-          {resultsCount} résultat{resultsCount !== 1 ? 's' : ''}
-        </span>
+        {stuck ? (
+          <button
+            type="button"
+            className="reviews__results-count reviews__results-count--dark reviews__results-count--btn"
+            onClick={onScrollTop}
+            aria-label="Remonter en haut"
+          >
+            <img src={iconFabUp} alt="" className="reviews__results-arrow" />
+            {resultsCount} résultat{resultsCount !== 1 ? 's' : ''}
+          </button>
+        ) : (
+          <span className={`reviews__results-count${dark ? ' reviews__results-count--dark' : ''}`}>
+            {resultsCount} résultat{resultsCount !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
       {activeFilterEntries.length > 0 && (
@@ -197,7 +235,7 @@ const NAME_EXIT_MS = 180
 // Matches the CSS transition duration on .reviews__list > .reviews__card.
 const LIST_EXIT_MS = 180
 
-export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) {
+export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, onAddNotification }) {
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
   const [isCompanySheetOpen, setCompanySheetOpen] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(COMPANIES[0])
@@ -211,12 +249,18 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
   const [isCollaboratorNameExiting, setCollaboratorNameExiting] = useState(false)
   const collaboratorExitTimeoutRef = useRef(null)
 
+  const googleBoostTimeoutsRef = useRef([])
+  useEffect(() => () => googleBoostTimeoutsRef.current.forEach(clearTimeout), [])
+
   // Home's stat tiles deep-link here with the matching tab's label (see
   // App.jsx) so the tab it corresponds to is already selected on the very
   // first render -- reviews.jsx fully remounts on every navigation (App.jsx
   // renders one page at a time), so a lazy initializer is enough; no need
   // for an effect that would otherwise flash the unfiltered list first.
-  const initialTabDef = initialTabLabel ? TAB_DEFS.find(tab => tab.label === initialTabLabel) : null
+  const initialTabDef =
+    initialTabLabel && initialTabLabel !== REVIEW_TAB_A_RECUPERER
+      ? TAB_DEFS.find(tab => tab.label === initialTabLabel)
+      : null
 
   const [isFiltersSheetOpen, setFiltersSheetOpen] = useState(false)
   const [appliedFilters, setAppliedFilters] = useState(() =>
@@ -225,6 +269,14 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
   const [hasAppliedFilters, setHasAppliedFilters] = useState(() => Boolean(initialTabDef))
   const activeFilters = hasAppliedFilters ? appliedFilters : EMPTY_FILTERS
   const activeFilterEntries = hasAppliedFilters ? getActiveFilterEntries(appliedFilters) : []
+
+  const [isPendingView, setPendingView] = useState(() => initialTabLabel === REVIEW_TAB_A_RECUPERER)
+  const [companyPendingReviews, setCompanyPendingReviews] = useState(() =>
+    Object.fromEntries(Object.entries(COMPANY_PENDING_REVIEWS).map(([id, items]) => [id, items])),
+  )
+  const [resendingItem, setResendingItem] = useState(null)
+  const [resendInitialView, setResendInitialView] = useState('resend')
+  const [archivingItem, setArchivingItem] = useState(null)
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [reviewsByCompany, setReviewsByCompany] = useState(() =>
@@ -245,7 +297,9 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
     isCollaboratorSheetOpen ||
     isFiltersSheetOpen ||
     selectedReview != null ||
-    respondingReview != null
+    respondingReview != null ||
+    resendingItem != null ||
+    archivingItem != null
 
   // useLockBodyScroll (used by every sheet) pins <body> via position:fixed
   // while a sheet is open, which stops real scrolling -- position:sticky
@@ -340,6 +394,11 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
   }
 
   const toggleTabFilter = tabDef => {
+    if (tabDef.isPending) {
+      withListTransition(() => setPendingView(v => !v))
+      return
+    }
+    setPendingView(false)
     const isActive = sameFilterSet(activeFilters.etat, tabDef.etat) && sameFilterSet(activeFilters.nps, tabDef.nps)
     applyFilters({ ...activeFilters, etat: isActive ? [] : tabDef.etat, nps: isActive ? [] : tabDef.nps })
   }
@@ -417,6 +476,100 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
     setSelectedReview(updatedReview)
   }
 
+  const updateReviewGoogleField = (review, patch, companyId) => {
+    setReviewsByCompany(data => ({
+      ...data,
+      [companyId]: data[companyId].map(r => (r.id === review.id ? { ...r, ...patch } : r)),
+    }))
+    return { ...review, ...patch }
+  }
+
+  // Sending the boost link only marks the review as "reminder sent" --
+  // COMPANY_REVIEWS_DATA has no notion of a pending Google share yet, so it
+  // lives purely in this component's own reviewsByCompany state. A few
+  // seconds later (standing in for "OS" actually confirming it), the review
+  // flips to fully shared and a notification lands, mirroring how a real
+  // confirmation would arrive well after the owner has moved on.
+  const handleSendGoogleBoost = review => {
+    const companyId = selectedCompany.id
+    const updatedReview = updateReviewGoogleField(review, { googleReminderSentDate: TODAY_STR }, companyId)
+    setSelectedReview(current => (current && current.id === review.id ? updatedReview : current))
+    setResponseAlert('Rappel de duplication envoyé')
+
+    const timeoutId = setTimeout(() => {
+      const confirmedReview = updateReviewGoogleField(
+        updatedReview,
+        { googleSharing: 'google-partage', googleReminderSentDate: null },
+        companyId,
+      )
+      setSelectedReview(current => (current && current.id === review.id ? confirmedReview : current))
+      onAddNotification?.(buildGoogleShareConfirmedNotification(confirmedReview))
+    }, GOOGLE_BOOST_CONFIRM_MS)
+    googleBoostTimeoutsRef.current.push(timeoutId)
+  }
+
+  // Expired questionnaires drop off this list entirely (per the Figma spec)
+  // instead of showing an "Expiré" state -- there's nothing left to recover.
+  const pendingReviews = (companyPendingReviews[selectedCompany.id] || [])
+    .filter(item => selectedCollaborator.id === 'all' || item.collaboratorId === selectedCollaborator.id)
+    .filter(item => !item.archived && getDaysUntil(item.expiryDate) >= 0)
+
+  // Selecting "Archivé" under État switches the whole list to archived
+  // questionnaires instead of filtering the current tab's content -- it's a
+  // different data source (see COMPANY_PENDING_REVIEWS), not another état
+  // value on top of the regular review list.
+  const isArchivedView = hasAppliedFilters && activeFilters.etat.includes('archive')
+  const archivedPendingReviews = (companyPendingReviews[selectedCompany.id] || []).filter(
+    item => item.archived && (selectedCollaborator.id === 'all' || item.collaboratorId === selectedCollaborator.id),
+  )
+
+  const handleOpenResend = item => {
+    setResendInitialView('resend')
+    setResendingItem(item)
+  }
+
+  const handleEditPending = item => {
+    setResendInitialView('edit-recipient')
+    setResendingItem(item)
+  }
+
+  const handleRequestArchive = item => setArchivingItem(item)
+
+  const handleConfirmArchive = () => {
+    const item = archivingItem
+    setCompanyPendingReviews(data => ({
+      ...data,
+      [selectedCompany.id]: data[selectedCompany.id].map(p => (p.id === item.id ? { ...p, archived: true } : p)),
+    }))
+    setArchivingItem(null)
+    setResponseAlert('1 questionnaire en attente a été archivé')
+  }
+
+  const handleUnarchivePending = item => {
+    setCompanyPendingReviews(data => ({
+      ...data,
+      [selectedCompany.id]: data[selectedCompany.id].map(p => (p.id === item.id ? { ...p, archived: false } : p)),
+    }))
+    setResponseAlert('Le questionnaire a été désarchivé')
+  }
+
+  const handleResendConfirmed = item => {
+    setCompanyPendingReviews(data => ({
+      ...data,
+      [selectedCompany.id]: data[selectedCompany.id].map(p => (p.id === item.id ? { ...p, relanceDate: TODAY_STR } : p)),
+    }))
+    setResponseAlert('Questionnaire renvoyé avec succès')
+  }
+
+  const handleSaveRecipient = (item, updates) => {
+    setCompanyPendingReviews(data => ({
+      ...data,
+      [selectedCompany.id]: data[selectedCompany.id].map(p => (p.id === item.id ? { ...p, ...updates } : p)),
+    }))
+    setResendingItem(current => (current && current.id === item.id ? { ...current, ...updates } : current))
+    setResponseAlert('Le destinataire a été modifié')
+  }
+
   // Tab badge counts stay based on every OTHER active filter (source,
   // collaborator, etc.) but ignore etat/nps specifically, since those are
   // exactly what the tabs themselves control -- otherwise selecting a tab
@@ -426,6 +579,9 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
     .filter(review => reviewMatchesFilters(review, { ...activeFilters, etat: [], nps: [] }))
 
   const tabs = TAB_DEFS.map(tabDef => {
+    if (tabDef.isPending) {
+      return { ...tabDef, value: String(pendingReviews.length), isActive: !isArchivedView && isPendingView }
+    }
     const count = tabCountReviews.filter(
       review =>
         (tabDef.etat.length === 0 || tabDef.etat.includes(review.status)) &&
@@ -434,9 +590,15 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
     return {
       ...tabDef,
       value: String(count),
-      isActive: sameFilterSet(activeFilters.etat, tabDef.etat) && sameFilterSet(activeFilters.nps, tabDef.nps),
+      isActive:
+        !isArchivedView &&
+        !isPendingView &&
+        sameFilterSet(activeFilters.etat, tabDef.etat) &&
+        sameFilterSet(activeFilters.nps, tabDef.nps),
     }
   })
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
   const sharedFiltersProps = {
     activeFilters,
@@ -444,6 +606,8 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
     removeActiveFilter,
     resultsCount: filteredReviews.length,
     onOpenFilters: () => setFiltersSheetOpen(true),
+    stuck: isFiltersStuck,
+    onScrollTop: scrollToTop,
   }
 
   return (
@@ -582,7 +746,34 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
         </div>
 
         <div className={`reviews__list${isListExiting ? ' reviews__list--exiting' : ''}`}>
-          {visibleReviews.length > 0 ? (
+          {isArchivedView ? (
+            archivedPendingReviews.length > 0 ? (
+              archivedPendingReviews.map(item => (
+                <PendingReviewCard
+                  key={item.id}
+                  item={item}
+                  onOpenResend={handleOpenResend}
+                  onUnarchive={handleUnarchivePending}
+                />
+              ))
+            ) : (
+              <p className="reviews__empty">Aucun questionnaire archivé.</p>
+            )
+          ) : isPendingView ? (
+            pendingReviews.length > 0 ? (
+              pendingReviews.map(item => (
+                <PendingReviewCard
+                  key={item.id}
+                  item={item}
+                  onOpenResend={handleOpenResend}
+                  onEdit={handleEditPending}
+                  onArchiveRequest={handleRequestArchive}
+                />
+              ))
+            ) : (
+              <p className="reviews__empty">Aucun questionnaire en attente.</p>
+            )
+          ) : visibleReviews.length > 0 ? (
             visibleReviews.map(review => (
               <ReviewCard
                 key={review.id}
@@ -595,7 +786,7 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
             <p className="reviews__empty">Aucun avis ne correspond à ces critères.</p>
           )}
 
-          {hasMore && (
+          {!isPendingView && !isArchivedView && hasMore && (
             <button type="button" className="reviews__load-more" onClick={handleLoadMore}>
               Charger plus
               <img src={iconChevronDown} alt="" />
@@ -663,6 +854,7 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
           onClose={() => setSelectedReview(null)}
           onSubmit={handleSubmitResponse}
           onDelete={handleDeleteResponse}
+          onSendGoogleBoost={handleSendGoogleBoost}
         />
       )}
 
@@ -673,6 +865,20 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview }) 
           onSubmit={handleSubmitResponse}
           onDelete={handleDeleteResponse}
         />
+      )}
+
+      {resendingItem && (
+        <ResendQuestionnaireSheet
+          item={resendingItem}
+          initialView={resendInitialView}
+          onClose={() => setResendingItem(null)}
+          onResend={handleResendConfirmed}
+          onSaveRecipient={handleSaveRecipient}
+        />
+      )}
+
+      {archivingItem && (
+        <ConfirmArchiveModal onConfirm={handleConfirmArchive} onCancel={() => setArchivingItem(null)} />
       )}
 
       {responseAlert && <ResponseAlert message={responseAlert} onClose={() => setResponseAlert(null)} />}

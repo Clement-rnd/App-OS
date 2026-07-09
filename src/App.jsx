@@ -69,6 +69,10 @@ function App() {
     setPage('reviews')
   }
 
+  const handleAddNotification = notification => {
+    setNotifications(list => [notification, ...list])
+  }
+
   const handleSubmitNotificationResponse = (review, responseText) => {
     setNotifications(list =>
       list.map(n =>
@@ -100,7 +104,12 @@ function App() {
 
     if (page === 'reviews') {
       return (
-        <Reviews onNavigate={handleNavigate} initialTabLabel={reviewsInitialTab} initialSelectedReview={reviewsInitialReview} />
+        <Reviews
+          onNavigate={handleNavigate}
+          initialTabLabel={reviewsInitialTab}
+          initialSelectedReview={reviewsInitialReview}
+          onAddNotification={handleAddNotification}
+        />
       )
     }
 

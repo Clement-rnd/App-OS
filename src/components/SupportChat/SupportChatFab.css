@@ -10,7 +10,9 @@
   height: 52px;
   border-radius: 100px;
   border: none;
-  background-color: #041b44;
+  background:
+    radial-gradient(ellipse at 115% -10%, rgba(44, 149, 255, 0.6) 0%, transparent 55%),
+    linear-gradient(90deg, #041b44 0%, #041b44 100%);
   box-shadow:
     0px 4px 12px rgba(4, 27, 68, 0.35),
     0px 2px 4px rgba(0, 0, 0, 0.15);

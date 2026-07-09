@@ -28,6 +28,10 @@ export const NOTIFICATION_TYPES = {
     avatarBg: 'rgba(44, 149, 255, 0.15)',
     actionType: 'boost',
   },
+  googleShareConfirmed: {
+    badgeIcon: iconStarBadge,
+    badgeColor: '#00d492',
+  },
 }
 
 const TYPE_ORDER = ['newReview', 'negativeReview', 'avisARecuperer', 'expiringDate', 'boostReviews']
@@ -193,3 +197,21 @@ export const GROUP_LABELS = GROUP_DEFS.reduce((labels, groupDef) => {
 export const GROUP_ORDER = GROUP_DEFS.map(groupDef => groupDef.key)
 
 export const initialNotifications = buildNotifications()
+
+// Created live (not part of the seeded list above) once a Google-boost
+// reminder the owner sent gets confirmed -- see Reviews.jsx's
+// handleSendGoogleBoost / App.jsx's onAddNotification.
+export function buildGoogleShareConfirmedNotification(review) {
+  return {
+    id: `not-google-share-${review.id}-${Date.now()}`,
+    type: 'googleShareConfirmed',
+    actorInitial: review.author.charAt(0).toUpperCase(),
+    message: `${review.author} a accepté de partager son avis sur Google`,
+    group: 'today',
+    time: "À l'instant",
+    unread: true,
+    actionable: false,
+    actionCompleted: true,
+    review,
+  }
+}

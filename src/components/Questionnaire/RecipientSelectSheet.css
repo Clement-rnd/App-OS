@@ -18,10 +18,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* Fixed, not max-height: a shorter filtered/empty result set should
-     never shrink the sheet itself -- .recipient-sheet__list (flex: 1
-     below) absorbs whatever space searching frees up instead. */
-  height: 90dvh;
+  max-height: 75dvh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
@@ -101,6 +98,21 @@
   flex-shrink: 0;
 }
 
+.recipient-sheet__appbar-main {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  animation: recipient-sheet-content-fade-in 280ms ease-out both;
+}
+
+.recipient-sheet__appbar-main--exiting {
+  animation-name: recipient-sheet-content-fade-out;
+  animation-duration: 130ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
 .recipient-sheet__title {
   flex: 1;
   font-size: 16px;
@@ -137,12 +149,49 @@
   }
 }
 
+@keyframes recipient-sheet-content-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.recipient-sheet__swap {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  transition: height 300ms ease;
+}
+
+.recipient-sheet__swap-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.recipient-sheet__swap-inner > * {
+  animation: recipient-sheet-content-fade-in 280ms ease-out both;
+}
+
+.recipient-sheet__swap-inner--exiting > * {
+  animation-name: recipient-sheet-content-fade-out;
+  animation-duration: 130ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
 .recipient-sheet__search-wrap {
   padding: 16px;
   width: 100%;
   background-color: #f0f6f9;
   flex-shrink: 0;
-  animation: recipient-sheet-content-fade-in 280ms ease-out both;
 }
 
 .recipient-sheet__search {
@@ -203,7 +252,6 @@
   width: 100%;
   flex-shrink: 0;
   box-sizing: border-box;
-  animation: recipient-sheet-content-fade-in 280ms ease-out both;
 }
 
 .recipient-sheet__results-label {
@@ -352,7 +400,6 @@
   width: 100%;
   padding: 16px 16px 24px;
   text-align: center;
-  animation: recipient-sheet-content-fade-in 280ms ease-out both;
 }
 
 .recipient-sheet__empty-text {
@@ -361,49 +408,82 @@
   color: #8ea1b2;
 }
 
-.recipient-sheet__empty-add-btn {
+.recipient-sheet__add-contact-fields {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.recipient-sheet__field {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  max-width: 100%;
-  padding: 12px 20px;
-  border: 1px solid #041b44;
-  border-radius: 10px;
-  background-color: #ffffff;
-  font-family: 'Poppins', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
+  width: 100%;
+  animation: recipient-sheet-content-fade-in 280ms ease-out both;
+}
+
+.recipient-sheet__field-label {
+  font-size: 12px;
+  font-weight: 500;
   color: #041b44;
-  cursor: pointer;
 }
 
-.recipient-sheet__empty-add-btn:disabled {
-  border-color: #dfe9ef;
+.recipient-sheet__field-input {
+  width: 100%;
+  height: 48px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f7fafc;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #041b44;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.recipient-sheet__field-input::placeholder {
   color: #8ea1b2;
-  cursor: not-allowed;
-}
-
-.recipient-sheet__empty-add-btn span {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.recipient-sheet__empty-add-btn img {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
 }
 
 .recipient-sheet__footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px 0;
   width: 100%;
   flex-shrink: 0;
+  padding: 0 16px;
   background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+.recipient-sheet__footer-frame {
+  width: 100%;
+  overflow: hidden;
+  transition: height 300ms ease;
+}
+
+.recipient-sheet__footer-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 0;
+  animation: recipient-sheet-content-fade-in 280ms ease-out both;
+}
+
+.recipient-sheet__footer-buttons--exiting {
+  animation-name: recipient-sheet-content-fade-out;
+  animation-duration: 130ms;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
 }
 
 .recipient-sheet__footer-hint {
@@ -416,6 +496,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   width: 100%;
   height: 44px;
   border-radius: 10px;
@@ -433,6 +514,11 @@
   border: 1px solid #041b44;
   color: #041b44;
   cursor: pointer;
+}
+
+.recipient-sheet__confirm-btn img {
+  width: 18px;
+  height: 18px;
 }
 
 .recipient-sheet__home-indicator-wrap {

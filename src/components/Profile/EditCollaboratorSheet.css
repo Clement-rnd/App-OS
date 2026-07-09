@@ -1,6 +1,7 @@
 .edit-collaborator-sheet-overlay {
   position: fixed;
   inset: 0;
+  height: var(--app-height, 100dvh);
   z-index: 20;
   display: flex;
   align-items: flex-end;

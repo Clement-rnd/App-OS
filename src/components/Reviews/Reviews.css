@@ -25,6 +25,7 @@
   content: '';
   position: fixed;
   inset: 0;
+  height: var(--app-height, 100dvh);
   z-index: -1;
   background-color: var(--reviews-bg-color);
   background-image: var(--reviews-bg-image);

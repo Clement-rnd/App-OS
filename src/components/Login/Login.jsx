@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
 import { SignUpModal } from '../SignUpModal/SignUpModal'
 import './Login.css'
@@ -9,6 +9,21 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
   const [showPassword, setShowPassword] = useState(false)
   const [touched, setTouched] = useState({ identifiant: false, password: false })
   const [showSignUpModal, setShowSignUpModal] = useState(false)
+
+  useEffect(() => {
+    // Login is the one screen reached on a cold PWA launch rather than by
+    // client-side navigation, so it's the only one exposed to iOS Safari's
+    // dvh-under-measures-at-launch quirk (every other page mounts well after
+    // the viewport has already settled). A real scroll is what corrects it
+    // per the original fix's diagnosis -- nudge one imperceptibly so the
+    // browser recomputes its real viewport metrics without waiting on the
+    // user to touch the screen first.
+    const id = requestAnimationFrame(() => {
+      window.scrollTo(0, 1)
+      window.scrollTo(0, 0)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [])
 
   const isIdentifiantValid = identifiant.trim().length > 0
   const isPasswordValid = password.length >= 8

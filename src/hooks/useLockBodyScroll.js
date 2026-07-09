@@ -10,24 +10,35 @@ export function useLockBodyScroll() {
   // which breaks its stickiness and makes it flash out of view.
   useLayoutEffect(() => {
     const scrollY = window.scrollY
+    // The vertical scrollbar (when the page had one) disappears the instant
+    // overflow is hidden below, so the viewport's usable width grows by its
+    // width for as long as the lock is active -- anything spanning 100% of
+    // that width (e.g. a sticky header) visibly shifts. Reserving the same
+    // width back as padding keeps the page's content box the same size.
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
     const { body } = document
     const previous = {
       position: body.style.position,
       top: body.style.top,
       width: body.style.width,
       overflow: body.style.overflow,
+      paddingRight: body.style.paddingRight,
     }
 
     body.style.position = 'fixed'
     body.style.top = `-${scrollY}px`
     body.style.width = '100%'
     body.style.overflow = 'hidden'
+    if (scrollbarWidth > 0) {
+      body.style.paddingRight = `${scrollbarWidth}px`
+    }
 
     return () => {
       body.style.position = previous.position
       body.style.top = previous.top
       body.style.width = previous.width
       body.style.overflow = previous.overflow
+      body.style.paddingRight = previous.paddingRight
       window.scrollTo(0, scrollY)
     }
   }, [])

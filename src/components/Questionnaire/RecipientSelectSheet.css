@@ -18,7 +18,10 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 90dvh;
+  /* Fixed, not max-height: a shorter filtered/empty result set should
+     never shrink the sheet itself -- .recipient-sheet__list (flex: 1
+     below) absorbs whatever space searching frees up instead. */
+  height: 90dvh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
@@ -173,6 +176,22 @@
   color: #8ea1b2;
 }
 
+.recipient-sheet__search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.recipient-sheet__search-clear img {
+  width: 16px;
+  height: 16px;
+}
+
 .recipient-sheet__results-row {
   display: flex;
   align-items: center;
@@ -234,6 +253,11 @@
   cursor: pointer;
 }
 
+.recipient-sheet__add-contact-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .recipient-sheet__add-contact-btn img {
   width: 20px;
   height: 20px;
@@ -242,6 +266,7 @@
 .recipient-sheet__list {
   display: flex;
   flex-direction: column;
+  flex: 1;
   width: 100%;
   overflow-y: auto;
   min-height: 0;
@@ -310,6 +335,64 @@
   flex-shrink: 0;
   width: 20px;
   height: 20px;
+}
+
+/* Shown instead of the list once a search matches nothing -- lets the
+   typed value (a number/email not saved as a contact) be added directly
+   as a recipient, the same "no results, but here's a way to add it
+   anyway" pattern WhatsApp's own contact picker uses. flex: 1 fills
+   .recipient-sheet__list the same way the item rows would, so the sheet
+   doesn't need special-casing to stay the same size in this state. */
+.recipient-sheet__empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 16px 24px;
+  text-align: center;
+  animation: recipient-sheet-content-fade-in 280ms ease-out both;
+}
+
+.recipient-sheet__empty-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #8ea1b2;
+}
+
+.recipient-sheet__empty-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 12px 20px;
+  border: 1px solid #041b44;
+  border-radius: 10px;
+  background-color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #041b44;
+  cursor: pointer;
+}
+
+.recipient-sheet__empty-add-btn:disabled {
+  border-color: #dfe9ef;
+  color: #8ea1b2;
+  cursor: not-allowed;
+}
+
+.recipient-sheet__empty-add-btn span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.recipient-sheet__empty-add-btn img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .recipient-sheet__footer {

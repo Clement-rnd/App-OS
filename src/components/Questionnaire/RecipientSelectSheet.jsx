@@ -6,11 +6,25 @@ import iconCheckSelected from '../../assets/recipients/icon-check-selected.svg'
 import iconAddContact from '../../assets/recipients/icon-add-contact.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { AddContactSheet } from './AddContactSheet'
 import './RecipientSelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
 const SHEET_ENTRANCE_MS = 380
 const MAX_RECIPIENTS = 5
+
+// Best-effort split of whatever the user typed in the search field into the
+// AddContactSheet's separate fields, so re-typing it there isn't required.
+function prefillFromQuery(raw) {
+  const trimmed = raw.trim()
+  if (!trimmed) return {}
+  if (trimmed.includes('@')) return { email: trimmed }
+  const digits = trimmed.replace(/\D/g, '')
+  const nonDigitChars = trimmed.replace(/[\d\s+().-]/g, '')
+  if (digits.length >= 6 && !nonDigitChars) return { phone: trimmed }
+  const [firstName, ...rest] = trimmed.split(' ')
+  return { firstName: firstName || '', lastName: rest.join(' ') }
+}
 
 const CONTACTS = [
   { id: 'annie', name: 'Annie Versaire', phone: '+33 6 12 34 56 78' },
@@ -39,6 +53,11 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
   const [query, setQuery] = useState('')
   const [selectedIds, setSelectedIds] = useState(() => new Set((initialSelected || []).map(c => c.id)))
   const [isClosing, setIsClosing] = useState(false)
+  // A recipient added by hand from the "no results" state below (a phone
+  // number/email that isn't a saved contact) -- kept separate from the
+  // static CONTACTS list, merged back in for search/selection/confirm.
+  const [customContacts, setCustomContacts] = useState([])
+  const [isAddContactOpen, setAddContactOpen] = useState(false)
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -51,12 +70,13 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
     closeDurationMs: CLOSE_ANIMATION_MS,
   })
 
+  const allContacts = [...CONTACTS, ...customContacts]
   const normalizedQuery = query.trim().toLowerCase()
   const queryDigits = query.replace(/\D/g, '')
   // A French number typed with its leading 0 (e.g. "06 12 34 56 78") should still match
   // the stored "+33 6 12 34 56 78" form, where the country code replaces that leading 0.
   const queryDigitsWithCountryCode = queryDigits.startsWith('0') ? `33${queryDigits.slice(1)}` : null
-  const filtered = CONTACTS.filter(c => {
+  const filtered = allContacts.filter(c => {
     if (c.name.toLowerCase().includes(normalizedQuery)) return true
     if (!queryDigits) return false
     const phoneDigits = c.phone.replace(/\D/g, '')
@@ -79,12 +99,28 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
     })
   }
 
+  // "No results" state: the typed value isn't a saved contact -- open the
+  // same "new contact" form used for collaborators, prefilled from what was
+  // typed, then add and select the result once it's saved.
+  const handleOpenAddContact = () => {
+    if (selectedIds.size >= MAX_RECIPIENTS) return
+    setAddContactOpen(true)
+  }
+
+  const handleSaveNewContact = contact => {
+    setCustomContacts(prev => [...prev, contact])
+    setSelectedIds(prev => new Set(prev).add(contact.id))
+    setQuery('')
+    setAddContactOpen(false)
+  }
+
   const handleConfirm = () => {
-    const selectedContacts = CONTACTS.filter(c => selectedIds.has(c.id))
+    const selectedContacts = allContacts.filter(c => selectedIds.has(c.id))
     closeWithAnimation(() => onConfirm(selectedContacts))
   }
 
   return (
+    <>
     <div className={`recipient-sheet-overlay${isClosing ? ' recipient-sheet-overlay--closing' : ''}`}>
       <div className="recipient-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
@@ -119,6 +155,16 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
               value={query}
               onChange={e => setQuery(e.target.value)}
             />
+            {query && (
+              <button
+                type="button"
+                className="recipient-sheet__search-clear"
+                onClick={() => setQuery('')}
+                aria-label="Effacer la recherche"
+              >
+                <img src={iconClearX} alt="" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -134,32 +180,53 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
               <img src={iconClearX} alt="" />
             </button>
           )}
-          <button type="button" className="recipient-sheet__add-contact-btn" aria-label="Ajouter un contact">
+          <button
+            type="button"
+            className="recipient-sheet__add-contact-btn"
+            aria-label="Ajouter un contact"
+            onClick={handleOpenAddContact}
+            disabled={selectedIds.size >= MAX_RECIPIENTS}
+          >
             <img src={iconAddContact} alt="" />
           </button>
         </div>
 
-        <div className="recipient-sheet__list">
-          {filtered.map((contact, index) => {
-            const isSelected = selectedIds.has(contact.id)
-            return (
-              <button
-                key={contact.id}
-                type="button"
-                className={`recipient-sheet__item${isSelected ? ' recipient-sheet__item--selected' : ''}`}
-                style={{ animationDelay: `${SHEET_ENTRANCE_MS + 60 + Math.min(index, 5) * 50}ms` }}
-                onClick={() => toggleContact(contact.id)}
-              >
-                <span className="recipient-sheet__avatar">{contact.name[0]}</span>
-                <span className="recipient-sheet__item-text">
-                  <span className="recipient-sheet__item-name">{contact.name}</span>
-                  <span className="recipient-sheet__item-phone">{contact.phone}</span>
-                </span>
-                {isSelected && <img src={iconCheckSelected} alt="" className="recipient-sheet__item-check" />}
-              </button>
-            )
-          })}
-        </div>
+        {query && filtered.length === 0 ? (
+          <div className="recipient-sheet__empty">
+            <p className="recipient-sheet__empty-text">Aucun résultat pour « {query.trim()} »</p>
+            <button
+              type="button"
+              className="recipient-sheet__empty-add-btn"
+              onClick={handleOpenAddContact}
+              disabled={selectedIds.size >= MAX_RECIPIENTS}
+            >
+              <img src={iconAddContact} alt="" />
+              <span>Ajouter comme nouveau contact</span>
+            </button>
+          </div>
+        ) : (
+          <div className="recipient-sheet__list">
+            {filtered.map((contact, index) => {
+              const isSelected = selectedIds.has(contact.id)
+              return (
+                <button
+                  key={contact.id}
+                  type="button"
+                  className={`recipient-sheet__item${isSelected ? ' recipient-sheet__item--selected' : ''}`}
+                  style={{ animationDelay: `${SHEET_ENTRANCE_MS + 60 + Math.min(index, 5) * 50}ms` }}
+                  onClick={() => toggleContact(contact.id)}
+                >
+                  <span className="recipient-sheet__avatar">{contact.name[0]}</span>
+                  <span className="recipient-sheet__item-text">
+                    <span className="recipient-sheet__item-name">{contact.name}</span>
+                    <span className="recipient-sheet__item-phone">{contact.phone}</span>
+                  </span>
+                  {isSelected && <img src={iconCheckSelected} alt="" className="recipient-sheet__item-check" />}
+                </button>
+              )
+            })}
+          </div>
+        )}
 
         <div className="recipient-sheet__footer">
           <p className="recipient-sheet__footer-hint">Sélectionnez jusqu'à {MAX_RECIPIENTS} destinataires</p>
@@ -175,5 +242,14 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
         </div>
       </div>
     </div>
+
+    {isAddContactOpen && (
+      <AddContactSheet
+        initialValue={prefillFromQuery(query)}
+        onClose={() => setAddContactOpen(false)}
+        onSave={handleSaveNewContact}
+      />
+    )}
+    </>
   )
 }

@@ -1,0 +1,180 @@
+.sort-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+}
+
+.sort-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: sort-sheet-fade-in 260ms ease-out;
+}
+
+.sort-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 75dvh;
+  background-color: #ffffff;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  animation: sort-sheet-slide-up 380ms ease-out;
+  transition: transform 220ms ease-out;
+}
+
+.sort-sheet--closing {
+  animation: sort-sheet-slide-down 380ms ease-in forwards;
+}
+
+@keyframes sort-sheet-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sort-sheet-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sort-sheet-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes sort-sheet-slide-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.sort-sheet-overlay--closing .sort-sheet-backdrop {
+  animation: sort-sheet-fade-out 260ms ease-in forwards;
+}
+
+.sort-sheet__handle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+  width: 100%;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.sort-sheet__handle {
+  width: 60px;
+  height: 5px;
+  border-radius: 2.5px;
+  background-color: #dfe9ef;
+}
+
+.sort-sheet__appbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 8px;
+  width: 100%;
+  flex-shrink: 0;
+  border-bottom: 1px solid #dfe9ef;
+  box-sizing: border-box;
+}
+
+.sort-sheet__title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.15px;
+  color: #041b44;
+}
+
+.sort-sheet__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 12px;
+  margin: -12px -4px -12px 0;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.sort-sheet__close img {
+  width: 20px;
+  height: 20px;
+}
+
+.sort-sheet__list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+.sort-sheet__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 12px 13px;
+  border: none;
+  border-bottom: 1px solid #dfe9ef;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+}
+
+.sort-sheet__item--selected {
+  background-color: rgba(44, 149, 255, 0.1);
+}
+
+.sort-sheet__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sort-sheet__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #041b44;
+}
+
+.sort-sheet__description {
+  font-size: 12px;
+  font-weight: 500;
+  color: #8ea1b2;
+}
+
+.sort-sheet__check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}

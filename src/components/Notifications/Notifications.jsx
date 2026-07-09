@@ -7,6 +7,8 @@ import iconChevronDown from '../../assets/questionnaire/icon-dropdown-chevron.sv
 import { NotificationRow } from './NotificationRow'
 import { GROUP_LABELS, GROUP_ORDER, NOTIFICATION_TYPES } from './notificationsData'
 import { REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
+import { useSimulatedLoading } from '../../hooks/useSimulatedLoading'
+import { Skeleton } from '../Skeleton/Skeleton'
 import './Notifications.css'
 
 const PAGE_SIZE = 10
@@ -20,6 +22,21 @@ const ROW_EXIT_MS = 180
 const ROW_BASE_DELAY_MS = 140
 const ROW_STAGGER_MS = 40
 const ROW_STAGGER_CAP = 6
+
+// Mirrors NotificationRow's own box so the shimmer occupies the same
+// footprint the real row will snap into once loading finishes.
+function NotificationRowSkeleton() {
+  return (
+    <div className="notif-row" aria-hidden="true">
+      <Skeleton width={38} height={38} radius={100} />
+      <div className="notif-row__body">
+        <Skeleton width="90%" height={12} />
+        <Skeleton width="60%" height={12} />
+        <Skeleton width={60} height={10} style={{ marginTop: 4 }} />
+      </div>
+    </div>
+  )
+}
 
 function groupNotifications(notifications) {
   const groups = {}
@@ -64,6 +81,7 @@ export function Notifications({
   onOpenReviewDetails,
   onRequestRespond,
 }) {
+  const isLoading = useSimulatedLoading()
   const [tab, setTab] = useState('all')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -265,6 +283,10 @@ export function Notifications({
       </div>
 
       <div className="notifications__list">
+        {isLoading ? (
+          Array.from({ length: 6 }, (_, index) => <NotificationRowSkeleton key={index} />)
+        ) : (
+          <>
         {groups.map(group => (
           <div key={group.key}>
             <div className="notifications__date-subheader" style={{ animationDelay: `${group.delay}ms` }}>
@@ -300,6 +322,8 @@ export function Notifications({
             Charger plus
             <img src={iconChevronDown} alt="" />
           </button>
+        )}
+          </>
         )}
       </div>
     </div>

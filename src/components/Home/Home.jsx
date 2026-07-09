@@ -20,6 +20,8 @@ import { ResponseAlert } from '../ResponseAlert/ResponseAlert'
 import { getNpsCategory } from '../../utils/nps'
 import { CANONICAL_REVIEWS } from '../../data/canonicalReviews'
 import { REVIEW_TAB_SANS_REPONSE, REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
+import { useSimulatedLoading } from '../../hooks/useSimulatedLoading'
+import { Skeleton } from '../Skeleton/Skeleton'
 import './Home.css'
 
 const initialReviews = CANONICAL_REVIEWS.map(review => ({ ...review, response: null }))
@@ -120,9 +122,41 @@ function ReviewCard({ review, onOpenDetails, onOpenRespond }) {
   )
 }
 
+// Mirrors ReviewCard's own box/padding exactly so the shimmer occupies the
+// same footprint the real card will snap into once loading finishes.
+function ReviewCardSkeleton() {
+  return (
+    <div className="home__review-card home__review-card--skeleton" aria-hidden="true">
+      <div className="home__review-skeleton-title">
+        <Skeleton width={120} height={14} />
+        <Skeleton width={40} height={14} />
+      </div>
+      <div className="home__review-meta">
+        <Skeleton width={70} height={10} />
+        <Skeleton width={90} height={12} />
+      </div>
+      <div className="home__review-chips">
+        <Skeleton width={72} height={20} radius={100} />
+        <Skeleton width={88} height={20} radius={100} />
+        <Skeleton width={80} height={20} radius={100} />
+      </div>
+      <div className="home__review-skeleton-text">
+        <Skeleton width="100%" height={12} />
+        <Skeleton width="100%" height={12} />
+        <Skeleton width="60%" height={12} />
+      </div>
+      <div className="home__review-actions">
+        <Skeleton width={90} height={14} />
+        <Skeleton width={60} height={14} style={{ marginLeft: 'auto' }} />
+      </div>
+    </div>
+  )
+}
+
 const REVIEW_CARD_STEP = 312 + 16 // card width + gap
 
 export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onOpenReviewsTab, unreadNotifCount = 0 }) {
+  const isLoading = useSimulatedLoading()
   const reviewsScrollerRef = useRef(null)
   const [reviews, setReviews] = useState(initialReviews)
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)
@@ -314,24 +348,28 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
         </div>
 
         <div className="home__reviews-scroller" ref={reviewsScrollerRef} onScroll={handleReviewsScroll}>
-          {reviews.map(review => (
-            <ReviewCard
-              key={review.id}
-              review={review}
-              onOpenDetails={setSelectedReview}
-              onOpenRespond={handleOpenRespond}
-            />
-          ))}
+          {isLoading
+            ? Array.from({ length: 3 }, (_, index) => <ReviewCardSkeleton key={index} />)
+            : reviews.map(review => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  onOpenDetails={setSelectedReview}
+                  onOpenRespond={handleOpenRespond}
+                />
+              ))}
         </div>
 
-        <div className="home__reviews-dots">
-          {reviews.map((review, index) => (
-            <span
-              key={review.id}
-              className={`home__dot${index === activeReviewIndex ? ' home__dot--active' : ''}`}
-            />
-          ))}
-        </div>
+        {!isLoading && (
+          <div className="home__reviews-dots">
+            {reviews.map((review, index) => (
+              <span
+                key={review.id}
+                className={`home__dot${index === activeReviewIndex ? ' home__dot--active' : ''}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <BottomNav active="home" onNavigate={onNavigate} />

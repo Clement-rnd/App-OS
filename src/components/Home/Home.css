@@ -539,6 +539,26 @@
   padding: 8px 16px 12px;
 }
 
+/* Skeleton -- mirrors the real card's own padding rhythm above so the
+   shimmer occupies the exact footprint the loaded card snaps into. */
+.home__review-card--skeleton {
+  cursor: default;
+}
+
+.home__review-skeleton-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 0;
+}
+
+.home__review-skeleton-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 16px 0;
+}
+
 .home__review-action {
   display: flex;
   flex: 1;

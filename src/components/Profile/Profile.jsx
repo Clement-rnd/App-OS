@@ -11,6 +11,8 @@ import { EditCompanySheet } from './EditCompanySheet'
 import { EditCollaboratorSheet } from './EditCollaboratorSheet'
 import { CollaboratorsListSheet } from './CollaboratorsListSheet'
 import { languageLabel } from './languages'
+import { useSimulatedLoading } from '../../hooks/useSimulatedLoading'
+import { Skeleton } from '../Skeleton/Skeleton'
 import './Profile.css'
 
 const initialManager = {
@@ -108,6 +110,7 @@ function InfoRow({ label, value }) {
 }
 
 export function Profile({ onNavigate, onLogout }) {
+  const isLoading = useSimulatedLoading()
   const [currentUser, setCurrentUser] = useState(initialManager)
   const [company, setCompany] = useState(initialCompany)
   const [collaborators, setCollaborators] = useState(initialCollaborators)
@@ -282,22 +285,36 @@ export function Profile({ onNavigate, onLogout }) {
               </p>
             </div>
             <div className="profile__card">
-              {collaborators.slice(0, 3).map((collaborator, index, arr) => (
-                <div
-                  className={`profile__collab-row${index === arr.length - 1 ? ' profile__collab-row--last' : ''}`}
-                  key={collaborator.id}
-                >
-                  <span className="profile__collab-avatar">
-                    {(collaborator.firstName[0] + collaborator.lastName[0]).toUpperCase()}
-                  </span>
-                  <div className="profile__collab-text">
-                    <p className="profile__collab-name">
-                      {collaborator.firstName} {collaborator.lastName}
-                    </p>
-                    <p className="profile__collab-title">{collaborator.title}</p>
-                  </div>
-                </div>
-              ))}
+              {isLoading
+                ? Array.from({ length: 3 }, (_, index) => (
+                    <div
+                      className={`profile__collab-row${index === 2 ? ' profile__collab-row--last' : ''}`}
+                      key={index}
+                      aria-hidden="true"
+                    >
+                      <Skeleton width={32} height={32} radius={100} />
+                      <div className="profile__collab-text">
+                        <Skeleton width={110} height={13} style={{ marginBottom: 4 }} />
+                        <Skeleton width={80} height={11} />
+                      </div>
+                    </div>
+                  ))
+                : collaborators.slice(0, 3).map((collaborator, index, arr) => (
+                    <div
+                      className={`profile__collab-row${index === arr.length - 1 ? ' profile__collab-row--last' : ''}`}
+                      key={collaborator.id}
+                    >
+                      <span className="profile__collab-avatar">
+                        {(collaborator.firstName[0] + collaborator.lastName[0]).toUpperCase()}
+                      </span>
+                      <div className="profile__collab-text">
+                        <p className="profile__collab-name">
+                          {collaborator.firstName} {collaborator.lastName}
+                        </p>
+                        <p className="profile__collab-title">{collaborator.title}</p>
+                      </div>
+                    </div>
+                  ))}
 
               <div className="profile__see-all-row">
                 <button type="button" className="profile__see-all-btn" onClick={() => setIsCollaboratorsListOpen(true)}>

@@ -167,6 +167,22 @@
   color: #8ea1b2;
 }
 
+.collaborators-list-sheet__search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.collaborators-list-sheet__search-clear img {
+  width: 16px;
+  height: 16px;
+}
+
 .collaborators-list-sheet__content {
   display: flex;
   flex: 1;

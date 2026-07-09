@@ -177,6 +177,30 @@
   color: #8ea1b2;
 }
 
+.collaborator-sheet__search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.collaborator-sheet__search-clear img {
+  width: 16px;
+  height: 16px;
+}
+
+.collaborator-sheet__empty {
+  padding: 32px 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8ea1b2;
+}
+
 .collaborator-sheet__list {
   display: flex;
   flex-direction: column;

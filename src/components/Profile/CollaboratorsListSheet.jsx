@@ -4,6 +4,7 @@ import iconSearch from '../../assets/profile/icon-search.svg'
 import iconAvatarUser from '../../assets/profile/icon-avatar-user.svg'
 import iconPencilBlue from '../../assets/profile/icon-pencil-blue.svg'
 import iconAddPlusBlue from '../../assets/profile/icon-add-plus-blue.svg'
+import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import './CollaboratorsListSheet.css'
 
@@ -63,6 +64,16 @@ export function CollaboratorsListSheet({ collaborators, onClose, onEditCollabora
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
+            {search && (
+              <button
+                type="button"
+                className="collaborators-list-sheet__search-clear"
+                onClick={() => setSearch('')}
+                aria-label="Effacer la recherche"
+              >
+                <img src={iconClearX} alt="" />
+              </button>
+            )}
           </div>
         </div>
 

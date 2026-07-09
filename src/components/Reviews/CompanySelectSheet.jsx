@@ -2,6 +2,7 @@ import { useState } from 'react'
 import iconCompanySearch from '../../assets/reviews/icon-company-search.svg'
 import iconCompanyBuilding from '../../assets/reviews/icon-company-building.svg'
 import iconCompanyCheck from '../../assets/reviews/icon-company-check.svg'
+import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './CompanySelectSheet.css'
@@ -67,28 +68,42 @@ export function CompanySelectSheet({ selectedId, onClose, onSelect }) {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
               />
+              {query && (
+                <button
+                  type="button"
+                  className="company-sheet__search-clear"
+                  onClick={() => setQuery('')}
+                  aria-label="Effacer la recherche"
+                >
+                  <img src={iconClearX} alt="" />
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="company-sheet__list">
-            {filtered.map(company => {
-              const isSelected = company.id === selectedId
-              return (
-                <button
-                  key={company.id}
-                  type="button"
-                  className={`company-sheet__item${isSelected ? ' company-sheet__item--selected' : ''}`}
-                  onClick={() => handleSelect(company)}
-                >
-                  <span className="company-sheet__icon">
-                    <img src={iconCompanyBuilding} alt="" />
-                  </span>
-                  <span className="company-sheet__name">{company.name}</span>
-                  {isSelected && <img src={iconCompanyCheck} alt="" className="company-sheet__check" />}
-                </button>
-              )
-            })}
-          </div>
+          {filtered.length === 0 ? (
+            <p className="company-sheet__empty">Aucun résultat pour « {query.trim()} »</p>
+          ) : (
+            <div className="company-sheet__list">
+              {filtered.map(company => {
+                const isSelected = company.id === selectedId
+                return (
+                  <button
+                    key={company.id}
+                    type="button"
+                    className={`company-sheet__item${isSelected ? ' company-sheet__item--selected' : ''}`}
+                    onClick={() => handleSelect(company)}
+                  >
+                    <span className="company-sheet__icon">
+                      <img src={iconCompanyBuilding} alt="" />
+                    </span>
+                    <span className="company-sheet__name">{company.name}</span>
+                    {isSelected && <img src={iconCompanyCheck} alt="" className="company-sheet__check" />}
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

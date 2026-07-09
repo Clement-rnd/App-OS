@@ -23,6 +23,7 @@ import { ReviewDetailsSheet } from './ReviewDetailsSheet'
 import { PendingReviewCard } from './PendingReviewCard'
 import { ResendQuestionnaireSheet } from './ResendQuestionnaireSheet'
 import { ConfirmArchiveModal } from './ConfirmArchiveModal'
+import { SortSheet, SORT_OPTIONS } from './SortSheet'
 import iconPillClose from '../../assets/reviews/icon-pill-close.svg'
 import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
 import { COMPANY_PENDING_REVIEWS } from './mockPendingReviews'
@@ -37,6 +38,8 @@ import {
 import { reviewMatchesFilters, parseReviewDate, getNpsFilterId, getDaysUntil } from './filterReviews'
 import { getNpsCategory } from '../../utils/nps'
 import { REVIEW_TAB_SANS_REPONSE, REVIEW_TAB_NEGATIFS, REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
+import { useSimulatedLoading } from '../../hooks/useSimulatedLoading'
+import { Skeleton } from '../Skeleton/Skeleton'
 import './Reviews.css'
 
 const PAGE_SIZE = 10
@@ -47,6 +50,12 @@ const TODAY_STR = '06/09/2026'
 // accepted -- long enough to read as a real async step, short enough that
 // the owner is still likely on this page to see the notification land.
 const GOOGLE_BOOST_CONFIRM_MS = 6000
+
+const SORT_COMPARATORS = {
+  'plus-recent': (a, b) => parseReviewDate(b.date) - parseReviewDate(a.date),
+  'plus-ancien': (a, b) => parseReviewDate(a.date) - parseReviewDate(b.date),
+  alphabetique: (a, b) => a.author.localeCompare(b.author, 'fr'),
+}
 
 const NPS_CHIP_CLASS = {
   Promoteur: 'reviews__chip--promoter',
@@ -163,6 +172,37 @@ function ReviewCard({ review, onOpenDetails, onOpenRespond }) {
   )
 }
 
+// Mirrors ReviewCard's own box/padding exactly so the shimmer occupies the
+// same footprint the real card will snap into once loading finishes.
+function ReviewCardSkeleton() {
+  return (
+    <div className="reviews__card reviews__card--skeleton" aria-hidden="true">
+      <div className="reviews__card-skeleton-title">
+        <Skeleton width={120} height={14} />
+        <Skeleton width={40} height={14} />
+      </div>
+      <div className="reviews__card-meta">
+        <Skeleton width={70} height={10} />
+        <Skeleton width={90} height={12} />
+      </div>
+      <div className="reviews__card-chips">
+        <Skeleton width={72} height={20} radius={100} />
+        <Skeleton width={88} height={20} radius={100} />
+        <Skeleton width={80} height={20} radius={100} />
+      </div>
+      <div className="reviews__card-skeleton-text">
+        <Skeleton width="100%" height={12} />
+        <Skeleton width="100%" height={12} />
+        <Skeleton width="60%" height={12} />
+      </div>
+      <div className="reviews__card-actions">
+        <Skeleton width={90} height={14} />
+        <Skeleton width={60} height={14} style={{ marginLeft: 'auto' }} />
+      </div>
+    </div>
+  )
+}
+
 function FiltersRow({
   dark,
   activeFilters,
@@ -170,6 +210,8 @@ function FiltersRow({
   removeActiveFilter,
   resultsCount,
   onOpenFilters,
+  sortLabel,
+  onOpenSort,
   stuck,
   onScrollTop,
 }) {
@@ -191,9 +233,13 @@ function FiltersRow({
             </span>
           )}
         </button>
-        <button type="button" className={`reviews__filter-chip${dark ? ' reviews__filter-chip--dark' : ''}`}>
+        <button
+          type="button"
+          className={`reviews__filter-chip${dark ? ' reviews__filter-chip--dark' : ''}`}
+          onClick={onOpenSort}
+        >
           <img src={iconSort} alt="" />
-          Plus récent
+          {sortLabel}
         </button>
         {stuck ? (
           <button
@@ -236,6 +282,7 @@ const NAME_EXIT_MS = 180
 const LIST_EXIT_MS = 180
 
 export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, onAddNotification }) {
+  const isLoading = useSimulatedLoading()
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
   const [isCompanySheetOpen, setCompanySheetOpen] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(COMPANIES[0])
@@ -263,6 +310,8 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
       : null
 
   const [isFiltersSheetOpen, setFiltersSheetOpen] = useState(false)
+  const [isSortSheetOpen, setSortSheetOpen] = useState(false)
+  const [sortOrder, setSortOrder] = useState('plus-recent')
   const [appliedFilters, setAppliedFilters] = useState(() =>
     initialTabDef ? { ...EMPTY_FILTERS, etat: initialTabDef.etat, nps: initialTabDef.nps } : EMPTY_FILTERS,
   )
@@ -296,6 +345,7 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
     isCompanySheetOpen ||
     isCollaboratorSheetOpen ||
     isFiltersSheetOpen ||
+    isSortSheetOpen ||
     selectedReview != null ||
     respondingReview != null ||
     resendingItem != null ||
@@ -436,7 +486,7 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
     .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
     .filter(review => reviewMatchesFilters(review, activeFilters))
     .slice()
-    .sort((a, b) => parseReviewDate(b.date) - parseReviewDate(a.date))
+    .sort(SORT_COMPARATORS[sortOrder])
 
   const visibleReviews = filteredReviews.slice(0, visibleCount)
   const hasMore = filteredReviews.length > visibleCount
@@ -606,6 +656,8 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
     removeActiveFilter,
     resultsCount: filteredReviews.length,
     onOpenFilters: () => setFiltersSheetOpen(true),
+    sortLabel: SORT_OPTIONS.find(option => option.id === sortOrder)?.label,
+    onOpenSort: () => setSortSheetOpen(true),
     stuck: isFiltersStuck,
     onScrollTop: scrollToTop,
   }
@@ -746,7 +798,9 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
         </div>
 
         <div className={`reviews__list${isListExiting ? ' reviews__list--exiting' : ''}`}>
-          {isArchivedView ? (
+          {isLoading ? (
+            Array.from({ length: 4 }, (_, index) => <ReviewCardSkeleton key={index} />)
+          ) : isArchivedView ? (
             archivedPendingReviews.length > 0 ? (
               archivedPendingReviews.map(item => (
                 <PendingReviewCard
@@ -786,7 +840,7 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
             <p className="reviews__empty">Aucun avis ne correspond à ces critères.</p>
           )}
 
-          {!isPendingView && !isArchivedView && hasMore && (
+          {!isLoading && !isPendingView && !isArchivedView && hasMore && (
             <button type="button" className="reviews__load-more" onClick={handleLoadMore}>
               Charger plus
               <img src={iconChevronDown} alt="" />
@@ -822,6 +876,20 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
             setSelectedCollaborator(collaborator)
             setVisibleCount(PAGE_SIZE)
             setCollaboratorSheetOpen(false)
+          }}
+        />
+      )}
+
+      {isSortSheetOpen && (
+        <SortSheet
+          selectedId={sortOrder}
+          onClose={() => setSortSheetOpen(false)}
+          onSelect={option => {
+            withListTransition(() => {
+              setSortOrder(option.id)
+              setVisibleCount(PAGE_SIZE)
+            })
+            setSortSheetOpen(false)
           }}
         />
       )}

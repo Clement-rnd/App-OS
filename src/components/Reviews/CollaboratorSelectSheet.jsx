@@ -3,6 +3,7 @@ import iconSheetClose from '../../assets/reviews/icon-sheet-close.svg'
 import iconCompanySearch from '../../assets/reviews/icon-company-search.svg'
 import iconCollaboratorAvatar from '../../assets/reviews/icon-collaborator-avatar.svg'
 import iconCompanyCheck from '../../assets/reviews/icon-company-check.svg'
+import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './CollaboratorSelectSheet.css'
@@ -108,34 +109,48 @@ export function CollaboratorSelectSheet({ selectedId, onClose, onSelect }) {
               value={query}
               onChange={e => setQuery(e.target.value)}
             />
+            {query && (
+              <button
+                type="button"
+                className="collaborator-sheet__search-clear"
+                onClick={() => setQuery('')}
+                aria-label="Effacer la recherche"
+              >
+                <img src={iconClearX} alt="" />
+              </button>
+            )}
           </div>
         </div>
 
         <div className="collaborator-sheet__content">
-          <div className="collaborator-sheet__list">
-            {filtered.map(collaborator => {
-              const isSelected = collaborator.id === selectedId
-              return (
-                <button
-                  key={collaborator.id}
-                  type="button"
-                  className={`collaborator-sheet__item${isSelected ? ' collaborator-sheet__item--selected' : ''}`}
-                  onClick={() => handleSelect(collaborator)}
-                >
-                  {!collaborator.isAll && (
-                    <span className="collaborator-sheet__icon">
-                      <img src={iconCollaboratorAvatar} alt="" />
+          {filtered.length === 0 ? (
+            <p className="collaborator-sheet__empty">Aucun résultat pour « {query.trim()} »</p>
+          ) : (
+            <div className="collaborator-sheet__list">
+              {filtered.map(collaborator => {
+                const isSelected = collaborator.id === selectedId
+                return (
+                  <button
+                    key={collaborator.id}
+                    type="button"
+                    className={`collaborator-sheet__item${isSelected ? ' collaborator-sheet__item--selected' : ''}`}
+                    onClick={() => handleSelect(collaborator)}
+                  >
+                    {!collaborator.isAll && (
+                      <span className="collaborator-sheet__icon">
+                        <img src={iconCollaboratorAvatar} alt="" />
+                      </span>
+                    )}
+                    <span className="collaborator-sheet__text">
+                      <span className="collaborator-sheet__name">{collaborator.name}</span>
+                      {collaborator.email && <span className="collaborator-sheet__email">{collaborator.email}</span>}
                     </span>
-                  )}
-                  <span className="collaborator-sheet__text">
-                    <span className="collaborator-sheet__name">{collaborator.name}</span>
-                    {collaborator.email && <span className="collaborator-sheet__email">{collaborator.email}</span>}
-                  </span>
-                  {isSelected && <img src={iconCompanyCheck} alt="" className="collaborator-sheet__check" />}
-                </button>
-              )
-            })}
-          </div>
+                    {isSelected && <img src={iconCompanyCheck} alt="" className="collaborator-sheet__check" />}
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

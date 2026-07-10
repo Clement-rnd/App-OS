@@ -426,6 +426,13 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
   }
 
   const removeActiveFilter = entry => {
+    // The "À Récupérer" tab isn't a real etat/nps filter (see toggleTabFilter)
+    // -- its pill (added in sharedFiltersProps below) needs its own removal
+    // path instead of going through removeFilterEntry.
+    if (entry.groupId === 'pending') {
+      withListTransition(() => setPendingView(false))
+      return
+    }
     withListTransition(() => setAppliedFilters(prev => removeFilterEntry(prev, entry)))
   }
 
@@ -652,7 +659,10 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
 
   const sharedFiltersProps = {
     activeFilters,
-    activeFilterEntries,
+    activeFilterEntries:
+      isPendingView && !isArchivedView
+        ? [...activeFilterEntries, { groupId: 'pending', optionId: 'a-recuperer', label: REVIEW_TAB_A_RECUPERER }]
+        : activeFilterEntries,
     removeActiveFilter,
     resultsCount: filteredReviews.length,
     onOpenFilters: () => setFiltersSheetOpen(true),
@@ -728,40 +738,67 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
         </button>
 
         <div className="reviews__kpis">
-          <button
-            type="button"
-            className={`reviews__kpi${activeFilters.source.includes('opinion-system') ? ' reviews__kpi--active' : ''}`}
-            onClick={() => toggleSourceFilter('opinion-system')}
-          >
-            <div className="reviews__kpi-title">
-              <img src={iconOsLogoColor} alt="" />
-              <span>Opinion System</span>
-            </div>
-            <div className="reviews__kpi-value-row">
-              <p className="reviews__kpi-value">
-                {companyData.kpiOS.rating}
-                <span className="reviews__kpi-value-suffix">/5</span>
-              </p>
-              <span className="reviews__kpi-badge">{osReviewCount} AVIS</span>
-            </div>
-          </button>
-          <button
-            type="button"
-            className={`reviews__kpi${activeFilters.source.includes('google') ? ' reviews__kpi--active' : ''}`}
-            onClick={() => toggleSourceFilter('google')}
-          >
-            <div className="reviews__kpi-title">
-              <img src={iconGoogleBadge} alt="" />
-              <span>Google</span>
-            </div>
-            <div className="reviews__kpi-value-row">
-              <p className="reviews__kpi-value">
-                {companyData.kpiGoogle.rating}
-                <span className="reviews__kpi-value-suffix">/5</span>
-              </p>
-              <span className="reviews__kpi-badge">{googleReviewCount} AVIS</span>
-            </div>
-          </button>
+          {isLoading ? (
+            <>
+              <div className="reviews__kpi" aria-hidden="true">
+                <div className="reviews__kpi-title">
+                  <Skeleton className="skeleton-bar--light" width={24} height={24} radius={100} />
+                  <Skeleton className="skeleton-bar--light" width={90} height={12} />
+                </div>
+                <div className="reviews__kpi-value-row">
+                  <Skeleton className="skeleton-bar--light" width={50} height={24} />
+                  <Skeleton className="skeleton-bar--light" width={50} height={20} radius={20} />
+                </div>
+              </div>
+              <div className="reviews__kpi" aria-hidden="true">
+                <div className="reviews__kpi-title">
+                  <Skeleton className="skeleton-bar--light" width={24} height={24} radius={100} />
+                  <Skeleton className="skeleton-bar--light" width={60} height={12} />
+                </div>
+                <div className="reviews__kpi-value-row">
+                  <Skeleton className="skeleton-bar--light" width={50} height={24} />
+                  <Skeleton className="skeleton-bar--light" width={50} height={20} radius={20} />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className={`reviews__kpi${activeFilters.source.includes('opinion-system') ? ' reviews__kpi--active' : ''}`}
+                onClick={() => toggleSourceFilter('opinion-system')}
+              >
+                <div className="reviews__kpi-title">
+                  <img src={iconOsLogoColor} alt="" />
+                  <span>Opinion System</span>
+                </div>
+                <div className="reviews__kpi-value-row">
+                  <p className="reviews__kpi-value">
+                    {companyData.kpiOS.rating}
+                    <span className="reviews__kpi-value-suffix">/5</span>
+                  </p>
+                  <span className="reviews__kpi-badge">{osReviewCount} AVIS</span>
+                </div>
+              </button>
+              <button
+                type="button"
+                className={`reviews__kpi${activeFilters.source.includes('google') ? ' reviews__kpi--active' : ''}`}
+                onClick={() => toggleSourceFilter('google')}
+              >
+                <div className="reviews__kpi-title">
+                  <img src={iconGoogleBadge} alt="" />
+                  <span>Google</span>
+                </div>
+                <div className="reviews__kpi-value-row">
+                  <p className="reviews__kpi-value">
+                    {companyData.kpiGoogle.rating}
+                    <span className="reviews__kpi-value-suffix">/5</span>
+                  </p>
+                  <span className="reviews__kpi-badge">{googleReviewCount} AVIS</span>
+                </div>
+              </button>
+            </>
+          )}
         </div>
       </div>
 

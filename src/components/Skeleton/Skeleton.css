@@ -6,6 +6,18 @@
   animation: skeleton-shimmer 1.4s ease-in-out infinite;
 }
 
+/* For placement over a dark/tinted background, where the default gray
+   shimmer would have no visible contrast. */
+.skeleton-bar--light {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.25) 25%,
+    rgba(255, 255, 255, 0.45) 37%,
+    rgba(255, 255, 255, 0.25) 63%
+  );
+  background-size: 400% 100%;
+}
+
 @keyframes skeleton-shimmer {
   0% {
     background-position: 100% 50%;

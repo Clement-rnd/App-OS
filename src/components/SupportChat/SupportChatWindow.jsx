@@ -5,6 +5,7 @@ import iconAttach from '../../assets/support-chat/icon-attach.svg'
 import iconSend from '../../assets/home/icon-send.svg'
 import { generateSupportReply } from './supportChatKnowledgeBase'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './SupportChatWindow.css'
 
 const CLOSE_ANIMATION_MS = 260
@@ -22,11 +23,13 @@ const seedMessage = {
 }
 
 export function SupportChatWindow({ isOpen, onClose }) {
+  useLockBodyScroll(isOpen)
   const screenHeight = useStandaloneScreenHeight()
   const [messages, setMessages] = useState([seedMessage])
   const [draft, setDraft] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const listRef = useRef(null)
+  const inputRef = useRef(null)
 
   // This window stays mounted for the whole session (so chat history
   // survives being closed) instead of unmounting like every other sheet --
@@ -58,6 +61,18 @@ export function SupportChatWindow({ isOpen, onClose }) {
     const el = listRef.current
     if (el) el.scrollTop = el.scrollHeight
   }, [messages, isTyping, isOpen])
+
+  // Opening the window is itself the user gesture, so focusing the input
+  // right after is enough for iOS/Android to raise the keyboard without
+  // requiring a second, separate tap. Keyed on isVisible (not isOpen):
+  // this component never unmounts, so the input already exists in the DOM
+  // under display: none the instant isOpen flips -- focusing it then is a
+  // no-op, since browsers refuse to focus a display: none element. isVisible
+  // only flips true on the next render, once the overlay is actually shown.
+  useEffect(() => {
+    if (!isVisible || isClosing) return
+    inputRef.current?.focus()
+  }, [isVisible, isClosing])
 
   const handleSend = () => {
     const trimmed = draft.trim()
@@ -95,7 +110,7 @@ export function SupportChatWindow({ isOpen, onClose }) {
         className={`support-chat-panel${isClosing ? ' support-chat-panel--closing' : ''}`}
         role="dialog"
         aria-label="Assistant support"
-        style={{ maxHeight: screenHeight * 0.9 }}
+        style={{ height: screenHeight * 0.9 }}
       >
         <div className="support-chat-panel__header">
           <span className="support-chat-panel__avatar">
@@ -152,6 +167,7 @@ export function SupportChatWindow({ isOpen, onClose }) {
         <div className="support-chat-panel__input-row">
           <div className="support-chat-panel__input">
             <input
+              ref={inputRef}
               type="text"
               placeholder="Écrire un message..."
               value={draft}

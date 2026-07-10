@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react'
 
-export function useLockBodyScroll() {
+export function useLockBodyScroll(enabled = true) {
   // useLayoutEffect (not useEffect): the cleanup must run synchronously
   // before paint, in the same frame as whatever else reacts to the sheet
   // closing (e.g. a page switching a sticky header back from position:fixed).
@@ -8,7 +8,13 @@ export function useLockBodyScroll() {
   // restores the body afterwards -- for one frame, a now-sticky element
   // sits inside a still-locked (position:fixed, negative top offset) body,
   // which breaks its stickiness and makes it flash out of view.
+  //
+  // `enabled` exists for callers that never unmount (e.g. a chat window
+  // that stays mounted so its history survives being closed) -- every
+  // other caller unmounts on close, which already releases the lock via
+  // this same cleanup, so they can ignore the param entirely.
   useLayoutEffect(() => {
+    if (!enabled) return
     const scrollY = window.scrollY
     // The vertical scrollbar (when the page had one) disappears the instant
     // overflow is hidden below, so the viewport's usable width grows by its
@@ -41,5 +47,5 @@ export function useLockBodyScroll() {
       body.style.paddingRight = previous.paddingRight
       window.scrollTo(0, scrollY)
     }
-  }, [])
+  }, [enabled])
 }

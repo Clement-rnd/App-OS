@@ -4,7 +4,7 @@ import iconAssistantAvatar from '../../assets/support-chat/icon-assistant-avatar
 import iconAttach from '../../assets/support-chat/icon-attach.svg'
 import iconSend from '../../assets/home/icon-send.svg'
 import { generateSupportReply } from './supportChatKnowledgeBase'
-import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
+import { useVisualViewportHeight } from '../../hooks/useVisualViewportHeight'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './SupportChatWindow.css'
 
@@ -24,7 +24,13 @@ const seedMessage = {
 
 export function SupportChatWindow({ isOpen, onClose }) {
   useLockBodyScroll(isOpen)
-  const screenHeight = useStandaloneScreenHeight()
+  // This window's own input can raise the keyboard, which shrinks the real
+  // visible area -- a height that ignores that (screen.height, used
+  // elsewhere in the app specifically for its immunity to viewport
+  // changes) just overflows past the keyboard instead of resizing above
+  // it. visualViewportHeight tracks the actual visible height continuously,
+  // shrinking when the keyboard rises and growing back when it's dismissed.
+  const viewportHeight = useVisualViewportHeight()
   const [messages, setMessages] = useState([seedMessage])
   const [draft, setDraft] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -101,14 +107,14 @@ export function SupportChatWindow({ isOpen, onClose }) {
   return (
     <div
       className={`support-chat-overlay${isVisible ? '' : ' support-chat-overlay--hidden'}${isClosing ? ' support-chat-overlay--closing' : ''}`}
-      style={{ height: screenHeight }}
+      style={{ height: viewportHeight }}
     >
       <div className="support-chat-backdrop" onClick={onClose} />
       <div
         className={`support-chat-panel${isClosing ? ' support-chat-panel--closing' : ''}`}
         role="dialog"
         aria-label="Assistant support"
-        style={{ height: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
+        style={{ height: viewportHeight * 0.9 }}
       >
         <div className="support-chat-panel__header">
           <span className="support-chat-panel__avatar">

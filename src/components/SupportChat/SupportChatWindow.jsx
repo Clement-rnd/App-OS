@@ -34,26 +34,27 @@ export function SupportChatWindow({ isOpen, onClose }) {
   // This window stays mounted for the whole session (so chat history
   // survives being closed) instead of unmounting like every other sheet --
   // isOpen alone used to snap display: none the instant it went false,
-  // skipping the slide-down/fade-out entirely. isVisible lags isOpen by
-  // CLOSE_ANIMATION_MS so the exit animation gets to play before the
-  // overlay actually leaves the layout.
-  const [isVisible, setIsVisible] = useState(isOpen)
+  // skipping the slide-down/fade-out entirely. isVisible is DERIVED (open
+  // or still playing the exit), not effect-managed state: the overlay must
+  // leave display: none in the very same render isOpen flips true, so the
+  // opener can flushSync that render and focus the input while still
+  // inside the tap gesture -- the only timing at which iOS agrees to
+  // raise the keyboard (see SupportChatFab's onClick in App.jsx).
   const [isClosing, setIsClosing] = useState(false)
+  const wasOpenRef = useRef(isOpen)
+  const isVisible = isOpen || isClosing
 
   useEffect(() => {
+    const wasOpen = wasOpenRef.current
+    wasOpenRef.current = isOpen
     if (isOpen) {
-      setIsVisible(true)
       setIsClosing(false)
       return
     }
-    if (!isVisible) return
+    if (!wasOpen) return
     setIsClosing(true)
-    const timeoutId = setTimeout(() => {
-      setIsVisible(false)
-      setIsClosing(false)
-    }, CLOSE_ANIMATION_MS)
+    const timeoutId = setTimeout(() => setIsClosing(false), CLOSE_ANIMATION_MS)
     return () => clearTimeout(timeoutId)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   useEffect(() => {
@@ -62,17 +63,14 @@ export function SupportChatWindow({ isOpen, onClose }) {
     if (el) el.scrollTop = el.scrollHeight
   }, [messages, isTyping, isOpen])
 
-  // Opening the window is itself the user gesture, so focusing the input
-  // right after is enough for iOS/Android to raise the keyboard without
-  // requiring a second, separate tap. Keyed on isVisible (not isOpen):
-  // this component never unmounts, so the input already exists in the DOM
-  // under display: none the instant isOpen flips -- focusing it then is a
-  // no-op, since browsers refuse to focus a display: none element. isVisible
-  // only flips true on the next render, once the overlay is actually shown.
+  // Effect-time focus fallback for platforms that allow raising the
+  // keyboard outside a user gesture (desktop, most Android browsers). On
+  // iOS this focuses the field but shows no keyboard -- that path is
+  // covered by the gesture-synchronous focus in the FAB's onClick instead.
   useEffect(() => {
-    if (!isVisible || isClosing) return
+    if (!isOpen) return
     inputRef.current?.focus()
-  }, [isVisible, isClosing])
+  }, [isOpen])
 
   const handleSend = () => {
     const trimmed = draft.trim()
@@ -173,6 +171,13 @@ export function SupportChatWindow({ isOpen, onClose }) {
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={() => {
+                // iOS "helpfully" scrolls the focused field into view when
+                // the keyboard rises, shoving the whole fixed sheet upward
+                // even though nothing needed scrolling (the body is locked).
+                // Snap the window scroll straight back.
+                requestAnimationFrame(() => window.scrollTo(0, 0))
+              }}
             />
             <button type="button" className="support-chat-panel__attach-btn" aria-label="Joindre un fichier">
               <img src={iconAttach} alt="" />

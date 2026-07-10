@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconSave from '../../assets/questionnaire/icon-save.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'

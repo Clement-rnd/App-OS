@@ -1,18 +1,24 @@
 import { useState } from 'react'
 
-// iOS under-measures the layout viewport at points this app has hit
-// repeatedly (cold PWA launch, sheets opened mid-session) -- and that bug
-// isn't confined to CSS viewport units (dvh/lvh/vh): window.innerHeight is
-// just as exposed, since it's reading the same under-measured layout
-// viewport, only via JS instead of CSS. window.screen.height is different --
-// it's the hardware screen resolution, orthogonal to any "viewport" concept,
-// so it's unaffected. Applied unconditionally (not gated behind detecting
-// standalone mode, which can silently fail to match): Math.max against
-// innerHeight means a real, legitimately smaller innerHeight (e.g. a
-// browser tab's on-screen keyboard or toolbar taking real space) still
-// wins over a same-or-smaller screen.height, so this never shrinks a
-// correctly-measured viewport, only rescues an under-measured one.
+// In an installed iOS PWA, the layout viewport is under-measured right when
+// a screen first mounts (confirmed on-device on Login) -- window.innerHeight
+// is exposed to that bug too, since it reads the same under-measured layout
+// viewport, only via JS instead of CSS. window.screen.height is the hardware
+// screen resolution instead, unaffected, so Math.max against it rescues an
+// under-measured innerHeight.
+//
+// That rescue is WRONG outside of standalone mode: in a normal browser tab
+// (confirmed on Android Chrome), screen.height is the full device screen
+// including the address bar and system nav bar, always bigger than
+// innerHeight -- Math.max would then override an already-correct, smaller
+// innerHeight with that inflated value, pushing fixed-position elements
+// (e.g. the bottom nav) below the real visible viewport entirely. So this
+// only trusts screen.height while actually running standalone; everywhere
+// else it's plain innerHeight, which is already correct there.
 export function useStandaloneScreenHeight() {
-  const [height] = useState(() => Math.max(window.screen.height, window.innerHeight))
+  const [height] = useState(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+    return isStandalone ? Math.max(window.screen.height, window.innerHeight) : window.innerHeight
+  })
   return height
 }

@@ -227,6 +227,35 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
         </div>
 
         <div className="home__dashboard">
+          {isLoading ? (
+            <>
+              <div className="home__stat home__stat--tint" aria-hidden="true">
+                <Skeleton className="skeleton-bar--light" width={140} height={13} />
+                <div className="home__stat-value-row">
+                  <Skeleton className="skeleton-bar--light" width={80} height={32} />
+                </div>
+              </div>
+              <div className="home__stat home__stat--tint" aria-hidden="true">
+                <Skeleton className="skeleton-bar--light" width={90} height={13} />
+                <div className="home__stat-value-row">
+                  <Skeleton className="skeleton-bar--light" width={50} height={24} />
+                </div>
+              </div>
+              <div className="home__stat home__stat--light" aria-hidden="true">
+                <Skeleton width={110} height={13} />
+                <div className="home__stat-value-row">
+                  <Skeleton width={40} height={24} />
+                </div>
+              </div>
+              <div className="home__stat home__stat--light" aria-hidden="true">
+                <Skeleton width={100} height={13} />
+                <div className="home__stat-value-row">
+                  <Skeleton width={40} height={24} />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
           <div className="home__stat home__stat--tint">
             <p className="home__stat-label">Ma note Opinion System</p>
             <div className="home__stat-value-row">
@@ -306,6 +335,8 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
               <img src={iconStatChevron} alt="" className="home__stat-icon" />
             </div>
           </div>
+            </>
+          )}
         </div>
 
         <div className="home__cta">

@@ -5,6 +5,7 @@ import iconPencil from '../../assets/home/icon-pencil.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useSheetViewTransition } from '../../hooks/useSheetViewTransition'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import { parseReviewDate } from './filterReviews'
 import './ResendQuestionnaireSheet.css'
 
@@ -68,6 +69,7 @@ function MoreIcon() {
 
 export function ResendQuestionnaireSheet({ item, initialView = 'resend', onClose, onResend, onSaveRecipient }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   // 'resend' | 'edit-recipient' -- switching between them morphs the content
   // of this same sheet instead of stacking a second sheet on top of itself
@@ -90,16 +92,8 @@ export function ResendQuestionnaireSheet({ item, initialView = 'resend', onClose
     closeDurationMs: CLOSE_ANIMATION_MS,
   })
 
-  const {
-    swapInnerRef,
-    footerInnerRef,
-    isContentExiting,
-    withViewTransition,
-    swapStyle,
-    onSwapTransitionEnd,
-    footerStyle,
-    onFooterTransitionEnd,
-  } = useSheetViewTransition(view, setView)
+  const { swapInnerRef, isContentExiting, withViewTransition, swapStyle, onSwapTransitionEnd } =
+    useSheetViewTransition(view, setView)
 
   const contactLine = email || phone
 
@@ -117,13 +111,16 @@ export function ResendQuestionnaireSheet({ item, initialView = 'resend', onClose
   const isRecipientValid = firstName.trim().length > 0 && lastName.trim().length > 0 && phone.trim().length > 0
 
   return (
-    <div className={`resend-sheet-overlay${isClosing ? ' resend-sheet-overlay--closing' : ''}`}>
+    <div
+      className={`resend-sheet-overlay${isClosing ? ' resend-sheet-overlay--closing' : ''}`}
+      style={{ height: screenHeight }}
+    >
       <div className="resend-sheet-backdrop" onClick={closeWithAnimation} />
       <div
         className={`resend-sheet${isClosing && !isDragClosing ? ' resend-sheet--closing' : ''}`}
         role="dialog"
         aria-label={view === 'edit-recipient' ? 'Modifier le destinataire' : 'Renvoyer le questionnaire'}
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="resend-sheet__handle-row" {...dragHandlers}>
           <span className="resend-sheet__handle" />
@@ -288,30 +285,23 @@ export function ResendQuestionnaireSheet({ item, initialView = 'resend', onClose
 
         <div className="resend-sheet__footer">
           <div
-            className="resend-sheet__footer-frame"
-            style={footerStyle}
-            onTransitionEnd={onFooterTransitionEnd}
+            key={view}
+            className={`resend-sheet__footer-buttons${isContentExiting ? ' resend-sheet__footer-buttons--exiting' : ''}`}
           >
-            <div
-              key={view}
-              ref={footerInnerRef}
-              className={`resend-sheet__footer-buttons${isContentExiting ? ' resend-sheet__footer-buttons--exiting' : ''}`}
-            >
-              {view === 'resend' ? (
-                <button type="button" className="resend-sheet__system-link">
-                  Laissez le système d'opinion l'envoyer par e-mail
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={`resend-sheet__save-btn${isRecipientValid ? '' : ' resend-sheet__save-btn--disabled'}`}
-                  disabled={!isRecipientValid}
-                  onClick={handleSaveRecipient}
-                >
-                  Enregistrer
-                </button>
-              )}
-            </div>
+            {view === 'resend' ? (
+              <button type="button" className="resend-sheet__system-link">
+                Laissez le système d'opinion l'envoyer par e-mail
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`resend-sheet__save-btn${isRecipientValid ? '' : ' resend-sheet__save-btn--disabled'}`}
+                disabled={!isRecipientValid}
+                onClick={handleSaveRecipient}
+              >
+                Enregistrer
+              </button>
+            )}
           </div>
           <div className="resend-sheet__home-indicator-wrap" />
         </div>

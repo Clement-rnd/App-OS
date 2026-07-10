@@ -6,11 +6,13 @@ import iconPencilBlue from '../../assets/profile/icon-pencil-blue.svg'
 import iconAddPlusBlue from '../../assets/profile/icon-add-plus-blue.svg'
 import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './CollaboratorsListSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
 
 export function CollaboratorsListSheet({ collaborators, onClose, onEditCollaborator, onAddCollaborator }) {
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -30,13 +32,13 @@ export function CollaboratorsListSheet({ collaborators, onClose, onEditCollabora
   )
 
   return (
-    <div className={`collaborators-list-sheet-overlay${isClosing ? ' collaborators-list-sheet-overlay--closing' : ''}`}>
+    <div className={`collaborators-list-sheet-overlay${isClosing ? ' collaborators-list-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="collaborators-list-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`collaborators-list-sheet${isClosing && !isDragClosing ? ' collaborators-list-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Mes collaborateurs"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="collaborators-list-sheet__handle-row" {...dragHandlers}>
           <span className="collaborators-list-sheet__handle" />

@@ -9,6 +9,7 @@ import iconFilterGoogleCertif from '../../assets/reviews/icon-filter-google-cert
 import iconFilterGoogleMuted from '../../assets/reviews/icon-filter-google-muted.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './FiltersSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -123,6 +124,7 @@ export function removeFilterEntry(filters, entry) {
 
 export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   const [filters, setFilters] = useState(initialFilters)
   const [customStart, setCustomStart] = useState(initialFilters.periodeRange?.start || '')
@@ -174,13 +176,13 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
   }
 
   return (
-    <div className={`filters-sheet-overlay${isClosing ? ' filters-sheet-overlay--closing' : ''}`}>
+    <div className={`filters-sheet-overlay${isClosing ? ' filters-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="filters-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`filters-sheet${isClosing && !isDragClosing ? ' filters-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Filtres"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="filters-sheet__handle-row" {...dragHandlers}>
           <span className="filters-sheet__handle" />

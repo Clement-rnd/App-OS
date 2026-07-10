@@ -4,6 +4,7 @@ import iconAssistantAvatar from '../../assets/support-chat/icon-assistant-avatar
 import iconAttach from '../../assets/support-chat/icon-attach.svg'
 import iconSend from '../../assets/home/icon-send.svg'
 import { generateSupportReply } from './supportChatKnowledgeBase'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './SupportChatWindow.css'
 
 function formatTime(date) {
@@ -19,6 +20,7 @@ const seedMessage = {
 }
 
 export function SupportChatWindow({ isOpen, onClose }) {
+  const screenHeight = useStandaloneScreenHeight()
   const [messages, setMessages] = useState([seedMessage])
   const [draft, setDraft] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -57,9 +59,17 @@ export function SupportChatWindow({ isOpen, onClose }) {
   }
 
   return (
-    <div className={`support-chat-overlay${isOpen ? '' : ' support-chat-overlay--hidden'}`}>
+    <div
+      className={`support-chat-overlay${isOpen ? '' : ' support-chat-overlay--hidden'}`}
+      style={{ height: screenHeight }}
+    >
       <div className="support-chat-backdrop" onClick={onClose} />
-      <div className="support-chat-panel" role="dialog" aria-label="Assistant support">
+      <div
+        className="support-chat-panel"
+        role="dialog"
+        aria-label="Assistant support"
+        style={{ maxHeight: screenHeight * 0.9 }}
+      >
         <div className="support-chat-panel__header">
           <span className="support-chat-panel__avatar">
             <img src={iconAssistantAvatar} alt="" />

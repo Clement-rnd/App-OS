@@ -2,20 +2,22 @@ import { useState } from 'react'
 import iconClose from '../../assets/home/icon-detail-close.svg'
 import iconReply from '../../assets/home/icon-detail-reply.svg'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import { ReviewSummaryCard } from './ReviewSummaryCard'
 import { RespondFields } from './RespondFields'
 import './RespondSheet.css'
 
 export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const isEditing = Boolean(review.response)
   const [replyText, setReplyText] = useState(review.response || '')
   const isValid = replyText.trim().length > 0
 
   return (
-    <div className="respond-sheet-overlay">
+    <div className="respond-sheet-overlay" style={{ height: screenHeight }}>
       <div className="respond-sheet-backdrop" onClick={onClose} />
-      <div className="respond-sheet" role="dialog" aria-label="Répondre à l'avis">
+      <div className="respond-sheet" role="dialog" aria-label="Répondre à l'avis" style={{ maxHeight: screenHeight * 0.9 }}>
         <div className="respond-sheet__handle-row">
           <span className="respond-sheet__handle" />
         </div>

@@ -3,12 +3,14 @@ import iconOpenSite from '../../assets/reviews/icon-open-site.svg'
 import iconShareLink from '../../assets/reviews/icon-share-link.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './ShareReviewsSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
 
 export function ShareReviewsSheet({ url, onClose }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
 
   const closeWithAnimation = callback => {
@@ -39,13 +41,13 @@ export function ShareReviewsSheet({ url, onClose }) {
   }
 
   return (
-    <div className={`share-reviews-sheet-overlay${isClosing ? ' share-reviews-sheet-overlay--closing' : ''}`}>
+    <div className={`share-reviews-sheet-overlay${isClosing ? ' share-reviews-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="share-reviews-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`share-reviews-sheet${isClosing && !isDragClosing ? ' share-reviews-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Partager"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="share-reviews-sheet__handle-row" {...dragHandlers}>
           <span className="share-reviews-sheet__handle" />

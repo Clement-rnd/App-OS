@@ -5,6 +5,7 @@ import iconTrash from '../../assets/questionnaire/icon-trash.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { LanguageField } from './LanguageField'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './EditCollaboratorSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -12,6 +13,7 @@ const SHEET_ENTRANCE_MS = 380
 
 export function EditCollaboratorSheet({ collaborator, isNew = false, onClose, onSave, onDelete }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   const [firstName, setFirstName] = useState(collaborator.firstName)
   const [lastName, setLastName] = useState(collaborator.lastName)
@@ -50,13 +52,13 @@ export function EditCollaboratorSheet({ collaborator, isNew = false, onClose, on
   const title = isNew ? 'Ajouter un collaborateur' : 'Modifier le collaborateur'
 
   return (
-    <div className={`edit-collaborator-sheet-overlay${isClosing ? ' edit-collaborator-sheet-overlay--closing' : ''}`}>
+    <div className={`edit-collaborator-sheet-overlay${isClosing ? ' edit-collaborator-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="edit-collaborator-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`edit-collaborator-sheet${isClosing && !isDragClosing ? ' edit-collaborator-sheet--closing' : ''}`}
         role="dialog"
         aria-label={title}
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="edit-collaborator-sheet__handle-row" {...dragHandlers}>
           <span className="edit-collaborator-sheet__handle" />

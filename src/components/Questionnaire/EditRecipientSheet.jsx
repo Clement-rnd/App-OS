@@ -6,6 +6,7 @@ import iconSave from '../../assets/questionnaire/icon-save.svg'
 import iconTrash from '../../assets/questionnaire/icon-trash.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './EditRecipientSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -18,6 +19,7 @@ function splitName(fullName) {
 
 export function EditRecipientSheet({ recipient, onClose, onSave, onDelete }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   const initialName = splitName(recipient.name)
   const [firstName, setFirstName] = useState(initialName.firstName)
@@ -46,13 +48,13 @@ export function EditRecipientSheet({ recipient, onClose, onSave, onDelete }) {
   }
 
   return (
-    <div className={`edit-recipient-sheet-overlay${isClosing ? ' edit-recipient-sheet-overlay--closing' : ''}`}>
+    <div className={`edit-recipient-sheet-overlay${isClosing ? ' edit-recipient-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="edit-recipient-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`edit-recipient-sheet${isClosing && !isDragClosing ? ' edit-recipient-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Modifier le destinataire"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="edit-recipient-sheet__handle-row" {...dragHandlers}>
           <span className="edit-recipient-sheet__handle" />

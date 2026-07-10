@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import iconFilterClose from '../../assets/reviews/icon-filter-close.svg'
 import iconBack from '../../assets/questionnaire/icon-back.svg'
 import iconReviewRating from '../../assets/home/icon-review-rating.svg'
@@ -146,27 +146,6 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
   const sheetMaxHeight = screenHeight * 0.9
   const [isClosing, setIsClosing] = useState(false)
   const [isContentScrolled, setContentScrolled] = useState(false)
-  // TEMPORARY debug readout -- remove once the share button cutoff on
-  // real iOS devices is understood; on-device measurements have been the
-  // only reliable way to resolve this class of bug (see the Login viewport
-  // investigation), so surface the real numbers instead of guessing again.
-  const [debugInfo, setDebugInfo] = useState('')
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      const sheetEl = document.querySelector('.review-details-sheet')
-      const footerEl = document.querySelector('.review-details-sheet__footer')
-      const shareBtnEl = document.querySelector('.review-details-sheet__share-btn')
-      const sheetRect = sheetEl?.getBoundingClientRect()
-      const footerRect = footerEl?.getBoundingClientRect()
-      const shareBtnRect = shareBtnEl?.getBoundingClientRect()
-      setDebugInfo(
-        `scr.h=${window.screen.height} inner.h=${window.innerHeight} vv.h=${Math.round(window.visualViewport?.height || 0)} ` +
-          `maxH=${Math.round(sheetMaxHeight)} sheet.bot=${Math.round(sheetRect?.bottom || 0)} ` +
-          `footer.bot=${Math.round(footerRect?.bottom || 0)} btn.bot=${Math.round(shareBtnRect?.bottom || 0)}`
-      )
-    })
-    return () => cancelAnimationFrame(id)
-  }, [sheetMaxHeight])
   // 'details' | 'respond' | 'google-boost' -- switching between them morphs
   // the content of this same sheet (see withViewTransition) instead of
   // opening a second modal on top of it.
@@ -241,23 +220,6 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
       style={{ height: screenHeight }}
     >
       <div className="review-details-backdrop" onClick={closeWithAnimation} />
-      <p
-        style={{
-          position: 'fixed',
-          top: 4,
-          left: 4,
-          zIndex: 999,
-          fontSize: 9,
-          lineHeight: 1.3,
-          color: '#ff3b30',
-          backgroundColor: 'rgba(255,255,255,0.9)',
-          padding: '2px 4px',
-          maxWidth: '95vw',
-          wordBreak: 'break-all',
-        }}
-      >
-        {debugInfo}
-      </p>
       <div
         className={`review-details-sheet${isClosing && !isDragClosing ? ' review-details-sheet--closing' : ''}`}
         role="dialog"

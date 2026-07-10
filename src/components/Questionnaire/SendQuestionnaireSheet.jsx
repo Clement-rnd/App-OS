@@ -11,6 +11,7 @@ import iconChevronRightSmall from '../../assets/questionnaire/icon-chevron-right
 import iconBack from '../../assets/questionnaire/icon-back.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './SendQuestionnaireSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -27,6 +28,7 @@ const DEFAULT_MESSAGE =
 
 export function SendQuestionnaireSheet({ recipients, onClose }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedChannels, setSelectedChannels] = useState(() => new Set())
@@ -92,13 +94,16 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
   }, [showQrScreen, recipient.id])
 
   return (
-    <div className={`send-sheet-overlay${isClosing ? ' send-sheet-overlay--closing' : ''}`}>
+    <div
+      className={`send-sheet-overlay${isClosing ? ' send-sheet-overlay--closing' : ''}`}
+      style={{ height: screenHeight }}
+    >
       <div className="send-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`send-sheet${isClosing && !isDragClosing ? ' send-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Envoyer le questionnaire"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="send-sheet__handle-row" {...dragHandlers}>
           <span className="send-sheet__handle" />

@@ -5,6 +5,7 @@ import iconCompanyCheck from '../../assets/reviews/icon-company-check.svg'
 import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './CompanySelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -19,6 +20,7 @@ export const COMPANIES = [
 
 export function CompanySelectSheet({ selectedId, onClose, onSelect }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [query, setQuery] = useState('')
   const [isClosing, setIsClosing] = useState(false)
 
@@ -41,13 +43,13 @@ export function CompanySelectSheet({ selectedId, onClose, onSelect }) {
   }
 
   return (
-    <div className={`company-sheet-overlay${isClosing ? ' company-sheet-overlay--closing' : ''}`}>
+    <div className={`company-sheet-overlay${isClosing ? ' company-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="company-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`company-sheet${isClosing && !isDragClosing ? ' company-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Sélectionner une entreprise"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="company-sheet__handle-row" {...dragHandlers}>
           <span className="company-sheet__handle" />

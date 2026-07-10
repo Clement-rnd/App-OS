@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 75dvh;
+  max-height: 90vh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
@@ -131,7 +131,12 @@
   flex-direction: column;
   width: 100%;
   padding-bottom: max(16px, env(safe-area-inset-bottom));
+  min-height: 0;
   overflow-y: auto;
+}
+
+.sort-sheet__list > * {
+  flex-shrink: 0;
 }
 
 .sort-sheet__item {

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import iconClose from '../../assets/home/icon-detail-close.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './ServiceInputSheet.css'
 
 const MAX_LENGTH = 80
@@ -10,6 +11,7 @@ const CLOSE_ANIMATION_MS = 380
 
 export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [value, setValue] = useState(initialValue || '')
   const [isClosing, setIsClosing] = useState(false)
   const isValid = value.trim().length > 0
@@ -29,13 +31,13 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
   })
 
   return (
-    <div className={`service-sheet-overlay${isClosing ? ' service-sheet-overlay--closing' : ''}`}>
+    <div className={`service-sheet-overlay${isClosing ? ' service-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="service-sheet-backdrop" onClick={handleClose} />
       <div
         className={`service-sheet${isClosing && !isDragClosing ? ' service-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Quel service avez-vous récemment fourni ?"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="service-sheet__handle-row" {...dragHandlers}>
           <span className="service-sheet__handle" />

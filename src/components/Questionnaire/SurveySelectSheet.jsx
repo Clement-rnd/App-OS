@@ -6,6 +6,7 @@ import iconListBadge from '../../assets/questionnaire/icon-list-item-badge.svg'
 import iconChevron from '../../assets/reviews/icon-chevron-big.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './SurveySelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -33,6 +34,7 @@ const TAB_INFO = {
 
 export function SurveySelectSheet({ onClose, onSelect }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [tab, setTab] = useState('certified')
   const [isClosing, setIsClosing] = useState(false)
   const [frameHeight, setFrameHeight] = useState(null)
@@ -77,13 +79,16 @@ export function SurveySelectSheet({ onClose, onSelect }) {
   const surveys = tab === 'certified' ? CERTIFIED_SURVEYS : STANDARD_SURVEYS
 
   return (
-    <div className={`survey-sheet-overlay${isClosing ? ' survey-sheet-overlay--closing' : ''}`}>
+    <div
+      className={`survey-sheet-overlay${isClosing ? ' survey-sheet-overlay--closing' : ''}`}
+      style={{ height: screenHeight }}
+    >
       <div className="survey-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`survey-sheet${isClosing && !isDragClosing ? ' survey-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Sélectionnez une enquête à envoyer"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="survey-sheet__handle-row" {...dragHandlers}>
           <span className="survey-sheet__handle" />

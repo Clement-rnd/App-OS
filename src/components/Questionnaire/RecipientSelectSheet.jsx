@@ -8,6 +8,7 @@ import iconAddContact from '../../assets/recipients/icon-add-contact.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useSheetViewTransition } from '../../hooks/useSheetViewTransition'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import { LanguageField } from '../Profile/LanguageField'
 import './RecipientSelectSheet.css'
 
@@ -51,6 +52,7 @@ const CONTACTS = [
 
 export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [query, setQuery] = useState('')
   const [selectedIds, setSelectedIds] = useState(() => new Set((initialSelected || []).map(c => c.id)))
   const [isClosing, setIsClosing] = useState(false)
@@ -175,13 +177,16 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
   }
 
   return (
-    <div className={`recipient-sheet-overlay${isClosing ? ' recipient-sheet-overlay--closing' : ''}`}>
+    <div
+      className={`recipient-sheet-overlay${isClosing ? ' recipient-sheet-overlay--closing' : ''}`}
+      style={{ height: screenHeight }}
+    >
       <div className="recipient-sheet-backdrop" onClick={requestClose} />
       <div
         className={`recipient-sheet${isClosing && !isDragClosing ? ' recipient-sheet--closing' : ''}`}
         role="dialog"
         aria-label={view === 'add-contact' ? 'Ajouter un contact' : 'Ajouter des destinataires'}
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="recipient-sheet__handle-row" {...dragHandlers}>
           <span className="recipient-sheet__handle" />

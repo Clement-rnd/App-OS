@@ -4,6 +4,7 @@ import iconSave from '../../assets/questionnaire/icon-save.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { LanguageField } from './LanguageField'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './EditProfileSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -11,6 +12,7 @@ const SHEET_ENTRANCE_MS = 380
 
 export function EditProfileSheet({ user, onClose, onSave }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   const [firstName, setFirstName] = useState(user.firstName)
   const [lastName, setLastName] = useState(user.lastName)
@@ -43,13 +45,13 @@ export function EditProfileSheet({ user, onClose, onSave }) {
   }
 
   return (
-    <div className={`edit-profile-sheet-overlay${isClosing ? ' edit-profile-sheet-overlay--closing' : ''}`}>
+    <div className={`edit-profile-sheet-overlay${isClosing ? ' edit-profile-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="edit-profile-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`edit-profile-sheet${isClosing && !isDragClosing ? ' edit-profile-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Éditer mon profil"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="edit-profile-sheet__handle-row" {...dragHandlers}>
           <span className="edit-profile-sheet__handle" />

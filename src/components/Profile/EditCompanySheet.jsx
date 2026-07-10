@@ -5,6 +5,7 @@ import iconPencil from '../../assets/home/icon-pencil.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { ColorPickerPopover } from './ColorPickerPopover'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './EditCompanySheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -13,6 +14,7 @@ const MAX_BRAND_COLORS = 2
 
 export function EditCompanySheet({ company, onClose, onSave }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   const [logoUrl, setLogoUrl] = useState(company.logoUrl)
   const [coverUrl, setCoverUrl] = useState(company.coverUrl)
@@ -46,13 +48,13 @@ export function EditCompanySheet({ company, onClose, onSave }) {
   }
 
   return (
-    <div className={`edit-company-sheet-overlay${isClosing ? ' edit-company-sheet-overlay--closing' : ''}`}>
+    <div className={`edit-company-sheet-overlay${isClosing ? ' edit-company-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="edit-company-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`edit-company-sheet${isClosing && !isDragClosing ? ' edit-company-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Modifier le profil de l'entreprise"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="edit-company-sheet__handle-row" {...dragHandlers}>
           <span className="edit-company-sheet__handle" />

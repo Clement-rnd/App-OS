@@ -3,6 +3,7 @@ import iconSheetClose from '../../assets/reviews/icon-sheet-close.svg'
 import iconCompanyCheck from '../../assets/reviews/icon-company-check.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './SortSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -15,6 +16,7 @@ export const SORT_OPTIONS = [
 
 export function SortSheet({ selectedId, onClose, onSelect }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
 
   const closeWithAnimation = callback => {
@@ -33,13 +35,13 @@ export function SortSheet({ selectedId, onClose, onSelect }) {
   }
 
   return (
-    <div className={`sort-sheet-overlay${isClosing ? ' sort-sheet-overlay--closing' : ''}`}>
+    <div className={`sort-sheet-overlay${isClosing ? ' sort-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="sort-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`sort-sheet${isClosing && !isDragClosing ? ' sort-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Trier par"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="sort-sheet__handle-row" {...dragHandlers}>
           <span className="sort-sheet__handle" />

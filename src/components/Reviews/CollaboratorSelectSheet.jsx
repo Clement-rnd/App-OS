@@ -6,6 +6,7 @@ import iconCompanyCheck from '../../assets/reviews/icon-company-check.svg'
 import iconClearX from '../../assets/recipients/icon-clear-x.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './CollaboratorSelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
@@ -53,6 +54,7 @@ export const COLLABORATORS = [
 
 export function CollaboratorSelectSheet({ selectedId, onClose, onSelect }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
   const [query, setQuery] = useState('')
   const [isClosing, setIsClosing] = useState(false)
 
@@ -75,13 +77,13 @@ export function CollaboratorSelectSheet({ selectedId, onClose, onSelect }) {
   }
 
   return (
-    <div className={`collaborator-sheet-overlay${isClosing ? ' collaborator-sheet-overlay--closing' : ''}`}>
+    <div className={`collaborator-sheet-overlay${isClosing ? ' collaborator-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="collaborator-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
       <div
         className={`collaborator-sheet${isClosing && !isDragClosing ? ' collaborator-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Sélectionner un collaborateur"
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
       >
         <div className="collaborator-sheet__handle-row" {...dragHandlers}>
           <span className="collaborator-sheet__handle" />

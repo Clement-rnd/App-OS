@@ -215,6 +215,29 @@
   width: 100%;
 }
 
+.profile__see-all-chip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 100px;
+  background-color: #041b44;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.profile__see-all-chip img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
 .profile__see-all-row {
   display: flex;
   justify-content: center;
@@ -235,6 +258,11 @@
   font-weight: 600;
   color: #041b44;
   white-space: nowrap;
+}
+
+.profile__see-all-btn img {
+  width: 16px;
+  height: 16px;
 }
 
 .profile__card {

@@ -5,6 +5,7 @@ import iconEditPencil from '../../assets/profile/icon-edit-pencil.svg'
 import iconAddPlus from '../../assets/profile/icon-add-plus.svg'
 import iconUserAvatar from '../../assets/profile/icon-user-avatar.svg'
 import iconChipBuilding from '../../assets/profile/icon-chip-building.svg'
+import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import iconLogout from '../../assets/profile/icon-logout.svg'
 import { EditProfileSheet } from './EditProfileSheet'
 import { EditCompanySheet } from './EditCompanySheet'
@@ -283,6 +284,14 @@ export function Profile({ onNavigate, onLogout }) {
               <p className="profile__section-title">
                 Mes Collaborateurs <span className="profile__section-title-count">({collaborators.length})</span>
               </p>
+              <button
+                type="button"
+                className="profile__see-all-chip"
+                onClick={() => setIsCollaboratorsListOpen(true)}
+              >
+                Voir tout
+                <img src={iconChevronRight} alt="" />
+              </button>
             </div>
             <div className="profile__card">
               {isLoading
@@ -319,6 +328,7 @@ export function Profile({ onNavigate, onLogout }) {
               <div className="profile__see-all-row">
                 <button type="button" className="profile__see-all-btn" onClick={() => setIsCollaboratorsListOpen(true)}>
                   Voir tout
+                  <img src={iconChevronRight} alt="" />
                 </button>
               </div>
 

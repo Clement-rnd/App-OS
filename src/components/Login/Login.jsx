@@ -10,62 +10,30 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
   const [touched, setTouched] = useState({ identifiant: false, password: false })
   const [showSignUpModal, setShowSignUpModal] = useState(false)
 
+  // Installed-PWA cold launch: iOS under-measures the layout viewport, so
+  // every viewport-derived length (the CSS dvh fallback, lvh, fixed inset:
+  // 0...) leaves the page box short of the physical screen bottom, exposing
+  // bare canvas below it until a scroll forces a remeasure. The hardware
+  // screen height is the one measurement already correct at launch, so in
+  // standalone mode the page box is sized in real pixels instead. In a
+  // browser tab screen.height is the monitor, not the window, so there the
+  // CSS dvh fallback stays in charge.
+  const [minHeight] = useState(() =>
+    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+      ? Math.max(window.screen.height, window.innerHeight)
+      : undefined
+  )
+
   useEffect(() => {
-    // iOS PWA cold-launch quirk, established on-device: the layout viewport
-    // is under-measured at launch and NO in-page layer can paint below it --
-    // a position: fixed layer stops at the mismeasured line whether sized
-    // with inset: 0 or 100lvh (both were tried; the band below stayed
-    // unpainted). The document canvas (<html>'s background) is the one
-    // surface always painted to the physical screen edges: flooding it with
-    // a flat color did reach the gap. So the page gradient lives here, on
-    // the canvas itself, sized against window.screen.height -- the real
-    // hardware screen height, which is correct even at cold launch --
-    // rather than any viewport-derived unit. Scoped to Login (the only
-    // screen reached at cold launch, and the only dark one over the gap);
-    // light pages keep the default white canvas, which their gap blends into.
+    // Safety net behind the px-sized box: the canvas color is the one paint
+    // that provably (tested on-device) reaches the physical screen edges no
+    // matter how the viewport resolves. Any sliver the sizing might ever
+    // miss shows the gradient's own bottom navy instead of white.
     const html = document.documentElement
-    const { body } = document
-    const previous = {
-      color: html.style.backgroundColor,
-      image: html.style.backgroundImage,
-      size: html.style.backgroundSize,
-      repeat: html.style.backgroundRepeat,
-      position: html.style.backgroundPosition,
-      body: body.style.backgroundColor,
-    }
-
-    const apply = () => {
-      // innerHeight wins in desktop browsers, where screen.height is the
-      // monitor, not the window; on the phone at launch screen.height is
-      // the reliable one. The gradient must never be shorter than either.
-      const height = Math.max(window.screen.height, window.innerHeight)
-      html.style.backgroundColor = '#041b44'
-      html.style.backgroundImage = [
-        'radial-gradient(ellipse at 120% 65%, rgba(0, 212, 146, 0.6) 0%, transparent 50%)',
-        'radial-gradient(ellipse at -2% 36%, rgba(44, 149, 255, 0.3) 0%, transparent 50%)',
-        'radial-gradient(ellipse at 105% -3%, rgba(44, 149, 255, 0.6) 0%, transparent 40%)',
-        'linear-gradient(180deg, #000000 0%, #010711 20%, #020e22 40%, #041b44 100%)',
-      ].join(', ')
-      html.style.backgroundSize = `100% ${height}px`
-      html.style.backgroundRepeat = 'no-repeat'
-      html.style.backgroundPosition = 'top left'
-    }
-    apply()
-    window.addEventListener('resize', apply)
-
-    // Body must be transparent while <html> paints: once html has its own
-    // background, body's white stops propagating to the canvas and would
-    // instead paint inside its own box, covering the gradient.
-    body.style.backgroundColor = 'transparent'
-
+    const previous = html.style.backgroundColor
+    html.style.backgroundColor = '#041b44'
     return () => {
-      window.removeEventListener('resize', apply)
-      html.style.backgroundColor = previous.color
-      html.style.backgroundImage = previous.image
-      html.style.backgroundSize = previous.size
-      html.style.backgroundRepeat = previous.repeat
-      html.style.backgroundPosition = previous.position
-      body.style.backgroundColor = previous.body
+      html.style.backgroundColor = previous
     }
   }, [])
 
@@ -77,7 +45,7 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
   const passwordError = touched.password && !isPasswordValid
 
   return (
-    <div className="login">
+    <div className="login" style={minHeight !== undefined ? { minHeight } : undefined}>
       <div className="login__header">
         <div className="login__status-bar" />
         <button className="login__skip-btn" type="button" onClick={onSkip}>

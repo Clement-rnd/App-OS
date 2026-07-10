@@ -2,17 +2,21 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  /* Browser-tab fallback only: in the installed PWA, Login.jsx overrides
+     min-height with the hardware screen height in px. iOS under-measures
+     the layout viewport at cold launch, and every viewport-derived length
+     (dvh, lvh, fixed inset: 0) inherits the error, cutting this box -- and
+     its gradient -- short of the physical screen bottom. A px height from
+     window.screen.height is the one measurement that is right at launch. */
   min-height: 100vh;
   min-height: 100dvh;
   font-family: 'Poppins', sans-serif;
+  background:
+    radial-gradient(ellipse at 120% 65%, rgba(0, 212, 146, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at -2% 36%, rgba(44, 149, 255, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 105% -3%, rgba(44, 149, 255, 0.6) 0%, transparent 40%),
+    linear-gradient(180deg, #000000 0%, #010711 20%, #020e22 40%, #041b44 100%);
 }
-
-/* The page gradient is painted on the document canvas (<html>) by a Login
-   mount effect, NOT here: established on-device, no in-page layer -- fixed,
-   inset: 0, lvh-sized or otherwise -- can paint below iOS's under-measured
-   cold-launch layout viewport, while the canvas always reaches the physical
-   screen edges. See the useEffect in Login.jsx before reintroducing any
-   background layer here. */
 
 /* Header */
 .login__header {

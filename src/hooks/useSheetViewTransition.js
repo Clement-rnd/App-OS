@@ -81,13 +81,11 @@ function useHeightFrame() {
 export function useSheetViewTransition(view, setView) {
   const [isContentExiting, setContentExiting] = useState(false)
   const swap = useHeightFrame()
-  const footer = useHeightFrame()
   const viewTimeoutRef = useRef(null)
   const hasMountedViewRef = useRef(false)
 
   const withViewTransition = nextView => {
     swap.measure()
-    footer.measure()
     setContentExiting(true)
     clearTimeout(viewTimeoutRef.current)
     viewTimeoutRef.current = setTimeout(() => {
@@ -98,7 +96,7 @@ export function useSheetViewTransition(view, setView) {
 
   // Runs right after `view` remounts the swapped content (still pinned to
   // the outgoing height): measure the new content's natural height and
-  // push each frame to it a frame later, so the browser registers the
+  // push the frame to it a frame later, so the browser registers the
   // outgoing height as a real "before" value instead of collapsing both
   // writes into one and skipping the transition.
   useLayoutEffect(() => {
@@ -106,12 +104,7 @@ export function useSheetViewTransition(view, setView) {
       hasMountedViewRef.current = true
       return
     }
-    const cancelSwap = swap.pushNextFrame()
-    const cancelFooter = footer.pushNextFrame()
-    return () => {
-      cancelSwap()
-      cancelFooter()
-    }
+    return swap.pushNextFrame()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view])
 
@@ -119,9 +112,6 @@ export function useSheetViewTransition(view, setView) {
     swapInnerRef: swap.innerRef,
     swapStyle: swap.style,
     onSwapTransitionEnd: swap.onTransitionEnd,
-    footerInnerRef: footer.innerRef,
-    footerStyle: footer.style,
-    onFooterTransitionEnd: footer.onTransitionEnd,
     isContentExiting,
     withViewTransition,
   }

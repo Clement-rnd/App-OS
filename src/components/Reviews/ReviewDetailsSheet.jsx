@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import iconFilterClose from '../../assets/reviews/icon-filter-close.svg'
 import iconBack from '../../assets/questionnaire/icon-back.svg'
 import iconReviewRating from '../../assets/home/icon-review-rating.svg'
@@ -8,6 +8,7 @@ import iconPencil from '../../assets/home/icon-pencil.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useSheetViewTransition } from '../../hooks/useSheetViewTransition'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import { StarRating } from '../StarRating/StarRating'
 import { RespondFields } from '../Home/RespondFields'
 import { getNpsCategory, getNpsScore, getRatingBreakdown } from '../../utils/nps'
@@ -138,7 +139,34 @@ const NPS_BADGE_CLASS = {
 
 export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSendGoogleBoost }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
+  // .review-details-sheet's own max-height: 90vh (in CSS) is exposed to the
+  // exact same iOS under-measurement as the overlay -- see
+  // useStandaloneScreenHeight for why screenHeight is the reliable value.
+  const sheetMaxHeight = screenHeight * 0.9
   const [isClosing, setIsClosing] = useState(false)
+  const [isContentScrolled, setContentScrolled] = useState(false)
+  // TEMPORARY debug readout -- remove once the share button cutoff on
+  // real iOS devices is understood; on-device measurements have been the
+  // only reliable way to resolve this class of bug (see the Login viewport
+  // investigation), so surface the real numbers instead of guessing again.
+  const [debugInfo, setDebugInfo] = useState('')
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      const sheetEl = document.querySelector('.review-details-sheet')
+      const footerEl = document.querySelector('.review-details-sheet__footer')
+      const shareBtnEl = document.querySelector('.review-details-sheet__share-btn')
+      const sheetRect = sheetEl?.getBoundingClientRect()
+      const footerRect = footerEl?.getBoundingClientRect()
+      const shareBtnRect = shareBtnEl?.getBoundingClientRect()
+      setDebugInfo(
+        `scr.h=${window.screen.height} inner.h=${window.innerHeight} vv.h=${Math.round(window.visualViewport?.height || 0)} ` +
+          `maxH=${Math.round(sheetMaxHeight)} sheet.bot=${Math.round(sheetRect?.bottom || 0)} ` +
+          `footer.bot=${Math.round(footerRect?.bottom || 0)} btn.bot=${Math.round(shareBtnRect?.bottom || 0)}`
+      )
+    })
+    return () => cancelAnimationFrame(id)
+  }, [sheetMaxHeight])
   // 'details' | 'respond' | 'google-boost' -- switching between them morphs
   // the content of this same sheet (see withViewTransition) instead of
   // opening a second modal on top of it.
@@ -157,16 +185,8 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
     closeDurationMs: CLOSE_ANIMATION_MS,
   })
 
-  const {
-    swapInnerRef,
-    footerInnerRef,
-    isContentExiting,
-    withViewTransition,
-    swapStyle,
-    onSwapTransitionEnd,
-    footerStyle,
-    onFooterTransitionEnd,
-  } = useSheetViewTransition(view, setView)
+  const { swapInnerRef, isContentExiting, withViewTransition, swapStyle, onSwapTransitionEnd } =
+    useSheetViewTransition(view, setView)
 
   const isEditing = Boolean(review.response)
   const isValid = replyText.trim().length > 0
@@ -216,8 +236,28 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
   )
 
   return (
-    <div className={`review-details-overlay${isClosing ? ' review-details-overlay--closing' : ''}`}>
+    <div
+      className={`review-details-overlay${isClosing ? ' review-details-overlay--closing' : ''}`}
+      style={{ height: screenHeight }}
+    >
       <div className="review-details-backdrop" onClick={closeWithAnimation} />
+      <p
+        style={{
+          position: 'fixed',
+          top: 4,
+          left: 4,
+          zIndex: 999,
+          fontSize: 9,
+          lineHeight: 1.3,
+          color: '#ff3b30',
+          backgroundColor: 'rgba(255,255,255,0.9)',
+          padding: '2px 4px',
+          maxWidth: '95vw',
+          wordBreak: 'break-all',
+        }}
+      >
+        {debugInfo}
+      </p>
       <div
         className={`review-details-sheet${isClosing && !isDragClosing ? ' review-details-sheet--closing' : ''}`}
         role="dialog"
@@ -228,13 +268,13 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
               ? 'Boostez mon avis sur Google'
               : "Détails de l'avis"
         }
-        style={dragStyle}
+        style={{ ...dragStyle, maxHeight: sheetMaxHeight }}
       >
         <div className="review-details-sheet__handle-row" {...dragHandlers}>
           <span className="review-details-sheet__handle" />
         </div>
 
-        <div className="review-details-sheet__appbar">
+        <div className={`review-details-sheet__appbar${isContentScrolled ? ' review-details-sheet__appbar--scrolled' : ''}`}>
           <div
             key={view}
             className={`review-details-sheet__appbar-main${isContentExiting ? ' review-details-sheet__appbar-main--exiting' : ''}`}
@@ -264,7 +304,10 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
           </button>
         </div>
 
-        <div className="review-details-sheet__content">
+        <div
+          className="review-details-sheet__content"
+          onScroll={e => setContentScrolled(e.currentTarget.scrollTop > 0)}
+        >
           {view !== 'google-boost' && reviewCard}
 
           <div className="review-details__swap" style={swapStyle} onTransitionEnd={onSwapTransitionEnd}>
@@ -413,57 +456,50 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
 
         <div className="review-details-sheet__footer">
           <div
-            className="review-details-sheet__footer-frame"
-            style={footerStyle}
-            onTransitionEnd={onFooterTransitionEnd}
+            key={view}
+            className={`review-details-sheet__footer-buttons${isContentExiting ? ' review-details-sheet__footer-buttons--exiting' : ''}`}
           >
-            <div
-              key={view}
-              ref={footerInnerRef}
-              className={`review-details-sheet__footer-buttons${isContentExiting ? ' review-details-sheet__footer-buttons--exiting' : ''}`}
-            >
-              {view === 'details' ? (
-                <>
-                  {!review.response && (
-                    <button
-                      type="button"
-                      className="review-details-sheet__reply-btn"
-                      onClick={() => withViewTransition('respond')}
-                    >
-                      <img src={iconArrowReply} alt="" />
-                      Répondre
-                    </button>
-                  )}
-                  {!isGoogleShared && !hasPendingGoogleReminder && (
-                    <button
-                      type="button"
-                      className="review-details-sheet__share-btn"
-                      onClick={() => withViewTransition('google-boost')}
-                    >
-                      <img src={iconGoogle} alt="" />
-                      Demandez de partager sur Google
-                    </button>
-                  )}
-                </>
-              ) : view === 'respond' ? (
-                <>
+            {view === 'details' ? (
+              <>
+                {!review.response && (
                   <button
                     type="button"
-                    className={`review-details-sheet__reply-btn${isValid ? '' : ' review-details-sheet__reply-btn--disabled'}`}
-                    disabled={!isValid}
-                    onClick={handleSubmit}
+                    className="review-details-sheet__reply-btn"
+                    onClick={() => withViewTransition('respond')}
                   >
                     <img src={iconArrowReply} alt="" />
-                    {isEditing ? 'Enregistrer' : 'Répondre'}
+                    Répondre
                   </button>
-                  {isEditing && (
-                    <button type="button" className="review-details-sheet__share-btn" onClick={handleDelete}>
-                      Supprimer la réponse
-                    </button>
-                  )}
-                </>
-              ) : null}
-            </div>
+                )}
+                {!isGoogleShared && !hasPendingGoogleReminder && (
+                  <button
+                    type="button"
+                    className="review-details-sheet__share-btn"
+                    onClick={() => withViewTransition('google-boost')}
+                  >
+                    <img src={iconGoogle} alt="" />
+                    Demander à partager sur Google
+                  </button>
+                )}
+              </>
+            ) : view === 'respond' ? (
+              <>
+                <button
+                  type="button"
+                  className={`review-details-sheet__reply-btn${isValid ? '' : ' review-details-sheet__reply-btn--disabled'}`}
+                  disabled={!isValid}
+                  onClick={handleSubmit}
+                >
+                  <img src={iconArrowReply} alt="" />
+                  {isEditing ? 'Enregistrer' : 'Répondre'}
+                </button>
+                {isEditing && (
+                  <button type="button" className="review-details-sheet__share-btn" onClick={handleDelete}>
+                    Supprimer la réponse
+                  </button>
+                )}
+              </>
+            ) : null}
           </div>
           <div className="review-details-sheet__home-indicator-wrap" />
         </div>

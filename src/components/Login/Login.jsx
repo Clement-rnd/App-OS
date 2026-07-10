@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
 import { SignUpModal } from '../SignUpModal/SignUpModal'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './Login.css'
 
 export function Login({ onLogin, onSkip, onForgotPassword }) {
@@ -9,20 +10,7 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
   const [showPassword, setShowPassword] = useState(false)
   const [touched, setTouched] = useState({ identifiant: false, password: false })
   const [showSignUpModal, setShowSignUpModal] = useState(false)
-
-  // Installed-PWA cold launch: iOS under-measures the layout viewport, so
-  // every viewport-derived length (the CSS dvh fallback, lvh, fixed inset:
-  // 0...) leaves the page box short of the physical screen bottom, exposing
-  // bare canvas below it until a scroll forces a remeasure. The hardware
-  // screen height is the one measurement already correct at launch, so in
-  // standalone mode the page box is sized in real pixels instead. In a
-  // browser tab screen.height is the monitor, not the window, so there the
-  // CSS dvh fallback stays in charge.
-  const [minHeight] = useState(() =>
-    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
-      ? Math.max(window.screen.height, window.innerHeight)
-      : undefined
-  )
+  const minHeight = useStandaloneScreenHeight()
 
   useEffect(() => {
     // Safety net behind the px-sized box: the canvas color is the one paint
@@ -45,7 +33,7 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
   const passwordError = touched.password && !isPasswordValid
 
   return (
-    <div className="login" style={minHeight !== undefined ? { minHeight } : undefined}>
+    <div className="login" style={{ minHeight }}>
       <div className="login__header">
         <div className="login__status-bar" />
         <button className="login__skip-btn" type="button" onClick={onSkip}>

@@ -1,3 +1,4 @@
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './BottomNav.css'
 
 function HouseIcon() {
@@ -76,8 +77,17 @@ const TABS = [
 ]
 
 export function BottomNav({ active, onNavigate, badges = {} }) {
+  const screenHeight = useStandaloneScreenHeight()
+  // Same iOS PWA viewport under-measurement as the full-screen sheet
+  // overlays -- `bottom: 0` (in BottomNav.css) anchors to the mismeasured
+  // layout viewport's edge, leaving a gap below the bar down to the real
+  // screen bottom. Anchoring from `top` at the hardware screen height and
+  // pulling the bar up by its own (auto) height sidesteps the bad `bottom`
+  // math entirely, without needing to know the bar's height up front.
+  const standaloneStyle = { bottom: 'auto', top: screenHeight, transform: 'translateY(-100%)' }
+
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav" style={standaloneStyle}>
       <div className="bottom-nav__row">
         {TABS.map(tab => {
           const isActive = tab.key === active

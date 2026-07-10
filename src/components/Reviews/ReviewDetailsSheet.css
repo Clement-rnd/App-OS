@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 75dvh;
+  max-height: 90vh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
@@ -90,14 +90,23 @@
 }
 
 .review-details-sheet__appbar {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
   width: 100%;
   flex-shrink: 0;
+  background-color: #ffffff;
   border-bottom: 1px solid #eeeeee;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0);
   box-sizing: border-box;
+  transition: box-shadow 200ms ease;
+}
+
+.review-details-sheet__appbar--scrolled {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .review-details-sheet__appbar-main {
@@ -164,7 +173,24 @@
   gap: 16px;
   width: 100%;
   padding: 16px;
+  /* Without this, a flex column's default min-height: auto stops this
+     region from ever shrinking below its natural (unwrapped) content
+     height, no matter how tight .review-details-sheet's max-height gets --
+     so instead of this region's own overflow-y: auto kicking in to scroll
+     the excess, the outer sheet's overflow: hidden just clips it, cutting
+     off whatever sits at the bottom (e.g. the "Demandez de partager sur
+     Google" button). */
+  min-height: 0;
   overflow-y: auto;
+}
+
+/* Without this, flexbox's default flex-shrink: 1 lets these squeeze smaller
+   than their own natural content when the sheet is tight on room, instead
+   of staying full size and letting the parent's overflow-y: auto above
+   scroll to reveal the rest -- e.g. the last rating bar or the "Demandez de
+   partager sur Google" button rendering cut off instead of one scroll away. */
+.review-details-sheet__content > * {
+  flex-shrink: 0;
 }
 
 /* Wraps only the part of the sheet that actually differs between the
@@ -522,22 +548,13 @@
   background-color: #ffffff;
 }
 
-/* Its own button count differs between views too (e.g. "Supprimer la
-   réponse" only shows once a response exists) -- driven by JS the same way
-   as .review-details__swap, so that change resizes smoothly instead of
-   snapping the footer's (and so the whole sheet's) height. */
-.review-details-sheet__footer-frame {
-  width: 100%;
-  overflow: hidden;
-  transition: height 300ms ease;
-}
-
 .review-details-sheet__footer-buttons {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   width: 100%;
+  padding-bottom: 16px;
 }
 
 .review-details-sheet__footer-buttons > * {

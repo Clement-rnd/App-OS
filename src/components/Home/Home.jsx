@@ -156,7 +156,7 @@ function ReviewCardSkeleton() {
 const REVIEW_CARD_STEP = 312 + 16 // card width + gap
 
 export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onOpenReviewsTab, unreadNotifCount = 0 }) {
-  const isLoading = useSimulatedLoading()
+  const isLoading = useSimulatedLoading('home')
   const reviewsScrollerRef = useRef(null)
   const [reviews, setReviews] = useState(initialReviews)
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)

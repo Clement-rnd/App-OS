@@ -81,7 +81,7 @@ export function Notifications({
   onOpenReviewDetails,
   onRequestRespond,
 }) {
-  const isLoading = useSimulatedLoading()
+  const isLoading = useSimulatedLoading('notifications')
   const [tab, setTab] = useState('all')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)

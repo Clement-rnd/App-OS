@@ -282,7 +282,7 @@ const NAME_EXIT_MS = 180
 const LIST_EXIT_MS = 180
 
 export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, onAddNotification }) {
-  const isLoading = useSimulatedLoading()
+  const isLoading = useSimulatedLoading('reviews')
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
   const [isCompanySheetOpen, setCompanySheetOpen] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState(COMPANIES[0])

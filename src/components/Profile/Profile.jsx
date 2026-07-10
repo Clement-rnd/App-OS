@@ -110,7 +110,7 @@ function InfoRow({ label, value }) {
 }
 
 export function Profile({ onNavigate, onLogout }) {
-  const isLoading = useSimulatedLoading()
+  const isLoading = useSimulatedLoading('profile')
   const [currentUser, setCurrentUser] = useState(initialManager)
   const [company, setCompany] = useState(initialCompany)
   const [collaborators, setCollaborators] = useState(initialCollaborators)

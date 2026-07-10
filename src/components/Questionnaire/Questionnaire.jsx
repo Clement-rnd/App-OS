@@ -18,6 +18,7 @@ import { RecipientSelectSheet } from './RecipientSelectSheet'
 import { EditRecipientSheet } from './EditRecipientSheet'
 import { SendQuestionnaireSheet } from './SendQuestionnaireSheet'
 import { ConfirmLeaveModal } from './ConfirmLeaveModal'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import { ContactsPermissionModal } from './ContactsPermissionModal'
 import './Questionnaire.css'
 
@@ -355,6 +356,13 @@ export function Questionnaire({ onNavigate }) {
   const [isSendSheetOpen, setSendSheetOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const hasContactsAccessRef = useRef(false)
+  const screenHeight = useStandaloneScreenHeight()
+  // Same iOS PWA viewport under-measurement as BottomNav/the sheet overlays:
+  // `bottom: 0` (in Questionnaire.css) anchors to the mismeasured layout
+  // viewport, leaving a gap below this footer down to the real screen
+  // bottom. Anchoring from `top` at the hardware screen height and pulling
+  // the footer up by its own (auto) height sidesteps the bad `bottom` math.
+  const footerStandaloneStyle = { bottom: 'auto', top: screenHeight, transform: 'translateY(-100%)' }
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0)
@@ -517,7 +525,7 @@ export function Questionnaire({ onNavigate }) {
         </StepCard>
       </div>
 
-      <footer className="questionnaire__footer">
+      <footer className="questionnaire__footer" style={footerStandaloneStyle}>
         <button
           type="button"
           className="questionnaire__submit-btn"

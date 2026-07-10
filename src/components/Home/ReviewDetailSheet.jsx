@@ -7,6 +7,7 @@ import iconBack from '../../assets/questionnaire/icon-back.svg'
 import { getNpsCategory } from '../../utils/nps'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useSheetViewTransition } from '../../hooks/useSheetViewTransition'
+import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import { ReviewSummaryCard } from './ReviewSummaryCard'
 import { RespondFields } from './RespondFields'
 import './ReviewDetailSheet.css'
@@ -26,23 +27,21 @@ const NPS_BADGE_CLASS = {
 
 export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
   useLockBodyScroll()
+  const screenHeight = useStandaloneScreenHeight()
+  // .review-detail-sheet's own max-height: 90vh (in CSS) is exposed to the
+  // exact same iOS under-measurement as the overlay -- see
+  // useStandaloneScreenHeight for why screenHeight is the reliable value.
+  const sheetMaxHeight = screenHeight * 0.9
   const npsCategory = getNpsCategory(parseFloat(review.rating))
   // 'details' | 'respond' -- switching between them morphs the content of
   // this same sheet (see withViewTransition) instead of opening a second
   // modal on top of it.
   const [view, setView] = useState('details')
   const [replyText, setReplyText] = useState(review.response || '')
+  const [isContentScrolled, setContentScrolled] = useState(false)
 
-  const {
-    swapInnerRef,
-    footerInnerRef,
-    isContentExiting,
-    withViewTransition,
-    swapStyle,
-    onSwapTransitionEnd,
-    footerStyle,
-    onFooterTransitionEnd,
-  } = useSheetViewTransition(view, setView)
+  const { swapInnerRef, isContentExiting, withViewTransition, swapStyle, onSwapTransitionEnd } =
+    useSheetViewTransition(view, setView)
 
   const isEditing = Boolean(review.response)
   const isValid = replyText.trim().length > 0
@@ -59,14 +58,19 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
   }
 
   return (
-    <div className="review-detail-overlay">
+    <div className="review-detail-overlay" style={{ height: screenHeight }}>
       <div className="review-detail-backdrop" onClick={onClose} />
-      <div className="review-detail-sheet" role="dialog" aria-label={view === 'respond' ? "Répondre à l'avis" : "Détails de l'avis"}>
+      <div
+        className="review-detail-sheet"
+        role="dialog"
+        aria-label={view === 'respond' ? "Répondre à l'avis" : "Détails de l'avis"}
+        style={{ maxHeight: sheetMaxHeight }}
+      >
         <div className="review-detail-sheet__handle-row">
           <span className="review-detail-sheet__handle" />
         </div>
 
-        <div className="review-detail-sheet__appbar">
+        <div className={`review-detail-sheet__appbar${isContentScrolled ? ' review-detail-sheet__appbar--scrolled' : ''}`}>
           <div
             key={view}
             className={`review-detail-sheet__appbar-main${isContentExiting ? ' review-detail-sheet__appbar-main--exiting' : ''}`}
@@ -90,7 +94,10 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
           </button>
         </div>
 
-        <div className="review-detail-sheet__content">
+        <div
+          className="review-detail-sheet__content"
+          onScroll={e => setContentScrolled(e.currentTarget.scrollTop > 0)}
+        >
           <ReviewSummaryCard review={review} />
 
           <div className="review-detail-swap" style={swapStyle} onTransitionEnd={onSwapTransitionEnd}>
@@ -173,50 +180,47 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
         </div>
 
         <div className="review-detail-sheet__footer">
-          <div className="review-detail-sheet__footer-frame" style={footerStyle} onTransitionEnd={onFooterTransitionEnd}>
-            <div
-              key={view}
-              ref={footerInnerRef}
-              className={`review-detail-sheet__footer-buttons${isContentExiting ? ' review-detail-sheet__footer-buttons--exiting' : ''}`}
-            >
-              {view === 'details' ? (
-                <>
-                  {!review.response && (
-                    <button
-                      type="button"
-                      className="review-detail-sheet__respond-btn"
-                      onClick={() => withViewTransition('respond')}
-                    >
-                      <img src={iconReply} alt="" />
-                      Répondre
-                    </button>
-                  )}
-                  {!review.googleShared && (
-                    <button type="button" className="review-detail-sheet__share-btn">
-                      <img src={iconGoogle} alt="" />
-                      Demandez de partager sur Google
-                    </button>
-                  )}
-                </>
-              ) : (
-                <>
+          <div
+            key={view}
+            className={`review-detail-sheet__footer-buttons${isContentExiting ? ' review-detail-sheet__footer-buttons--exiting' : ''}`}
+          >
+            {view === 'details' ? (
+              <>
+                {!review.response && (
                   <button
                     type="button"
-                    className={`review-detail-sheet__respond-btn${isValid ? '' : ' review-detail-sheet__respond-btn--disabled'}`}
-                    disabled={!isValid}
-                    onClick={handleSubmit}
+                    className="review-detail-sheet__respond-btn"
+                    onClick={() => withViewTransition('respond')}
                   >
                     <img src={iconReply} alt="" />
-                    {isEditing ? 'Enregistrer' : 'Répondre'}
+                    Répondre
                   </button>
-                  {isEditing && (
-                    <button type="button" className="review-detail-sheet__share-btn" onClick={handleDelete}>
-                      Supprimer la réponse
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
+                )}
+                {!review.googleShared && (
+                  <button type="button" className="review-detail-sheet__share-btn">
+                    <img src={iconGoogle} alt="" />
+                    Demander à partager sur Google
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className={`review-detail-sheet__respond-btn${isValid ? '' : ' review-detail-sheet__respond-btn--disabled'}`}
+                  disabled={!isValid}
+                  onClick={handleSubmit}
+                >
+                  <img src={iconReply} alt="" />
+                  {isEditing ? 'Enregistrer' : 'Répondre'}
+                </button>
+                {isEditing && (
+                  <button type="button" className="review-detail-sheet__share-btn" onClick={handleDelete}>
+                    Supprimer la réponse
+                  </button>
+                )}
+              </>
+            )}
           </div>
           <div className="review-detail-sheet__home-indicator-wrap" />
         </div>

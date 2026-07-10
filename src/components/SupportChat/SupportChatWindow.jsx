@@ -9,6 +9,11 @@ import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import './SupportChatWindow.css'
 
 const CLOSE_ANIMATION_MS = 260
+// A plain estimate (~most iOS keyboards without a QuickType/predictive
+// bar showing) -- there's no way to measure the real one from here, and
+// visualViewport's resize event isn't reliable enough on-device to be the
+// only source (see handleInputFocus below).
+const FALLBACK_KEYBOARD_INSET = 300
 
 function formatTime(date) {
   return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
@@ -30,30 +35,39 @@ export function SupportChatWindow({ isOpen, onClose }) {
   const [isTyping, setIsTyping] = useState(false)
   const listRef = useRef(null)
   const inputRef = useRef(null)
+  // How much of the bottom of the screen the keyboard currently covers --
+  // NOT used to resize the overlay/panel (that made the whole sheet lurch
+  // when tried before); applied as bottom padding on the panel instead, so
+  // only its flex layout reacts: the messages list (flex: 1) yields that
+  // much space and the input row rides up to sit just above the keyboard,
+  // while the panel's own height stays fixed at "opens straight to max".
+  const [keyboardInset, setKeyboardInset] = useState(0)
 
   // This window stays mounted for the whole session (so chat history
   // survives being closed) instead of unmounting like every other sheet --
   // isOpen alone used to snap display: none the instant it went false,
-  // skipping the slide-down/fade-out entirely. isVisible lags isOpen by
-  // CLOSE_ANIMATION_MS so the exit animation gets to play before the
-  // overlay actually leaves the layout.
-  const [isVisible, setIsVisible] = useState(isOpen)
+  // skipping the slide-down/fade-out entirely. isVisible is DERIVED
+  // (open, or still playing the exit), not effect-managed state: the
+  // overlay must leave display: none in the very same render isOpen
+  // flips true, so App.jsx's flushSync can focus the input while still
+  // inside the tap gesture -- an effect setting isVisible a tick later
+  // would leave the input under display: none for that whole tick, and
+  // focusing a display: none element is a silent no-op.
   const [isClosing, setIsClosing] = useState(false)
+  const wasOpenRef = useRef(isOpen)
+  const isVisible = isOpen || isClosing
 
   useEffect(() => {
+    const wasOpen = wasOpenRef.current
+    wasOpenRef.current = isOpen
     if (isOpen) {
-      setIsVisible(true)
       setIsClosing(false)
       return
     }
-    if (!isVisible) return
+    if (!wasOpen) return
     setIsClosing(true)
-    const timeoutId = setTimeout(() => {
-      setIsVisible(false)
-      setIsClosing(false)
-    }, CLOSE_ANIMATION_MS)
+    const timeoutId = setTimeout(() => setIsClosing(false), CLOSE_ANIMATION_MS)
     return () => clearTimeout(timeoutId)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   useEffect(() => {
@@ -62,17 +76,32 @@ export function SupportChatWindow({ isOpen, onClose }) {
     if (el) el.scrollTop = el.scrollHeight
   }, [messages, isTyping, isOpen])
 
-  // Opening the window is itself the user gesture, so focusing the input
-  // right after is enough for iOS/Android to raise the keyboard without
-  // requiring a second, separate tap. Keyed on isVisible (not isOpen):
-  // this component never unmounts, so the input already exists in the DOM
-  // under display: none the instant isOpen flips -- focusing it then is a
-  // no-op, since browsers refuse to focus a display: none element. isVisible
-  // only flips true on the next render, once the overlay is actually shown.
-  useEffect(() => {
-    if (!isVisible || isClosing) return
-    inputRef.current?.focus()
-  }, [isVisible, isClosing])
+  // The actual focus happens synchronously inside the FAB's own onClick
+  // in App.jsx (flushSync + focus, still inside the tap) -- iOS only
+  // raises the keyboard for a focus() in that exact synchronous gesture
+  // window, so a React effect here (necessarily a tick later) would focus
+  // the field but never show the keyboard.
+
+  // window.visualViewport's resize event turned out not to be reliable
+  // enough on-device to hang the keyboard-inset logic on (it may not fire
+  // at all in this installed-PWA context) -- focus/blur on the input
+  // itself is guaranteed to fire, since the keyboard opening off of it is
+  // the whole feature. FALLBACK_KEYBOARD_INSET is a plain estimate (no
+  // device can be measured live from here); visualViewport, if it *does*
+  // report something, refines that estimate once the keyboard's open
+  // animation has actually finished.
+  const handleInputFocus = () => {
+    setKeyboardInset(FALLBACK_KEYBOARD_INSET)
+    const vv = window.visualViewport
+    if (!vv) return
+    setTimeout(() => {
+      const measured = Math.max(0, window.innerHeight - vv.height)
+      if (measured > 0) setKeyboardInset(measured)
+      window.scrollTo(0, 0)
+    }, 350)
+  }
+
+  const handleInputBlur = () => setKeyboardInset(0)
 
   const handleSend = () => {
     const trimmed = draft.trim()
@@ -110,7 +139,10 @@ export function SupportChatWindow({ isOpen, onClose }) {
         className={`support-chat-panel${isClosing ? ' support-chat-panel--closing' : ''}`}
         role="dialog"
         aria-label="Assistant support"
-        style={{ height: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
+        style={{
+          height: screenHeight === undefined ? undefined : screenHeight * 0.9,
+          paddingBottom: keyboardInset,
+        }}
       >
         <div className="support-chat-panel__header">
           <span className="support-chat-panel__avatar">
@@ -173,6 +205,8 @@ export function SupportChatWindow({ isOpen, onClose }) {
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <button type="button" className="support-chat-panel__attach-btn" aria-label="Joindre un fichier">
               <img src={iconAttach} alt="" />

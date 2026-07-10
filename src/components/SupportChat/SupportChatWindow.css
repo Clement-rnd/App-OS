@@ -32,9 +32,9 @@
   flex-direction: column;
   width: 100%;
   /* Opens straight at its full height (product decision: no growing from
-     50dvh) -- dvh fallback for every platform where CSS tracks the real
-     viewport; iOS-standalone overrides this inline from JS (see
-     useStandaloneScreenHeight). */
+     a smaller starting point) -- dvh fallback for every platform where
+     CSS tracks the real viewport; iOS-standalone overrides this inline
+     from JS (see useStandaloneScreenHeight). */
   height: 90dvh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;

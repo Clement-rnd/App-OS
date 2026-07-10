@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { flushSync } from 'react-dom'
 import { Login } from './components/Login/Login'
 import { Home } from './components/Home/Home'
 import { ForgotPassword } from './components/ForgotPassword/ForgotPassword'
@@ -164,19 +163,7 @@ function App() {
 
       {!isAuthPage && (
         <>
-          <SupportChatFab
-            onClick={() => {
-              // iOS only raises the keyboard for a focus() that happens
-              // synchronously inside the tap gesture -- an effect-time focus
-              // after the state lands is silently keyboard-less. flushSync
-              // forces the chat window (always mounted, display: none while
-              // closed) to become visible within this same handler so its
-              // input is focusable right here.
-              flushSync(() => setIsSupportChatOpen(true))
-              document.querySelector('.support-chat-panel input')?.focus()
-            }}
-            hidden={isSupportChatOpen}
-          />
+          <SupportChatFab onClick={() => setIsSupportChatOpen(true)} hidden={isSupportChatOpen} />
           <SupportChatWindow isOpen={isSupportChatOpen} onClose={() => setIsSupportChatOpen(false)} />
         </>
       )}

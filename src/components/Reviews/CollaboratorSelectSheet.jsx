@@ -83,7 +83,7 @@ export function CollaboratorSelectSheet({ selectedId, onClose, onSelect }) {
         className={`collaborator-sheet${isClosing && !isDragClosing ? ' collaborator-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Sélectionner un collaborateur"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="collaborator-sheet__handle-row" {...dragHandlers}>
           <span className="collaborator-sheet__handle" />

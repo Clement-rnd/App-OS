@@ -4,24 +4,24 @@ import { useState } from 'react'
 // a screen first mounts (confirmed on-device on Login) -- window.innerHeight
 // is exposed to that bug too, since it reads the same under-measured layout
 // viewport, only via JS instead of CSS. window.screen.height is the hardware
-// screen resolution instead, unaffected, so Math.max against it rescues an
-// under-measured innerHeight.
+// screen resolution instead, unaffected, so it can stand in for the real
+// height there.
 //
-// This rescue is specifically an iOS bug -- Android's innerHeight is
-// reliable in both a browser tab AND installed/standalone mode, and Android
-// keeps its own system nav bar space out of innerHeight but not out of
-// screen.height, so Math.max there overshoots and pushes fixed-position
-// elements (e.g. the bottom nav, confirmed on a teammate's Android device)
-// below the real visible viewport. Gating on "standalone" alone isn't
-// enough to exclude it either: an Android PWA added to the home screen is
-// also standalone. So this checks for iOS specifically, not just
-// standalone -- everywhere else (Android in any mode, desktop, iOS Safari
-// tabs) uses plain innerHeight, which is already correct there.
+// Everywhere else this returns undefined ON PURPOSE, and callers fall back
+// to their plain CSS (bottom: 0, max-height in dvh, inset: 0...). Returning
+// a JS-measured number outside iOS-standalone has broken twice now
+// (Android browser tab, then installed Android PWA): a value captured once
+// at mount goes stale the moment the window settles or resizes -- Android
+// PWAs resize right after their splash screen, keyboards resize browsers,
+// etc. -- while CSS keeps tracking the real viewport continuously. Only
+// iOS-standalone needs the JS override, because there it's the CSS units
+// themselves that measure wrong; everywhere else CSS is the more reliable
+// source, not less.
 export function useStandaloneScreenHeight() {
   const [height] = useState(() => {
     const isIOS = /iPad|iPhone|iPod/.test(window.navigator.userAgent) && !window.MSStream
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
-    return isIOS && isStandalone ? Math.max(window.screen.height, window.innerHeight) : window.innerHeight
+    return isIOS && isStandalone ? Math.max(window.screen.height, window.innerHeight) : undefined
   })
   return height
 }

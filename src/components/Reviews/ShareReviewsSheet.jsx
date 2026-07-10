@@ -47,7 +47,7 @@ export function ShareReviewsSheet({ url, onClose }) {
         className={`share-reviews-sheet${isClosing && !isDragClosing ? ' share-reviews-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Partager"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="share-reviews-sheet__handle-row" {...dragHandlers}>
           <span className="share-reviews-sheet__handle" />

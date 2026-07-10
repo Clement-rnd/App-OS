@@ -38,7 +38,7 @@ export function CollaboratorsListSheet({ collaborators, onClose, onEditCollabora
         className={`collaborators-list-sheet${isClosing && !isDragClosing ? ' collaborators-list-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Mes collaborateurs"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="collaborators-list-sheet__handle-row" {...dragHandlers}>
           <span className="collaborators-list-sheet__handle" />

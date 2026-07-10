@@ -120,7 +120,7 @@ export function ResendQuestionnaireSheet({ item, initialView = 'resend', onClose
         className={`resend-sheet${isClosing && !isDragClosing ? ' resend-sheet--closing' : ''}`}
         role="dialog"
         aria-label={view === 'edit-recipient' ? 'Modifier le destinataire' : 'Renvoyer le questionnaire'}
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="resend-sheet__handle-row" {...dragHandlers}>
           <span className="resend-sheet__handle" />

@@ -58,7 +58,7 @@ export function EditCollaboratorSheet({ collaborator, isNew = false, onClose, on
         className={`edit-collaborator-sheet${isClosing && !isDragClosing ? ' edit-collaborator-sheet--closing' : ''}`}
         role="dialog"
         aria-label={title}
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="edit-collaborator-sheet__handle-row" {...dragHandlers}>
           <span className="edit-collaborator-sheet__handle" />

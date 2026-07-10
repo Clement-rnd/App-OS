@@ -362,7 +362,8 @@ export function Questionnaire({ onNavigate }) {
   // viewport, leaving a gap below this footer down to the real screen
   // bottom. Anchoring from `top` at the hardware screen height and pulling
   // the footer up by its own (auto) height sidesteps the bad `bottom` math.
-  const footerStandaloneStyle = { bottom: 'auto', top: screenHeight, transform: 'translateY(-100%)' }
+  const footerStandaloneStyle =
+    screenHeight !== undefined ? { bottom: 'auto', top: screenHeight, transform: 'translateY(-100%)' } : undefined
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0)

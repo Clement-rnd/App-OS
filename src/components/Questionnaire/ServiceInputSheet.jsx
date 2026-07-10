@@ -37,7 +37,7 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
         className={`service-sheet${isClosing && !isDragClosing ? ' service-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Quel service avez-vous récemment fourni ?"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="service-sheet__handle-row" {...dragHandlers}>
           <span className="service-sheet__handle" />

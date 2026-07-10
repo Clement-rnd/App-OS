@@ -182,7 +182,7 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
         className={`filters-sheet${isClosing && !isDragClosing ? ' filters-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Filtres"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="filters-sheet__handle-row" {...dragHandlers}>
           <span className="filters-sheet__handle" />

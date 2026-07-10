@@ -49,7 +49,7 @@ export function CompanySelectSheet({ selectedId, onClose, onSelect }) {
         className={`company-sheet${isClosing && !isDragClosing ? ' company-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Sélectionner une entreprise"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="company-sheet__handle-row" {...dragHandlers}>
           <span className="company-sheet__handle" />

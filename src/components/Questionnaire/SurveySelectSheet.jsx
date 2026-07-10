@@ -88,7 +88,7 @@ export function SurveySelectSheet({ onClose, onSelect }) {
         className={`survey-sheet${isClosing && !isDragClosing ? ' survey-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Sélectionnez une enquête à envoyer"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="survey-sheet__handle-row" {...dragHandlers}>
           <span className="survey-sheet__handle" />

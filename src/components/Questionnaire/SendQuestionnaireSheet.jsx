@@ -103,7 +103,7 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
         className={`send-sheet${isClosing && !isDragClosing ? ' send-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Envoyer le questionnaire"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="send-sheet__handle-row" {...dragHandlers}>
           <span className="send-sheet__handle" />

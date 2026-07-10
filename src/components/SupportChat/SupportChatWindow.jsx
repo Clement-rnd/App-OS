@@ -110,7 +110,7 @@ export function SupportChatWindow({ isOpen, onClose }) {
         className={`support-chat-panel${isClosing ? ' support-chat-panel--closing' : ''}`}
         role="dialog"
         aria-label="Assistant support"
-        style={{ height: screenHeight * 0.9 }}
+        style={{ height: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="support-chat-panel__header">
           <span className="support-chat-panel__avatar">

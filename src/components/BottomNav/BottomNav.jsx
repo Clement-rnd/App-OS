@@ -84,7 +84,11 @@ export function BottomNav({ active, onNavigate, badges = {} }) {
   // screen bottom. Anchoring from `top` at the hardware screen height and
   // pulling the bar up by its own (auto) height sidesteps the bad `bottom`
   // math entirely, without needing to know the bar's height up front.
-  const standaloneStyle = { bottom: 'auto', top: screenHeight, transform: 'translateY(-100%)' }
+  // undefined outside iOS-standalone: CSS `bottom: 0` stays in charge there
+  // (it tracks the real viewport continuously; a JS value captured at mount
+  // went stale on Android PWA launch and hid the bar entirely).
+  const standaloneStyle =
+    screenHeight !== undefined ? { bottom: 'auto', top: screenHeight, transform: 'translateY(-100%)' } : undefined
 
   return (
     <nav className="bottom-nav" style={standaloneStyle}>

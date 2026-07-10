@@ -17,7 +17,7 @@ export function RespondSheet({ review, onClose, onSubmit, onDelete }) {
   return (
     <div className="respond-sheet-overlay" style={{ height: screenHeight }}>
       <div className="respond-sheet-backdrop" onClick={onClose} />
-      <div className="respond-sheet" role="dialog" aria-label="Répondre à l'avis" style={{ maxHeight: screenHeight * 0.9 }}>
+      <div className="respond-sheet" role="dialog" aria-label="Répondre à l'avis" style={{ maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}>
         <div className="respond-sheet__handle-row">
           <span className="respond-sheet__handle" />
         </div>

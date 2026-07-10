@@ -93,16 +93,8 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
     closeDurationMs: CLOSE_ANIMATION_MS,
   })
 
-  const {
-    swapInnerRef,
-    footerInnerRef,
-    isContentExiting,
-    withViewTransition,
-    swapStyle,
-    onSwapTransitionEnd,
-    footerStyle,
-    onFooterTransitionEnd,
-  } = useSheetViewTransition(view, setView)
+  const { swapInnerRef, isContentExiting, withViewTransition, swapStyle, onSwapTransitionEnd } =
+    useSheetViewTransition(view, setView)
 
   const allContacts = [...CONTACTS, ...customContacts]
   const normalizedQuery = query.trim().toLowerCase()
@@ -186,7 +178,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
         className={`recipient-sheet${isClosing && !isDragClosing ? ' recipient-sheet--closing' : ''}`}
         role="dialog"
         aria-label={view === 'add-contact' ? 'Ajouter un contact' : 'Ajouter des destinataires'}
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="recipient-sheet__handle-row" {...dragHandlers}>
           <span className="recipient-sheet__handle" />
@@ -345,12 +337,10 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
         </div>
 
         <div className="recipient-sheet__footer">
-          <div className="recipient-sheet__footer-frame" style={footerStyle} onTransitionEnd={onFooterTransitionEnd}>
-            <div
-              key={view}
-              ref={footerInnerRef}
-              className={`recipient-sheet__footer-buttons${isContentExiting ? ' recipient-sheet__footer-buttons--exiting' : ''}`}
-            >
+          <div
+            key={view}
+            className={`recipient-sheet__footer-buttons${isContentExiting ? ' recipient-sheet__footer-buttons--exiting' : ''}`}
+          >
               {view === 'select' ? (
                 <>
                   <p className="recipient-sheet__footer-hint">Sélectionnez jusqu'à {MAX_RECIPIENTS} destinataires</p>
@@ -389,7 +379,6 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
                   </button>
                 </>
               )}
-            </div>
           </div>
           <div className="recipient-sheet__home-indicator-wrap" />
         </div>

@@ -54,7 +54,7 @@ export function EditRecipientSheet({ recipient, onClose, onSave, onDelete }) {
         className={`edit-recipient-sheet${isClosing && !isDragClosing ? ' edit-recipient-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Modifier le destinataire"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="edit-recipient-sheet__handle-row" {...dragHandlers}>
           <span className="edit-recipient-sheet__handle" />

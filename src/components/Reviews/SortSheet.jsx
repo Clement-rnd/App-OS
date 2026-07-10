@@ -41,7 +41,7 @@ export function SortSheet({ selectedId, onClose, onSelect }) {
         className={`sort-sheet${isClosing && !isDragClosing ? ' sort-sheet--closing' : ''}`}
         role="dialog"
         aria-label="Trier par"
-        style={{ ...dragStyle, maxHeight: screenHeight * 0.9 }}
+        style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="sort-sheet__handle-row" {...dragHandlers}>
           <span className="sort-sheet__handle" />

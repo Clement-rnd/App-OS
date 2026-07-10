@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconSave from '../../assets/questionnaire/icon-save.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
@@ -31,6 +31,29 @@ export function EditProfileSheet({ user, onClose, onSave }) {
     closeDurationMs: CLOSE_ANIMATION_MS,
   })
 
+  // TEMPORARY debug readout -- on-device measurements only, remove once the
+  // save-button clipping report is understood.
+  const [debugInfo, setDebugInfo] = useState('')
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      const overlayEl = document.querySelector('.edit-profile-sheet-overlay')
+      const sheetEl = document.querySelector('.edit-profile-sheet')
+      const btnEl = document.querySelector('.edit-profile-sheet__save-btn')
+      const indicatorEl = document.querySelector('.edit-profile-sheet__home-indicator-wrap')
+      const overlayRect = overlayEl?.getBoundingClientRect()
+      const sheetRect = sheetEl?.getBoundingClientRect()
+      const btnRect = btnEl?.getBoundingClientRect()
+      const indicatorRect = indicatorEl?.getBoundingClientRect()
+      const safeBottom = getComputedStyle(document.documentElement).getPropertyValue('--sab') || 'n/a'
+      setDebugInfo(
+        `scr.h=${window.screen.height} inner.h=${window.innerHeight} vv.h=${Math.round(window.visualViewport?.height || 0)} dpr=${window.devicePixelRatio} ` +
+          `overlay.h=${Math.round(overlayRect?.height || 0)} sheet.bot=${Math.round(sheetRect?.bottom || 0)} ` +
+          `btn.bot=${Math.round(btnRect?.bottom || 0)} indicator.bot=${Math.round(indicatorRect?.bottom || 0)} sab=${safeBottom}`
+      )
+    })
+    return () => cancelAnimationFrame(id)
+  }, [])
+
   const handleSave = () => {
     closeWithAnimation(() =>
       onSave({
@@ -47,6 +70,23 @@ export function EditProfileSheet({ user, onClose, onSave }) {
   return (
     <div className={`edit-profile-sheet-overlay${isClosing ? ' edit-profile-sheet-overlay--closing' : ''}`} style={{ height: screenHeight }}>
       <div className="edit-profile-sheet-backdrop" onClick={() => closeWithAnimation(onClose)} />
+      <p
+        style={{
+          position: 'fixed',
+          top: 4,
+          left: 4,
+          zIndex: 999,
+          fontSize: 9,
+          lineHeight: 1.3,
+          color: '#ff3b30',
+          backgroundColor: 'rgba(255,255,255,0.9)',
+          padding: '2px 4px',
+          maxWidth: '95vw',
+          wordBreak: 'break-all',
+        }}
+      >
+        {debugInfo}
+      </p>
       <div
         className={`edit-profile-sheet${isClosing && !isDragClosing ? ' edit-profile-sheet--closing' : ''}`}
         role="dialog"

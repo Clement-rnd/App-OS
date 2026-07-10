@@ -7,6 +7,8 @@ import { generateSupportReply } from './supportChatKnowledgeBase'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import './SupportChatWindow.css'
 
+const CLOSE_ANIMATION_MS = 260
+
 function formatTime(date) {
   return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
@@ -25,6 +27,31 @@ export function SupportChatWindow({ isOpen, onClose }) {
   const [draft, setDraft] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const listRef = useRef(null)
+
+  // This window stays mounted for the whole session (so chat history
+  // survives being closed) instead of unmounting like every other sheet --
+  // isOpen alone used to snap display: none the instant it went false,
+  // skipping the slide-down/fade-out entirely. isVisible lags isOpen by
+  // CLOSE_ANIMATION_MS so the exit animation gets to play before the
+  // overlay actually leaves the layout.
+  const [isVisible, setIsVisible] = useState(isOpen)
+  const [isClosing, setIsClosing] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true)
+      setIsClosing(false)
+      return
+    }
+    if (!isVisible) return
+    setIsClosing(true)
+    const timeoutId = setTimeout(() => {
+      setIsVisible(false)
+      setIsClosing(false)
+    }, CLOSE_ANIMATION_MS)
+    return () => clearTimeout(timeoutId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
@@ -60,12 +87,12 @@ export function SupportChatWindow({ isOpen, onClose }) {
 
   return (
     <div
-      className={`support-chat-overlay${isOpen ? '' : ' support-chat-overlay--hidden'}`}
+      className={`support-chat-overlay${isVisible ? '' : ' support-chat-overlay--hidden'}${isClosing ? ' support-chat-overlay--closing' : ''}`}
       style={{ height: screenHeight }}
     >
       <div className="support-chat-backdrop" onClick={onClose} />
       <div
-        className="support-chat-panel"
+        className={`support-chat-panel${isClosing ? ' support-chat-panel--closing' : ''}`}
         role="dialog"
         aria-label="Assistant support"
         style={{ maxHeight: screenHeight * 0.9 }}

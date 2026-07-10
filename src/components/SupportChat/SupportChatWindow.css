@@ -50,6 +50,32 @@
   }
 }
 
+.support-chat-panel--closing {
+  animation: support-chat-slide-down 260ms ease-in forwards;
+}
+
+@keyframes support-chat-slide-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.support-chat-overlay--closing .support-chat-backdrop {
+  animation: support-chat-fade-out 260ms ease-in forwards;
+}
+
+@keyframes support-chat-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 .support-chat-panel__header {
   display: flex;
   align-items: center;

@@ -10,8 +10,6 @@ import iconGoogle from '../../assets/home/icon-google.svg'
 import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
-import iconChevronDown from '../../assets/questionnaire/icon-dropdown-chevron.svg'
-import iconFabUp from '../../assets/reviews/icon-fab-up.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
 import { StarRating } from '../StarRating/StarRating'
 import { RespondSheet } from '../Home/RespondSheet'
@@ -34,8 +32,9 @@ import {
   countActiveFilters,
   getActiveFilterEntries,
   removeFilterEntry,
+  applyFilterRules,
 } from './FiltersSheet'
-import { reviewMatchesFilters, parseReviewDate, getNpsFilterId, getDaysUntil } from './filterReviews'
+import { reviewMatchesFilters, matchesReponseFilter, parseReviewDate, getNpsFilterId, getDaysUntil } from './filterReviews'
 import { getNpsCategory } from '../../utils/nps'
 import { REVIEW_TAB_SANS_REPONSE, REVIEW_TAB_NEGATIFS, REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
 import { useSimulatedLoading } from '../../hooks/useSimulatedLoading'
@@ -70,14 +69,18 @@ const NPS_CHIP_CLASS = {
 // combination was active, since combining them freely would make two tabs
 // appear partially active at once.
 const TAB_DEFS = [
-  { label: REVIEW_TAB_SANS_REPONSE, etat: ['sans-reponse'], nps: [], tone: 'info' },
-  { label: REVIEW_TAB_NEGATIFS, etat: [], nps: ['detracteur'], tone: 'danger' },
+  { label: REVIEW_TAB_SANS_REPONSE, reponse: 'sans-reponse', nps: [], tone: 'info' },
+  { label: REVIEW_TAB_NEGATIFS, reponse: null, nps: ['detracteur'], tone: 'danger' },
   // Not a filter shortcut like the two above -- questionnaires that were
   // sent but never answered aren't reviews at all yet (see
   // COMPANY_PENDING_REVIEWS), so this tab switches the whole list to a
   // different data source and card type instead of filtering the same one.
   { label: REVIEW_TAB_A_RECUPERER, tone: 'warning', isPending: true },
 ]
+
+// The only three État options there are -- see the comment on reviewFilters
+// below for why they get stripped out before matching against real reviews.
+const PENDING_ETAT_IDS = ['en-attente', 'expire', 'archive']
 
 function sameFilterSet(a, b) {
   return a.length === b.length && a.every(id => b.includes(id))
@@ -213,7 +216,6 @@ function FiltersRow({
   sortLabel,
   onOpenSort,
   stuck,
-  onScrollTop,
 }) {
   return (
     <div className={`reviews__filters${dark ? ' reviews__filters--dark' : ''}`}>
@@ -241,21 +243,9 @@ function FiltersRow({
           <img src={iconSort} alt="" />
           {sortLabel}
         </button>
-        {stuck ? (
-          <button
-            type="button"
-            className="reviews__results-count reviews__results-count--dark reviews__results-count--btn"
-            onClick={onScrollTop}
-            aria-label="Remonter en haut"
-          >
-            <img src={iconFabUp} alt="" className="reviews__results-arrow" />
-            {resultsCount} résultat{resultsCount !== 1 ? 's' : ''}
-          </button>
-        ) : (
-          <span className={`reviews__results-count${dark ? ' reviews__results-count--dark' : ''}`}>
-            {resultsCount} résultat{resultsCount !== 1 ? 's' : ''}
-          </span>
-        )}
+        <span className={`reviews__results-count${dark || stuck ? ' reviews__results-count--dark' : ''}`}>
+          {resultsCount} résultat{resultsCount !== 1 ? 's' : ''}
+        </span>
       </div>
 
       {activeFilterEntries.length > 0 && (
@@ -312,14 +302,31 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
   const [isFiltersSheetOpen, setFiltersSheetOpen] = useState(false)
   const [isSortSheetOpen, setSortSheetOpen] = useState(false)
   const [sortOrder, setSortOrder] = useState('plus-recent')
-  const [appliedFilters, setAppliedFilters] = useState(() =>
-    initialTabDef ? { ...EMPTY_FILTERS, etat: initialTabDef.etat, nps: initialTabDef.nps } : EMPTY_FILTERS,
+  const [appliedFilters, setAppliedFilters] = useState(() => {
+    if (initialTabDef) return { ...EMPTY_FILTERS, reponse: initialTabDef.reponse, nps: initialTabDef.nps }
+    // État's "En attente" IS "À Relancer" (see isPendingView below) -- this
+    // deep-links the same way the other two tabs do, just through etat
+    // instead of reponse/nps.
+    if (initialTabLabel === REVIEW_TAB_A_RECUPERER) return { ...EMPTY_FILTERS, etat: ['en-attente'] }
+    return EMPTY_FILTERS
+  })
+  const [hasAppliedFilters, setHasAppliedFilters] = useState(
+    () => Boolean(initialTabDef) || initialTabLabel === REVIEW_TAB_A_RECUPERER,
   )
-  const [hasAppliedFilters, setHasAppliedFilters] = useState(() => Boolean(initialTabDef))
   const activeFilters = hasAppliedFilters ? appliedFilters : EMPTY_FILTERS
   const activeFilterEntries = hasAppliedFilters ? getActiveFilterEntries(appliedFilters) : []
-
-  const [isPendingView, setPendingView] = useState(() => initialTabLabel === REVIEW_TAB_A_RECUPERER)
+  // Derived, not its own state: État's "En attente" chip and the "À
+  // Relancer" tab are the same thing, so whichever one gets toggled -- the
+  // chip in Filtres, or the tab itself -- the other reflects it for free
+  // instead of needing to stay manually in sync.
+  const isPendingView = activeFilters.etat.includes('en-attente')
+  // En attente/Expiré/Archivé describe the SENT QUESTIONNAIRE, not a
+  // submitted review -- they redirect the whole page to the pending-
+  // questionnaires data source (see isPendingView/isArchivedView below)
+  // rather than filtering real reviews by these three statuses, so real-
+  // review counts (résultats badge, tab counts) need them stripped out or
+  // "27 résultats" would show above a list of 5 pending cards.
+  const reviewFilters = { ...activeFilters, etat: activeFilters.etat.filter(id => !PENDING_ETAT_IDS.includes(id)) }
   const [companyPendingReviews, setCompanyPendingReviews] = useState(() =>
     Object.fromEntries(Object.entries(COMPANY_PENDING_REVIEWS).map(([id, items]) => [id, items])),
   )
@@ -328,6 +335,7 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
   const [archivingItem, setArchivingItem] = useState(null)
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const loadMoreSentinelRef = useRef(null)
   const [reviewsByCompany, setReviewsByCompany] = useState(() =>
     Object.fromEntries(Object.entries(COMPANY_REVIEWS_DATA).map(([id, data]) => [id, data.reviews]))
   )
@@ -426,11 +434,10 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
   }
 
   const removeActiveFilter = entry => {
-    // The "À Récupérer" tab isn't a real etat/nps filter (see toggleTabFilter)
-    // -- its pill (added in sharedFiltersProps below) needs its own removal
-    // path instead of going through removeFilterEntry.
-    if (entry.groupId === 'pending') {
-      withListTransition(() => setPendingView(false))
+    // Same lock as the "En attente" chip in FiltersSheet.jsx (see its
+    // DISABLE_RULES) -- Expiré/Archivé depend on it staying selected, so
+    // its pill can't be removed out from under them either.
+    if (entry.groupId === 'etat' && entry.optionId === 'en-attente' && activeFilters.etat.some(id => id === 'expire' || id === 'archive')) {
       return
     }
     withListTransition(() => setAppliedFilters(prev => removeFilterEntry(prev, entry)))
@@ -452,12 +459,29 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
 
   const toggleTabFilter = tabDef => {
     if (tabDef.isPending) {
-      withListTransition(() => setPendingView(v => !v))
+      // Toggling this tab just toggles État's "En attente" chip -- see
+      // isPendingView above. Routed through applyFilterRules so this gets
+      // the exact same cascade a manual "En attente" chip tap in Filtres
+      // gets (clearing source/note/nps/reponse/googleSharing) -- otherwise
+      // switching straight from e.g. "Avis Négatifs" to "À Relancer" would
+      // leave "Détracteur" selected alongside "En attente" ("en attente is
+      // only paired with expired or archived").
+      const nextEtat = isPendingView
+        ? activeFilters.etat.filter(id => id !== 'en-attente')
+        : [...activeFilters.etat, 'en-attente']
+      applyFilters(applyFilterRules({ ...activeFilters, etat: nextEtat }, 'etat'))
       return
     }
-    setPendingView(false)
-    const isActive = sameFilterSet(activeFilters.etat, tabDef.etat) && sameFilterSet(activeFilters.nps, tabDef.nps)
-    applyFilters({ ...activeFilters, etat: isActive ? [] : tabDef.etat, nps: isActive ? [] : tabDef.nps })
+    const isActive = activeFilters.reponse === tabDef.reponse && sameFilterSet(activeFilters.nps, tabDef.nps)
+    applyFilters({
+      ...activeFilters,
+      reponse: isActive ? null : tabDef.reponse,
+      nps: isActive ? [] : tabDef.nps,
+      // Switching to a different tab leaves "À Relancer" behind entirely --
+      // Expiré/Archivé only make sense alongside En attente (see
+      // AUTO_SELECT_RULES in FiltersSheet.jsx), so all three go together.
+      etat: activeFilters.etat.filter(id => !['en-attente', 'expire', 'archive'].includes(id)),
+    })
   }
 
   useEffect(() => {
@@ -491,14 +515,12 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
   const googleReviewCount = companyReviews.filter(review => review.source === 'google').length
   const filteredReviews = companyReviews
     .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
-    .filter(review => reviewMatchesFilters(review, activeFilters))
+    .filter(review => reviewMatchesFilters(review, reviewFilters))
     .slice()
     .sort(SORT_COMPARATORS[sortOrder])
 
   const visibleReviews = filteredReviews.slice(0, visibleCount)
   const hasMore = filteredReviews.length > visibleCount
-
-  const handleLoadMore = () => setVisibleCount(count => count + PAGE_SIZE)
 
   const handleOpenRespond = review => {
     setSelectedReview(null)
@@ -565,20 +587,44 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
     googleBoostTimeoutsRef.current.push(timeoutId)
   }
 
-  // Expired questionnaires drop off this list entirely (per the Figma spec)
-  // instead of showing an "Expiré" state -- there's nothing left to recover.
+  // Expired questionnaires drop off this (default) list -- they only show
+  // up once "Expiré" is explicitly selected, via expiredPendingReviews below.
   const pendingReviews = (companyPendingReviews[selectedCompany.id] || [])
     .filter(item => selectedCollaborator.id === 'all' || item.collaboratorId === selectedCollaborator.id)
     .filter(item => !item.archived && getDaysUntil(item.expiryDate) >= 0)
 
-  // Selecting "Archivé" under État switches the whole list to archived
-  // questionnaires instead of filtering the current tab's content -- it's a
-  // different data source (see COMPANY_PENDING_REVIEWS), not another état
-  // value on top of the regular review list.
+  // Selecting "Archivé"/"Expiré" under État switches the whole list to that
+  // slice of the pending questionnaires instead of filtering the current
+  // tab's content -- these are still the same data source (see
+  // COMPANY_PENDING_REVIEWS), just narrowed the other two ways.
   const isArchivedView = hasAppliedFilters && activeFilters.etat.includes('archive')
   const archivedPendingReviews = (companyPendingReviews[selectedCompany.id] || []).filter(
     item => item.archived && (selectedCollaborator.id === 'all' || item.collaboratorId === selectedCollaborator.id),
   )
+  const isExpiredView = hasAppliedFilters && activeFilters.etat.includes('expire')
+  const expiredPendingReviews = (companyPendingReviews[selectedCompany.id] || []).filter(
+    item =>
+      !item.archived &&
+      getDaysUntil(item.expiryDate) < 0 &&
+      (selectedCollaborator.id === 'all' || item.collaboratorId === selectedCollaborator.id),
+  )
+
+  // Infinite scroll: loads the next page itself once the sentinel at the
+  // bottom of the list comes near the viewport, instead of a "Charger
+  // plus" button the user has to tap.
+  useEffect(() => {
+    if (isLoading || isPendingView || !hasMore) return
+    const el = loadMoreSentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) setVisibleCount(count => count + PAGE_SIZE)
+      },
+      { rootMargin: '200px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [isLoading, isPendingView, hasMore])
 
   const handleOpenResend = item => {
     setResendInitialView('resend')
@@ -628,48 +674,51 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
   }
 
   // Tab badge counts stay based on every OTHER active filter (source,
-  // collaborator, etc.) but ignore etat/nps specifically, since those are
+  // collaborator, etc.) but ignore reponse/nps specifically, since those are
   // exactly what the tabs themselves control -- otherwise selecting a tab
   // would change the numbers shown on the other two.
   const tabCountReviews = companyReviews
     .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
-    .filter(review => reviewMatchesFilters(review, { ...activeFilters, etat: [], nps: [] }))
+    .filter(review => reviewMatchesFilters(review, { ...reviewFilters, reponse: null, nps: [] }))
 
   const tabs = TAB_DEFS.map(tabDef => {
     if (tabDef.isPending) {
-      return { ...tabDef, value: String(pendingReviews.length), isActive: !isArchivedView && isPendingView }
+      // Stays active/highlighted even once narrowed to Expiré or Archivé --
+      // both still mean "En attente" underneath (see AUTO_SELECT_RULES in
+      // FiltersSheet.jsx), so this is still the same view, just filtered.
+      return { ...tabDef, value: String(pendingReviews.length), isActive: isPendingView }
     }
     const count = tabCountReviews.filter(
       review =>
-        (tabDef.etat.length === 0 || tabDef.etat.includes(review.status)) &&
+        (!tabDef.reponse || matchesReponseFilter(review, tabDef.reponse)) &&
         (tabDef.nps.length === 0 || tabDef.nps.includes(getNpsFilterId(review.rating))),
     ).length
     return {
       ...tabDef,
       value: String(count),
       isActive:
-        !isArchivedView &&
-        !isPendingView &&
-        sameFilterSet(activeFilters.etat, tabDef.etat) &&
-        sameFilterSet(activeFilters.nps, tabDef.nps),
+        !isPendingView && activeFilters.reponse === tabDef.reponse && sameFilterSet(activeFilters.nps, tabDef.nps),
     }
   })
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
-
   const sharedFiltersProps = {
     activeFilters,
-    activeFilterEntries:
-      isPendingView && !isArchivedView
-        ? [...activeFilterEntries, { groupId: 'pending', optionId: 'a-recuperer', label: REVIEW_TAB_A_RECUPERER }]
-        : activeFilterEntries,
+    // "En attente" (and Expiré/Archivé alongside it) already shows up here
+    // as a real pill -- État is a normal filter group now, not a synthetic
+    // stand-in for the "À Relancer" tab (see isPendingView above).
+    // "Détracteur" reads as "Négatifs" here specifically -- this pill is
+    // reached via the "Avis Négatifs" tab, so it should echo that tab's
+    // wording. The Badge NPS chip inside Filtres itself still says
+    // "Détracteur" (that's the actual NPS category name).
+    activeFilterEntries: activeFilterEntries.map(entry =>
+      entry.groupId === 'nps' && entry.optionId === 'detracteur' ? { ...entry, label: 'Négatifs' } : entry,
+    ),
     removeActiveFilter,
     resultsCount: filteredReviews.length,
     onOpenFilters: () => setFiltersSheetOpen(true),
     sortLabel: SORT_OPTIONS.find(option => option.id === sortOrder)?.label,
     onOpenSort: () => setSortSheetOpen(true),
     stuck: isFiltersStuck,
-    onScrollTop: scrollToTop,
   }
 
   return (
@@ -850,6 +899,20 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
             ) : (
               <p className="reviews__empty">Aucun questionnaire archivé.</p>
             )
+          ) : isExpiredView ? (
+            expiredPendingReviews.length > 0 ? (
+              expiredPendingReviews.map(item => (
+                <PendingReviewCard
+                  key={item.id}
+                  item={item}
+                  onOpenResend={handleOpenResend}
+                  onEdit={handleEditPending}
+                  onArchiveRequest={handleRequestArchive}
+                />
+              ))
+            ) : (
+              <p className="reviews__empty">Aucun questionnaire expiré.</p>
+            )
           ) : isPendingView ? (
             pendingReviews.length > 0 ? (
               pendingReviews.map(item => (
@@ -877,11 +940,8 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
             <p className="reviews__empty">Aucun avis ne correspond à ces critères.</p>
           )}
 
-          {!isLoading && !isPendingView && !isArchivedView && hasMore && (
-            <button type="button" className="reviews__load-more" onClick={handleLoadMore}>
-              Charger plus
-              <img src={iconChevronDown} alt="" />
-            </button>
+          {!isLoading && !isPendingView && hasMore && (
+            <div ref={loadMoreSentinelRef} className="reviews__load-more-sentinel" aria-hidden="true" />
           )}
         </div>
       </div>

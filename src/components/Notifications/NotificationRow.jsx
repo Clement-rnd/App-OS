@@ -1,6 +1,6 @@
 import iconChevronRightFilled from '../../assets/notifications/icon-chevron-right-filled.svg'
 import iconChecksWhite from '../../assets/notifications/icon-checks-white.svg'
-import iconArchiveWhite from '../../assets/notifications/icon-archive-white.svg'
+import iconDeleteWhite from '../../assets/notifications/icon-delete-white.svg'
 import { useSwipeActions } from '../../hooks/useSwipeActions'
 import { NOTIFICATION_TYPES } from './notificationsData'
 import './NotificationRow.css'
@@ -10,7 +10,7 @@ const ACTION_LABELS = {
   boost: 'Envoyer une demande',
 }
 
-export function NotificationRow({ notification, onMarkRead, onArchive, onRowClick, animationDelay, isExiting }) {
+export function NotificationRow({ notification, onMarkRead, onDelete, onRowClick, animationDelay, isExiting }) {
   const { dragHandlers, translateX, isDragging, close } = useSwipeActions()
   const typeConfig = NOTIFICATION_TYPES[notification.type] || {}
   const needsAction = notification.actionable && !notification.actionCompleted
@@ -20,8 +20,8 @@ export function NotificationRow({ notification, onMarkRead, onArchive, onRowClic
     close()
   }
 
-  const handleArchive = () => {
-    onArchive(notification.id)
+  const handleDelete = () => {
+    onDelete(notification.id)
   }
 
   const handleRowClick = () => {
@@ -49,9 +49,9 @@ export function NotificationRow({ notification, onMarkRead, onArchive, onRowClic
           <img src={iconChecksWhite} alt="" />
           Lu
         </button>
-        <button type="button" className="notif-row-action notif-row-action--archive" onClick={handleArchive}>
-          <img src={iconArchiveWhite} alt="" />
-          Archiver
+        <button type="button" className="notif-row-action notif-row-action--delete" onClick={handleDelete}>
+          <img src={iconDeleteWhite} alt="" />
+          Supprimer
         </button>
       </div>
 

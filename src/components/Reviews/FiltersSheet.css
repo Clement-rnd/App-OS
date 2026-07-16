@@ -209,6 +209,19 @@
   color: #ffffff;
 }
 
+.filters-sheet__chip:disabled {
+  cursor: not-allowed;
+}
+
+/* A disabled option that's still selected is "locked in" (see
+   FiltersSheet.jsx's noClear rules, e.g. "En attente" while Expiré is
+   active) rather than unavailable -- greying it out like a genuinely
+   unavailable option would read as "this got deselected", the opposite of
+   what's true. */
+.filters-sheet__chip:disabled:not(.filters-sheet__chip--selected) {
+  opacity: 0.4;
+}
+
 .filters-sheet__chip-icon {
   width: 20px;
   height: 20px;
@@ -288,7 +301,6 @@
   padding: 12px 16px 0;
   width: 100%;
   flex-shrink: 0;
-  border-top: 1px solid #eeeeee;
   background-color: #ffffff;
 }
 

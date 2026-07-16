@@ -3,8 +3,8 @@ import iconBack from '../../assets/notifications/icon-back.svg'
 import iconKebab from '../../assets/notifications/icon-kebab.svg'
 import iconChecks from '../../assets/notifications/icon-checks.svg'
 import iconTrash from '../../assets/questionnaire/icon-trash.svg'
-import iconChevronDown from '../../assets/questionnaire/icon-dropdown-chevron.svg'
 import { NotificationRow } from './NotificationRow'
+import { ResponseAlert } from '../ResponseAlert/ResponseAlert'
 import { GROUP_LABELS, GROUP_ORDER, NOTIFICATION_TYPES } from './notificationsData'
 import { REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
 import { useSimulatedLoading } from '../../hooks/useSimulatedLoading'
@@ -85,6 +85,8 @@ export function Notifications({
   const [tab, setTab] = useState('all')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [deleteAlert, setDeleteAlert] = useState(null)
+  const loadMoreSentinelRef = useRef(null)
   const menuRef = useRef(null)
 
   // Header + tabs stick to the top as one block (see .notifications__sticky-top);
@@ -136,16 +138,30 @@ export function Notifications({
     setVisibleCount(PAGE_SIZE)
   }
 
-  const handleLoadMore = () => {
-    setVisibleCount(count => count + PAGE_SIZE)
-  }
+  // Infinite scroll: loads the next page itself once the sentinel at the
+  // bottom of the list comes near the viewport, instead of a "Charger
+  // plus" button the user has to tap.
+  useEffect(() => {
+    if (isLoading || !hasMore) return
+    const el = loadMoreSentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) setVisibleCount(count => count + PAGE_SIZE)
+      },
+      { rootMargin: '200px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [isLoading, hasMore])
 
   const handleMarkRead = id => {
     onChangeNotifications(list => list.map(n => (n.id === id ? { ...n, unread: false } : n)))
   }
 
-  const handleArchive = id => {
+  const handleDelete = id => {
     onChangeNotifications(list => list.filter(n => n.id !== id))
+    setDeleteAlert('La notification a été supprimée')
   }
 
   // Every row navigates somewhere on click, not just the actionable ones --
@@ -299,7 +315,7 @@ export function Notifications({
                 animationDelay={delay}
                 isExiting={pendingRemoveIds.has(notification.id)}
                 onMarkRead={handleMarkRead}
-                onArchive={handleArchive}
+                onDelete={handleDelete}
                 onRowClick={handleRowClick}
               />
             ))}
@@ -313,19 +329,13 @@ export function Notifications({
         )}
 
         {hasMore && (
-          <button
-            type="button"
-            className="notifications__load-more"
-            style={{ animationDelay: `${trailingDelay}ms` }}
-            onClick={handleLoadMore}
-          >
-            Charger plus
-            <img src={iconChevronDown} alt="" />
-          </button>
+          <div ref={loadMoreSentinelRef} className="notifications__load-more-sentinel" aria-hidden="true" />
         )}
           </>
         )}
       </div>
+
+      {deleteAlert && <ResponseAlert message={deleteAlert} onClose={() => setDeleteAlert(null)} />}
     </div>
   )
 }

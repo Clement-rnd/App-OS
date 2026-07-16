@@ -4,4 +4,4 @@
 // label string and risking silent drift between the two.
 export const REVIEW_TAB_SANS_REPONSE = 'Sans Réponses'
 export const REVIEW_TAB_NEGATIFS = 'Avis Négatifs'
-export const REVIEW_TAB_A_RECUPERER = 'À Récupérer'
+export const REVIEW_TAB_A_RECUPERER = 'À Relancer'

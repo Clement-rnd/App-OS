@@ -3,7 +3,6 @@ import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
 import iconFlagFrance from '../../assets/questionnaire/icon-flag-france.svg'
 import iconDropdownChevron from '../../assets/questionnaire/icon-dropdown-chevron.svg'
 import iconSave from '../../assets/questionnaire/icon-save.svg'
-import iconTrash from '../../assets/questionnaire/icon-trash.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
@@ -17,7 +16,7 @@ function splitName(fullName) {
   return { firstName: firstName || '', lastName: rest.join(' ') }
 }
 
-export function EditRecipientSheet({ recipient, onClose, onSave, onDelete }) {
+export function EditRecipientSheet({ recipient, onClose, onSave }) {
   useLockBodyScroll()
   const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
@@ -41,10 +40,6 @@ export function EditRecipientSheet({ recipient, onClose, onSave, onDelete }) {
   const handleSave = () => {
     const name = [firstName, lastName].filter(Boolean).join(' ').trim() || recipient.name
     closeWithAnimation(() => onSave({ ...recipient, name, email, phone }))
-  }
-
-  const handleDelete = () => {
-    closeWithAnimation(() => onDelete(recipient.id))
   }
 
   return (
@@ -137,10 +132,6 @@ export function EditRecipientSheet({ recipient, onClose, onSave, onDelete }) {
           <button type="button" className="edit-recipient-sheet__save-btn" onClick={handleSave}>
             Enregistrer
             <img src={iconSave} alt="" />
-          </button>
-          <button type="button" className="edit-recipient-sheet__delete-btn" onClick={handleDelete}>
-            <img src={iconTrash} alt="" />
-            Supprimer
           </button>
           <div className="edit-recipient-sheet__home-indicator-wrap" />
         </div>

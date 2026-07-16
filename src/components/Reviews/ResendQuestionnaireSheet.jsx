@@ -2,6 +2,8 @@ import { useState } from 'react'
 import iconFilterClose from '../../assets/reviews/icon-filter-close.svg'
 import iconBack from '../../assets/questionnaire/icon-back.svg'
 import iconPencil from '../../assets/home/icon-pencil.svg'
+import logoIconSmall from '../../assets/home/logo-icon-small.svg'
+import iconChevronRightSmall from '../../assets/questionnaire/icon-chevron-right-small.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useSheetViewTransition } from '../../hooks/useSheetViewTransition'
@@ -75,7 +77,10 @@ export function ResendQuestionnaireSheet({ item, initialView = 'resend', onClose
   // of this same sheet instead of stacking a second sheet on top of itself
   // (same pattern as ReviewDetailsSheet).
   const [view, setView] = useState(initialView)
-  const [message, setMessage] = useState(DEFAULT_MESSAGE)
+  // Same link shape SendQuestionnaireSheet's QR code encodes -- included
+  // directly in the message text (not as a separate, disconnected "URL"
+  // caption) since that's the actual link the recipient would tap.
+  const [message, setMessage] = useState(() => `${DEFAULT_MESSAGE}\n\nhttps://avis.opinion-system.fr/r/${item.id}`)
   const [firstName, setFirstName] = useState(item.author.trim().split(' ')[0] || '')
   const [lastName, setLastName] = useState(item.author.trim().split(' ').slice(1).join(' '))
   const [email, setEmail] = useState(item.email || '')
@@ -190,7 +195,6 @@ export function ResendQuestionnaireSheet({ item, initialView = 'resend', onClose
                     value={message}
                     onChange={e => setMessage(e.target.value)}
                   />
-                  <p className="resend-sheet__url-placeholder">URL</p>
                 </div>
 
                 <div className="resend-sheet__section">
@@ -290,7 +294,11 @@ export function ResendQuestionnaireSheet({ item, initialView = 'resend', onClose
           >
             {view === 'resend' ? (
               <button type="button" className="resend-sheet__system-link">
-                Laissez le système d'opinion l'envoyer par e-mail
+                <img className="resend-sheet__system-link-badge" src={logoIconSmall} alt="" />
+                <span className="resend-sheet__system-link-text">
+                  Laissez Opinion System l'envoyer par e-mail
+                </span>
+                <img className="resend-sheet__system-link-chevron" src={iconChevronRightSmall} alt="" />
               </button>
             ) : (
               <button

@@ -520,6 +520,38 @@
   height: 18px;
 }
 
+/* Same shape as .recipient-sheet__confirm-btn, but its own class -- this is
+   the only one of the sheet's three footer buttons that should turn the
+   app's primary yellow once enabled, not the outlined navy style the
+   select-recipients buttons share. */
+.recipient-sheet__save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  background-color: #dfe9ef;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #8ea1b2;
+  cursor: not-allowed;
+}
+
+.recipient-sheet__save-btn--enabled {
+  background-color: #ffd500;
+  color: #041b44;
+  cursor: pointer;
+}
+
+.recipient-sheet__save-btn img {
+  width: 18px;
+  height: 18px;
+}
+
 .recipient-sheet__home-indicator-wrap {
   width: 100%;
   padding-top: 8px;

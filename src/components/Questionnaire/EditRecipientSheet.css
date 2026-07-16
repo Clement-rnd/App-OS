@@ -298,27 +298,6 @@
   height: 18px;
 }
 
-.edit-recipient-sheet__delete-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px;
-  border: none;
-  border-radius: 10px;
-  background: none;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #fc6530;
-}
-
-.edit-recipient-sheet__delete-btn img {
-  width: 18px;
-  height: 18px;
-}
-
 .edit-recipient-sheet__home-indicator-wrap {
   width: 100%;
   padding-top: 8px;

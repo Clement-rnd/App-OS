@@ -2,11 +2,10 @@ import { useState } from 'react'
 import iconFilterReset from '../../assets/reviews/icon-filter-reset.svg'
 import iconFilterClose from '../../assets/reviews/icon-filter-close.svg'
 import iconFilterOsWhite from '../../assets/reviews/icon-filter-os-white.svg'
+import iconFilterOsDark from '../../assets/reviews/icon-filter-os-dark.svg'
 import iconFilterGoogleColor from '../../assets/reviews/icon-filter-google-color.svg'
 import iconFilterOsCertifWhite from '../../assets/reviews/icon-filter-os-certif-white.svg'
-import iconFilterOsDark from '../../assets/reviews/icon-filter-os-dark.svg'
 import iconFilterGoogleCertif from '../../assets/reviews/icon-filter-google-certif.svg'
-import iconFilterGoogleMuted from '../../assets/reviews/icon-filter-google-muted.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
@@ -15,62 +14,6 @@ import './FiltersSheet.css'
 const CLOSE_ANIMATION_MS = 380
 
 export const FILTER_GROUPS = [
-  {
-    id: 'source',
-    label: 'Source',
-    multi: true,
-    options: [
-      { id: 'opinion-system', label: 'Opinion System', icon: iconFilterOsWhite },
-      { id: 'google', label: 'Google', icon: iconFilterGoogleColor },
-    ],
-  },
-  {
-    id: 'note',
-    label: 'Note',
-    multi: true,
-    options: [
-      { id: 'positif', label: 'Positif' },
-      { id: 'neutre', label: 'Neutre' },
-      { id: 'negatif', label: 'Négatif' },
-    ],
-  },
-  {
-    id: 'nps',
-    label: 'Badge NPS',
-    multi: true,
-    options: [
-      { id: 'promoteur', label: 'Promoteur' },
-      { id: 'passif', label: 'Passif' },
-      { id: 'detracteur', label: 'Détracteur' },
-    ],
-  },
-  {
-    id: 'type',
-    label: 'Type de Questionnaire',
-    multi: true,
-    options: [
-      { id: 'certifie-os', label: 'Certifié OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
-      { id: 'standard-os', label: 'Standard OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
-      { id: 'google-partage', label: 'Google Partagé', icon: iconFilterGoogleCertif, iconMuted: iconFilterGoogleMuted },
-      {
-        id: 'google-non-partage',
-        label: 'Google Non-Partagé',
-        icon: iconFilterGoogleCertif,
-        iconMuted: iconFilterGoogleMuted,
-      },
-    ],
-  },
-  {
-    id: 'etat',
-    label: 'État',
-    multi: true,
-    options: [
-      { id: 'en-attente', label: 'En attente' },
-      { id: 'sans-reponse', label: 'Sans réponse' },
-      { id: 'expire', label: 'Expiré' },
-      { id: 'archive', label: 'Archivé' },
-    ],
-  },
   {
     id: 'periode',
     label: 'Période',
@@ -83,16 +26,160 @@ export const FILTER_GROUPS = [
       { id: 'personnalise', label: 'Personnalisé' },
     ],
   },
+  {
+    id: 'type',
+    label: 'Questionnaire envoyé',
+    multi: true,
+    options: [
+      { id: 'certifie-os', label: 'Certifié OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
+      { id: 'standard-os', label: 'Standard OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
+    ],
+  },
+  {
+    id: 'etat',
+    label: "État de l'envoi du questionnaire",
+    multi: true,
+    options: [
+      { id: 'en-attente', label: 'En attente' },
+      { id: 'expire', label: 'Expiré' },
+      { id: 'archive', label: 'Archivé' },
+    ],
+  },
+  {
+    id: 'source',
+    // No review exists yet while "En attente" is active (see the État
+    // group above) -- hidden outright instead of shown disabled, rather
+    // than greying out a whole section of chips the user can't use anyway.
+    hiddenWhenPending: true,
+    label: "Source de l'avis",
+    multi: true,
+    options: [
+      { id: 'opinion-system', label: 'Opinion System', icon: iconFilterOsWhite, iconMuted: iconFilterOsDark },
+      { id: 'google', label: 'Google', icon: iconFilterGoogleColor },
+    ],
+  },
+  {
+    id: 'note',
+    hiddenWhenPending: true,
+    label: "Note de l'avis",
+    multi: true,
+    options: [
+      { id: 'positif', label: 'Positif' },
+      { id: 'neutre', label: 'Neutre' },
+      { id: 'negatif', label: 'Négatif' },
+    ],
+  },
+  {
+    id: 'nps',
+    hiddenWhenPending: true,
+    label: 'Badge NPS',
+    multi: true,
+    options: [
+      { id: 'promoteur', label: 'Promoteur' },
+      { id: 'passif', label: 'Passif' },
+      { id: 'detracteur', label: 'Détracteur' },
+    ],
+  },
+  {
+    id: 'reponse',
+    hiddenWhenPending: true,
+    label: "Réponse a l'avis",
+    multi: false,
+    options: [
+      { id: 'sans-reponse', label: 'Sans-Réponse' },
+      { id: 'avis-repondu', label: 'Répondu' },
+    ],
+  },
+  {
+    id: 'googleSharing',
+    hiddenWhenPending: true,
+    label: 'Partage sur Google',
+    multi: true,
+    // Google's logo always renders in its own brand colors (no muted
+    // variant) regardless of selection -- unlike the OS icons above,
+    // which do dim when unselected.
+    options: [
+      { id: 'google-partage', label: 'Google Partagé', icon: iconFilterGoogleCertif },
+      { id: 'google-non-partage', label: 'Google Non-Partagé', icon: iconFilterGoogleCertif },
+    ],
+  },
 ]
 
 export const EMPTY_FILTERS = {
   source: [],
+  etat: [],
+  reponse: null,
   note: [],
   nps: [],
   type: [],
-  etat: [],
+  googleSharing: [],
   periode: null,
   periodeRange: { start: '', end: '' },
+}
+
+// Cross-group rules: selecting the option on the left disables (and, if
+// already selected, clears) the option on the right -- combinations that
+// don't make sense together in this data model. One-directional by design
+// (only listed here in the direction the product asked for). Omitting
+// disablesOption disables every option in that group instead of just one.
+const DISABLE_RULES = [
+  { whenGroup: 'source', whenOption: 'google', disablesGroup: 'googleSharing', disablesOption: 'google-non-partage' },
+  { whenGroup: 'type', whenOption: 'standard-os', disablesGroup: 'source', disablesOption: 'google' },
+  { whenGroup: 'reponse', whenOption: 'avis-repondu', disablesGroup: 'reponse', disablesOption: 'sans-reponse' },
+
+  // "En attente": no review exists yet, so nothing about it (its source,
+  // note, badge, whether it got a reply, whether it's shared on Google) is
+  // meaningful to filter on. "Expiré"/"Archivé" force this on too (see
+  // AUTO_SELECT_RULES below), so they inherit the same disables for free
+  // instead of needing their own copies of these five rules.
+  { whenGroup: 'etat', whenOption: 'en-attente', disablesGroup: 'source' },
+  { whenGroup: 'etat', whenOption: 'en-attente', disablesGroup: 'note' },
+  { whenGroup: 'etat', whenOption: 'en-attente', disablesGroup: 'nps' },
+  { whenGroup: 'etat', whenOption: 'en-attente', disablesGroup: 'reponse' },
+  { whenGroup: 'etat', whenOption: 'en-attente', disablesGroup: 'googleSharing' },
+
+  // "Expiré" and "Archivé" are mutually exclusive -- a questionnaire is
+  // either one or the other, never both.
+  { whenGroup: 'etat', whenOption: 'expire', disablesGroup: 'etat', disablesOption: 'archive' },
+  { whenGroup: 'etat', whenOption: 'archive', disablesGroup: 'etat', disablesOption: 'expire' },
+
+  // Both auto-select "En attente" on (see AUTO_SELECT_RULES below) and
+  // depend on it staying selected -- locks the chip so it can't be toggled
+  // back off out from under them while either is active. noClear: this
+  // rule is the reason "En attente" IS selected right now, so the usual
+  // clear-on-disable behavior (see toggleOption) would immediately undo
+  // the auto-select that just put it there.
+  { whenGroup: 'etat', whenOption: 'expire', disablesGroup: 'etat', disablesOption: 'en-attente', noClear: true },
+  { whenGroup: 'etat', whenOption: 'archive', disablesGroup: 'etat', disablesOption: 'en-attente', noClear: true },
+]
+
+// Some options imply another option in the same group -- applied before
+// DISABLE_RULES on every toggle (see toggleOption) so a rule keyed off the
+// implied option fires in the same click instead of needing a second one.
+const AUTO_SELECT_RULES = [
+  { whenGroup: 'etat', whenOption: 'expire', alsoSelectGroup: 'etat', alsoSelectOption: 'en-attente' },
+  { whenGroup: 'etat', whenOption: 'archive', alsoSelectGroup: 'etat', alsoSelectOption: 'en-attente' },
+]
+
+function groupIncludes(value, optionId) {
+  return Array.isArray(value) ? value.includes(optionId) : value === optionId
+}
+
+function clearOption(value, optionId) {
+  if (Array.isArray(value)) return value.filter(id => id !== optionId)
+  return value === optionId ? null : value
+}
+
+// Every filter starts out enabled -- DISABLE_RULES only ever grey out an
+// option as a RESULT of some other option actively being selected, never
+// by default.
+export function isOptionDisabled(groupId, optionId, filters) {
+  return DISABLE_RULES.some(
+    rule =>
+      rule.disablesGroup === groupId &&
+      (rule.disablesOption === undefined || rule.disablesOption === optionId) &&
+      groupIncludes(filters[rule.whenGroup], rule.whenOption),
+  )
 }
 
 export function countActiveFilters(filters) {
@@ -122,6 +209,51 @@ export function removeFilterEntry(filters, entry) {
   return { ...filters, [entry.groupId]: null }
 }
 
+// The AUTO_SELECT_RULES/DISABLE_RULES cascade that follows any change to
+// changedGroupId's value -- shared so every place that mutates filters (the
+// chip taps in this sheet's own toggleOption below, but also Reviews.jsx's
+// "Mes Avis" tab shortcuts) gets the exact same business rules instead of
+// the tabs silently bypassing them (e.g. leaving "Détracteur" selected
+// alongside "En attente").
+export function applyFilterRules(filters, changedGroupId) {
+  const updated = { ...filters }
+
+  // Auto-select first, so a rule keyed off the implied option (e.g.
+  // selecting "Expiré" implying "En attente") also takes effect in this same
+  // pass -- DISABLE_RULES below reads updated[changedGroupId], not the
+  // pre-auto-select value, so it sees the implied option too.
+  AUTO_SELECT_RULES.forEach(rule => {
+    if (rule.whenGroup === changedGroupId && groupIncludes(updated[changedGroupId], rule.whenOption)) {
+      const targetGroup = FILTER_GROUPS.find(g => g.id === rule.alsoSelectGroup)
+      const targetValue = updated[rule.alsoSelectGroup]
+      if (targetGroup.multi) {
+        if (!targetValue.includes(rule.alsoSelectOption)) {
+          updated[rule.alsoSelectGroup] = [...targetValue, rule.alsoSelectOption]
+        }
+      } else if (targetValue !== rule.alsoSelectOption) {
+        updated[rule.alsoSelectGroup] = rule.alsoSelectOption
+      }
+    }
+  })
+
+  // Newly selecting an option (directly, or via AUTO_SELECT_RULES above) can
+  // invalidate an already-selected one in another group (see DISABLE_RULES)
+  // -- clear it so a disabled chip is never left looking selected.
+  DISABLE_RULES.forEach(rule => {
+    if (rule.noClear) return
+    if (rule.whenGroup === changedGroupId && groupIncludes(updated[changedGroupId], rule.whenOption)) {
+      if (rule.disablesOption) {
+        updated[rule.disablesGroup] = clearOption(updated[rule.disablesGroup], rule.disablesOption)
+      } else {
+        const targetGroup = FILTER_GROUPS.find(g => g.id === rule.disablesGroup)
+        updated[rule.disablesGroup] = targetGroup.multi ? [] : null
+      }
+    }
+  })
+
+  return updated
+}
+
 export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
   useLockBodyScroll()
   const screenHeight = useStandaloneScreenHeight()
@@ -145,13 +277,35 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
 
   const toggleOption = (group, optionId) => {
     setFilters(prev => {
-      if (group.multi) {
-        const current = prev[group.id]
-        const next = current.includes(optionId) ? current.filter(id => id !== optionId) : [...current, optionId]
-        return { ...prev, [group.id]: next }
-      }
-      return { ...prev, [group.id]: prev[group.id] === optionId ? null : optionId }
+      const current = prev[group.id]
+      const next = group.multi
+        ? current.includes(optionId)
+          ? current.filter(id => id !== optionId)
+          : [...current, optionId]
+        : current === optionId
+          ? null
+          : optionId
+
+      return applyFilterRules({ ...prev, [group.id]: next }, group.id)
     })
+  }
+
+  const renderChip = (group, option) => {
+    const isSelected = group.multi ? filters[group.id].includes(option.id) : filters[group.id] === option.id
+    const isDisabled = isOptionDisabled(group.id, option.id, filters)
+    const icon = option.icon ? (isSelected ? option.icon : option.iconMuted || option.icon) : null
+    return (
+      <button
+        key={option.id}
+        type="button"
+        className={`filters-sheet__chip${isSelected ? ' filters-sheet__chip--selected' : ''}`}
+        onClick={() => toggleOption(group, option.id)}
+        disabled={isDisabled}
+      >
+        {icon && <img src={icon} alt="" className="filters-sheet__chip-icon" />}
+        {option.label}
+      </button>
+    )
   }
 
   const closeCustomRange = () => {
@@ -207,28 +361,12 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
         </div>
 
         <div className="filters-sheet__content">
-          {FILTER_GROUPS.map(group => (
+          {FILTER_GROUPS.filter(
+            group => !group.hidden && !(group.hiddenWhenPending && filters.etat.includes('en-attente')),
+          ).map(group => (
             <div className="filters-sheet__group" key={group.id}>
               <p className="filters-sheet__group-label">{group.label}</p>
-              <div className="filters-sheet__chips">
-                {group.options.map(option => {
-                  const isSelected = group.multi
-                    ? filters[group.id].includes(option.id)
-                    : filters[group.id] === option.id
-                  const icon = option.icon ? (isSelected ? option.icon : option.iconMuted || option.icon) : null
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      className={`filters-sheet__chip${isSelected ? ' filters-sheet__chip--selected' : ''}`}
-                      onClick={() => toggleOption(group, option.id)}
-                    >
-                      {icon && <img src={icon} alt="" className="filters-sheet__chip-icon" />}
-                      {option.label}
-                    </button>
-                  )
-                })}
-              </div>
+              <div className="filters-sheet__chips">{group.options.map(option => renderChip(group, option))}</div>
 
               {group.id === 'periode' && isCustomRangeOpen && (
                 <div className="filters-sheet__custom-range">

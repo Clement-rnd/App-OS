@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import logoCompact from '../../assets/home/logo-compact.svg'
 import iconBell from '../../assets/home/icon-bell.svg'
 import iconStatReviews from '../../assets/home/icon-stat-reviews.svg'
@@ -19,12 +19,95 @@ import { RespondSheet } from './RespondSheet'
 import { ResponseAlert } from '../ResponseAlert/ResponseAlert'
 import { getNpsCategory } from '../../utils/nps'
 import { CANONICAL_REVIEWS } from '../../data/canonicalReviews'
+import { COMPANY_REVIEWS_DATA } from '../Reviews/mockReviewsData'
+import { COMPANY_PENDING_REVIEWS } from '../Reviews/mockPendingReviews'
 import { REVIEW_TAB_SANS_REPONSE, REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
 import { useSimulatedLoading } from '../../hooks/useSimulatedLoading'
 import { Skeleton } from '../Skeleton/Skeleton'
+import { buildGoogleShareConfirmedNotification } from '../Notifications/notificationsData'
 import './Home.css'
 
 const initialReviews = CANONICAL_REVIEWS.map(review => ({ ...review, response: null }))
+// Same default company Reviews.jsx starts on (COMPANIES[0] there) -- every
+// stat below is computed from this one shared dataset instead of the small
+// carousel sample above, so they always agree with what Mes Avis shows.
+const DEFAULT_COMPANY_ID = 'bastien-arfi'
+const DEFAULT_COMPANY_REVIEWS = COMPANY_REVIEWS_DATA[DEFAULT_COMPANY_ID].reviews
+const TOTAL_REVIEWS_COUNT = DEFAULT_COMPANY_REVIEWS.length
+const UNANSWERED_COUNT = DEFAULT_COMPANY_REVIEWS.filter(review => !review.response).length
+const NEGATIVE_COUNT = DEFAULT_COMPANY_REVIEWS.filter(
+  review => getNpsCategory(parseFloat(review.rating)) === 'Détracteur',
+).length
+const PENDING_COUNT = (COMPANY_PENDING_REVIEWS[DEFAULT_COMPANY_ID] || []).length
+
+// Ratios rather than raw counts for négatifs/sans-réponse -- 15 negatives
+// reads very differently out of 20 reviews than out of 200, so the count
+// alone can't tell "fine" from "worrying". À relancer has no natural total
+// to divide by (it's outstanding requests, not reviews), so it stays a raw
+// count.
+const NEGATIVE_ATTENTION_RATIO = 0.15
+const NEGATIVE_WATCH_RATIO = 0.08
+const UNANSWERED_ATTENTION_RATIO = 0.5
+const UNANSWERED_WATCH_RATIO = 0.25
+const PENDING_ATTENTION_COUNT = 10
+const PENDING_WATCH_COUNT = 5
+
+// Highest tier whose thresholds are breached wins; within a tier, négatifs
+// is called out first since a bad review hurts reputation more directly
+// than a slow reply or an unanswered questionnaire request.
+function getReputationStatus({ total, unansweredCount, negativeCount, pendingCount }) {
+  const unansweredRatio = total > 0 ? unansweredCount / total : 0
+  const negativeRatio = total > 0 ? negativeCount / total : 0
+
+  const tiers = [
+    {
+      tier: 'attention',
+      label: 'Nécessite votre attention',
+      thresholds: { negative: NEGATIVE_ATTENTION_RATIO, unanswered: UNANSWERED_ATTENTION_RATIO, pending: PENDING_ATTENTION_COUNT },
+    },
+    {
+      tier: 'watch',
+      label: 'Réputation à surveiller',
+      thresholds: { negative: NEGATIVE_WATCH_RATIO, unanswered: UNANSWERED_WATCH_RATIO, pending: PENDING_WATCH_COUNT },
+    },
+  ]
+
+  for (const { tier, label, thresholds } of tiers) {
+    const flags = {
+      negative: negativeRatio >= thresholds.negative,
+      unanswered: unansweredRatio >= thresholds.unanswered,
+      pending: pendingCount >= thresholds.pending,
+    }
+    if (flags.negative || flags.unanswered || flags.pending) {
+      const reason = flags.negative
+        ? `${negativeCount} avis négatifs`
+        : flags.unanswered
+          ? `${unansweredCount} avis sans réponse`
+          : `${pendingCount} relances en attente`
+      return { tier, label, reason, flags }
+    }
+  }
+
+  return {
+    tier: 'excellent',
+    label: 'Réputation excellente',
+    reason: null,
+    flags: { negative: false, unanswered: false, pending: false },
+  }
+}
+
+const REPUTATION_STATUS = getReputationStatus({
+  total: TOTAL_REVIEWS_COUNT,
+  unansweredCount: UNANSWERED_COUNT,
+  negativeCount: NEGATIVE_COUNT,
+  pendingCount: PENDING_COUNT,
+})
+// Matches Reviews.jsx's own TODAY anchor -- stamped onto a review the moment
+// a Google-boost reminder is sent from here.
+const TODAY_STR = '06/09/2026'
+// Simulates the delay before "OS" confirms a Google-boost reminder was
+// accepted -- same reasoning as Reviews.jsx's own handleSendGoogleBoost.
+const GOOGLE_BOOST_CONFIRM_MS = 6000
 
 const NPS_CHIP_CLASS = {
   Promoteur: 'home__chip--promoter',
@@ -155,7 +238,14 @@ function ReviewCardSkeleton() {
 
 const REVIEW_CARD_STEP = 312 + 16 // card width + gap
 
-export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onOpenReviewsTab, unreadNotifCount = 0 }) {
+export function Home({
+  onNavigate,
+  onOpenQuestionnaire,
+  onOpenNotifications,
+  onOpenReviewsTab,
+  onAddNotification,
+  unreadNotifCount = 0,
+}) {
   const isLoading = useSimulatedLoading('home')
   const reviewsScrollerRef = useRef(null)
   const [reviews, setReviews] = useState(initialReviews)
@@ -163,6 +253,9 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
   const [selectedReview, setSelectedReview] = useState(null)
   const [respondingReview, setRespondingReview] = useState(null)
   const [responseAlert, setResponseAlert] = useState(null)
+
+  const googleBoostTimeoutsRef = useRef([])
+  useEffect(() => () => googleBoostTimeoutsRef.current.forEach(clearTimeout), [])
 
   const handleOpenRespond = review => {
     setSelectedReview(null)
@@ -185,6 +278,25 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
     setSelectedReview(updatedReview)
   }
 
+  // Sending the boost link only marks the review as "reminder sent" -- a few
+  // seconds later (standing in for "OS" actually confirming it), the review
+  // flips to fully shared and a notification lands. Mirrors Reviews.jsx's own
+  // handleSendGoogleBoost so this CTA behaves identically from either page.
+  const handleSendGoogleBoost = review => {
+    const updatedReview = { ...review, googleReminderSentDate: TODAY_STR }
+    setReviews(list => list.map(r => (r.id === review.id ? updatedReview : r)))
+    setSelectedReview(current => (current && current.id === review.id ? updatedReview : current))
+    setResponseAlert('Rappel de duplication envoyé')
+
+    const timeoutId = setTimeout(() => {
+      const confirmedReview = { ...updatedReview, googleShared: true, googleReminderSentDate: null }
+      setReviews(list => list.map(r => (r.id === review.id ? confirmedReview : r)))
+      setSelectedReview(current => (current && current.id === review.id ? confirmedReview : current))
+      onAddNotification?.(buildGoogleShareConfirmedNotification(confirmedReview))
+    }, GOOGLE_BOOST_CONFIRM_MS)
+    googleBoostTimeoutsRef.current.push(timeoutId)
+  }
+
   const handleReviewsScroll = () => {
     const scroller = reviewsScrollerRef.current
     if (!scroller) return
@@ -192,7 +304,11 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
     setActiveReviewIndex(Math.max(0, Math.min(index, reviews.length - 1)))
   }
 
-  const unansweredCount = reviews.filter(review => !review.response).length
+  const unansweredCount = UNANSWERED_COUNT
+  const sansReponseFlagClass = REPUTATION_STATUS.flags.unanswered
+    ? ` home__stat--flagged-${REPUTATION_STATUS.tier}`
+    : ''
+  const aRelancerFlagClass = REPUTATION_STATUS.flags.pending ? ` home__stat--flagged-${REPUTATION_STATUS.tier}` : ''
 
   return (
     <div className="home">
@@ -220,9 +336,11 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
               <span>La Boîte Immobilière</span>
             </div>
           </div>
-          <div className="home__reputation">
-            <span className="home__reputation-dot" />
-            Réputation excellente
+          <div className={`home__reputation home__reputation--${REPUTATION_STATUS.tier}`}>
+            <span className="home__reputation-row">
+              <span className="home__reputation-dot" />
+              {REPUTATION_STATUS.label}
+            </span>
           </div>
         </div>
 
@@ -298,7 +416,7 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
             </div>
           </div>
           <div
-            className="home__stat home__stat--light home__stat--clickable"
+            className={`home__stat home__stat--light home__stat--clickable${sansReponseFlagClass}`}
             role="button"
             tabIndex={0}
             onClick={() => onOpenReviewsTab?.(REVIEW_TAB_SANS_REPONSE)}
@@ -318,7 +436,7 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
             </div>
           </div>
           <div
-            className="home__stat home__stat--light home__stat--clickable"
+            className={`home__stat home__stat--light home__stat--clickable${aRelancerFlagClass}`}
             role="button"
             tabIndex={0}
             onClick={() => onOpenReviewsTab?.(REVIEW_TAB_A_RECUPERER)}
@@ -329,9 +447,11 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
               }
             }}
           >
-            <p className="home__stat-label home__stat-label--dark">Avis à récupérer</p>
+            <p className="home__stat-label home__stat-label--dark">Avis à récolter</p>
             <div className="home__stat-value-row">
-              <p className="home__stat-value home__stat-value--medium home__stat-value--dark">05</p>
+              <p className="home__stat-value home__stat-value--medium home__stat-value--dark">
+                {String(PENDING_COUNT).padStart(2, '0')}
+              </p>
               <img src={iconStatChevron} alt="" className="home__stat-icon" />
             </div>
           </div>
@@ -411,6 +531,7 @@ export function Home({ onNavigate, onOpenQuestionnaire, onOpenNotifications, onO
           onClose={() => setSelectedReview(null)}
           onSubmit={handleSubmitResponse}
           onDelete={handleDeleteResponse}
+          onSendGoogleBoost={handleSendGoogleBoost}
         />
       )}
 

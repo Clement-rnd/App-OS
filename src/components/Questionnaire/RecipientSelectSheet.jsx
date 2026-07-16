@@ -96,7 +96,11 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
   const { swapInnerRef, isContentExiting, withViewTransition, swapStyle, onSwapTransitionEnd } =
     useSheetViewTransition(view, setView)
 
-  const allContacts = [...CONTACTS, ...customContacts]
+  // Custom contacts go first -- added (and auto-selected, see
+  // handleSaveContact) one at a time right before confirming, so the just-
+  // added one needs to be immediately visible as selected without scrolling
+  // past the entire static list to find it at the bottom.
+  const allContacts = [...customContacts, ...CONTACTS]
   const normalizedQuery = query.trim().toLowerCase()
   const queryDigits = query.replace(/\D/g, '')
   // A French number typed with its leading 0 (e.g. "06 12 34 56 78") should still match
@@ -141,11 +145,12 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
     withViewTransition('add-contact')
   }
 
+  // Phone and email aren't each individually required -- at least one of
+  // them is, so the questionnaire has some way to reach the contact.
+  const hasPhone = contactPhone.trim().length > 0
+  const hasEmail = contactEmail.trim().length > 0
   const isContactValid =
-    contactFirstName.trim().length > 0 &&
-    contactLastName.trim().length > 0 &&
-    contactPhone.trim().length > 0 &&
-    contactEmail.trim().length > 0
+    contactFirstName.trim().length > 0 && contactLastName.trim().length > 0 && (hasPhone || hasEmail)
 
   const handleSaveContact = () => {
     if (!isContactValid) return
@@ -229,32 +234,34 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
                   </div>
                 </div>
 
-                <div className="recipient-sheet__results-row">
-                  <p className="recipient-sheet__results-label">
-                    {query ? `Contacts Trouvés (${filtered.length})` : `Contacts (${filtered.length})`}
-                  </p>
-                  {selectedCount > 0 && (
+                {!hasNoResults && (
+                  <div className="recipient-sheet__results-row">
+                    <p className="recipient-sheet__results-label">
+                      {query ? `Contacts Trouvés (${filtered.length})` : `Contacts (${filtered.length})`}
+                    </p>
+                    {selectedCount > 0 && (
+                      <button
+                        type="button"
+                        className="recipient-sheet__selected-pill"
+                        onClick={() => setSelectedIds(new Set())}
+                      >
+                        <span>
+                          <strong>{selectedCount}</strong> Sélectionnés
+                        </span>
+                        <img src={iconClearX} alt="" />
+                      </button>
+                    )}
                     <button
                       type="button"
-                      className="recipient-sheet__selected-pill"
-                      onClick={() => setSelectedIds(new Set())}
+                      className="recipient-sheet__add-contact-btn"
+                      aria-label="Ajouter un contact"
+                      onClick={handleOpenAddContact}
+                      disabled={!canAddMore}
                     >
-                      <span>
-                        <strong>{selectedCount}</strong> Sélectionnés
-                      </span>
-                      <img src={iconClearX} alt="" />
+                      <img src={iconAddContact} alt="" />
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    className="recipient-sheet__add-contact-btn"
-                    aria-label="Ajouter un contact"
-                    onClick={handleOpenAddContact}
-                    disabled={!canAddMore}
-                  >
-                    <img src={iconAddContact} alt="" />
-                  </button>
-                </div>
+                  </div>
+                )}
 
                 {hasNoResults ? (
                   <div className="recipient-sheet__empty">
@@ -313,7 +320,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
                 </div>
 
                 <div className="recipient-sheet__field">
-                  <label className="recipient-sheet__field-label">Téléphone*</label>
+                  <label className="recipient-sheet__field-label">Téléphone{!hasEmail && '*'}</label>
                   <input
                     type="tel"
                     className="recipient-sheet__field-input"
@@ -323,7 +330,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
                 </div>
 
                 <div className="recipient-sheet__field">
-                  <label className="recipient-sheet__field-label">Mail*</label>
+                  <label className="recipient-sheet__field-label">Mail{!hasPhone && '*'}</label>
                   <input
                     type="email"
                     className="recipient-sheet__field-input"
@@ -343,7 +350,9 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
           >
               {view === 'select' ? (
                 <>
-                  <p className="recipient-sheet__footer-hint">Sélectionnez jusqu'à {MAX_RECIPIENTS} destinataires</p>
+                  {!hasNoResults && (
+                    <p className="recipient-sheet__footer-hint">Sélectionnez jusqu'à {MAX_RECIPIENTS} destinataires</p>
+                  )}
                   {hasNoResults ? (
                     <button
                       type="button"
@@ -370,7 +379,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
                   <p className="recipient-sheet__footer-hint">* Informations Requises</p>
                   <button
                     type="button"
-                    className={`recipient-sheet__confirm-btn${isContactValid ? ' recipient-sheet__confirm-btn--enabled' : ''}`}
+                    className={`recipient-sheet__save-btn${isContactValid ? ' recipient-sheet__save-btn--enabled' : ''}`}
                     disabled={!isContactValid}
                     onClick={handleSaveContact}
                   >

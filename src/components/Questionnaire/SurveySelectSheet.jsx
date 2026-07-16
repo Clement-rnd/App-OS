@@ -19,7 +19,7 @@ const TAB_EXIT_MS = EXIT_ITEM_BASE_DELAY + EXIT_ITEM_STEP * 2 + EXIT_DURATION_MS
 const CERTIFIED_SURVEYS = [
   { id: 'transaction', title: 'Transaction immobilière', subtitle: '10 questions - 3 fois certifié' },
   { id: 'satisfaction', title: 'Satisfaction client', subtitle: '10 questions - 3x certifié' },
-  { id: 'suivi', title: 'Suivi post-enquête', subtitle: '10 questions - 3x certifié' },
+  { id: 'suivi', title: 'Suivi post-questionnaire', subtitle: '10 questions - 3x certifié' },
 ]
 
 const STANDARD_SURVEYS = [
@@ -87,7 +87,7 @@ export function SurveySelectSheet({ onClose, onSelect }) {
       <div
         className={`survey-sheet${isClosing && !isDragClosing ? ' survey-sheet--closing' : ''}`}
         role="dialog"
-        aria-label="Sélectionnez une enquête à envoyer"
+        aria-label="Sélectionnez un questionnaire à envoyer"
         style={{ ...dragStyle, maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.9 }}
       >
         <div className="survey-sheet__handle-row" {...dragHandlers}>
@@ -95,7 +95,7 @@ export function SurveySelectSheet({ onClose, onSelect }) {
         </div>
 
         <div className="survey-sheet__appbar">
-          <p className="survey-sheet__title">Sélectionnez une enquête à envoyer</p>
+          <p className="survey-sheet__title">Sélectionnez un questionnaire à envoyer</p>
           <button
             type="button"
             className="survey-sheet__close"
@@ -164,7 +164,7 @@ export function SurveySelectSheet({ onClose, onSelect }) {
                       ? `${EXIT_ITEM_BASE_DELAY + index * EXIT_ITEM_STEP}ms`
                       : `${entranceBaseDelay + 60 + index * 50}ms`,
                   }}
-                  onClick={() => closeWithAnimation(() => onSelect(survey))}
+                  onClick={() => closeWithAnimation(() => onSelect({ ...survey, type: tab }))}
                 >
                   <span className="survey-sheet__item-badge">
                     <img src={iconListBadge} alt="" />

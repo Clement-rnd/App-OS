@@ -75,17 +75,29 @@ function matchesPeriode(dateStr, periode, periodeRange) {
   return true
 }
 
+// "Réponse" (sans réponse / avis répondu) is a separate axis from "État"
+// (en attente / expiré / archivé): a review's lifecycle status and whether
+// it's actually been answered don't move together (e.g. an archived review
+// can still have gone unanswered) -- keyed off the response text itself
+// rather than status, so it stays accurate regardless of État.
+export function matchesReponseFilter(review, reponse) {
+  if (reponse === 'sans-reponse') return !review.response
+  if (reponse === 'avis-repondu') return Boolean(review.response)
+  return true
+}
+
 export function reviewMatchesFilters(review, filters) {
   if (filters.source.length && !filters.source.includes(review.source)) return false
   if (filters.note.length && !filters.note.includes(getNoteCategory(review.rating))) return false
   if (filters.nps.length && !filters.nps.includes(getNpsFilterId(review.rating))) return false
 
-  if (filters.type.length) {
-    const matchesType = filters.type.includes(review.certification) || filters.type.includes(review.googleSharing)
-    if (!matchesType) return false
-  }
+  if (filters.type.length && !filters.type.includes(review.certification)) return false
+
+  if (filters.googleSharing.length && !filters.googleSharing.includes(review.googleSharing)) return false
 
   if (filters.etat.length && !filters.etat.includes(review.status)) return false
+
+  if (filters.reponse && !matchesReponseFilter(review, filters.reponse)) return false
 
   if (!matchesPeriode(review.date, filters.periode, filters.periodeRange)) return false
 

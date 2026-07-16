@@ -5,14 +5,14 @@ const AUTO_DISMISS_MS = 4000
 
 // Confirmation toast shown after submitting or editing a review response,
 // shared by Home and Mes Avis so both give the same feedback.
-export function ResponseAlert({ message, onClose }) {
+export function ResponseAlert({ message, onClose, className = '' }) {
   useEffect(() => {
     const timer = setTimeout(onClose, AUTO_DISMISS_MS)
     return () => clearTimeout(timer)
   }, [onClose])
 
   return (
-    <div className="response-alert" role="status">
+    <div className={`response-alert${className ? ` ${className}` : ''}`} role="status">
       <p className="response-alert__text">{message}</p>
       <button type="button" className="response-alert__close" onClick={onClose} aria-label="Fermer">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="none">

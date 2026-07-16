@@ -365,6 +365,23 @@
   height: 16px;
 }
 
+.questionnaire__recipient-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.questionnaire__recipient-remove img {
+  width: 18px;
+  height: 18px;
+}
+
 .questionnaire__recipient-add-btn {
   display: flex;
   align-items: center;
@@ -391,6 +408,7 @@
    EditProfileSheet.css's __field/__label/__input and LanguageField.css),
    instead of each screen inventing its own label treatment. */
 .questionnaire__field {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -634,4 +652,178 @@
   width: 100%;
   height: 28px;
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Success screen (shown in place of the step list once every recipient has
+   been sent -- see Questionnaire.jsx's sentResult) */
+
+/* ResponseAlert's own default `bottom: 100px` clears a standard single-
+   button footer/BottomNav elsewhere in the app, but the success screen's
+   footer below is taller (two stacked buttons + home indicator) -- without
+   this override the toast lands on top of "Envoyer un autre questionnaire"
+   instead of above it. */
+.response-alert--above-success-footer {
+  bottom: 156px;
+}
+
+.questionnaire__success-desc {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  color: #041b44;
+  width: 100%;
+  /* Narrows the line just enough that it wraps after "envoyée" -- without
+     this, "avec succès" fits on line 1 and only the "!" spills onto its
+     own line 2. The &nbsp; in the text itself (see Questionnaire.jsx)
+     backs this up at any width by keeping "succès !" from splitting. */
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.questionnaire__success-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: #ffffff;
+}
+
+.questionnaire__success-sent-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.questionnaire__success-sent-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b1742;
+}
+
+.questionnaire__success-recipient {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background-color: #f7fafc;
+}
+
+.questionnaire__success-sent-status {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.questionnaire__success-sent-status img {
+  width: 20px;
+  height: 20px;
+}
+
+.questionnaire__success-sent-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.6px solid #ffffff;
+  border-radius: 100px;
+  background-color: #43b6a3;
+}
+
+.questionnaire__success-sent-badge img {
+  width: 10px;
+  height: 10px;
+}
+
+.questionnaire__success-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* Same label-left/value-right divider row as Profile's own InfoRow (see
+   .profile__field-row) -- this summary is read-only in exactly the same
+   way, so it reads as the same kind of information instead of inventing a
+   new layout for it. */
+.questionnaire__success-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 26px;
+  border-bottom: 1px solid #f0f6f9;
+}
+
+.questionnaire__success-field-label {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  color: #8ea1b2;
+}
+
+.questionnaire__success-field-value {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  color: #041b44;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.questionnaire__success-footer-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.questionnaire__success-primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  border: 1px solid #041b44;
+  border-radius: 10px;
+  background: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #102d69;
+  cursor: pointer;
+}
+
+.questionnaire__success-secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: auto;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #041b44;
+  cursor: pointer;
 }

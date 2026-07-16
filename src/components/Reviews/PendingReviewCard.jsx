@@ -51,7 +51,11 @@ export function PendingReviewCard({ item, onOpenResend, onEdit, onArchiveRequest
 
   const daysLeft = getDaysUntil(item.expiryDate)
   const expiryLabel =
-    daysLeft <= 0 ? "Expire aujourd'hui" : `Expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`
+    daysLeft < 0
+      ? 'Expiré'
+      : daysLeft === 0
+        ? "Expire aujourd'hui"
+        : `Expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`
 
   return (
     <div className="pending-card">

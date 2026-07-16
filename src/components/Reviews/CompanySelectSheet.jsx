@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import iconSheetClose from '../../assets/reviews/icon-sheet-close.svg'
 import iconCompanySearch from '../../assets/reviews/icon-company-search.svg'
 import iconCompanyBuilding from '../../assets/reviews/icon-company-building.svg'
 import iconCompanyCheck from '../../assets/reviews/icon-company-check.svg'
@@ -57,6 +58,14 @@ export function CompanySelectSheet({ selectedId, onClose, onSelect }) {
 
         <div className="company-sheet__appbar">
           <p className="company-sheet__title">Sélectionner une entreprise</p>
+          <button
+            type="button"
+            className="company-sheet__close"
+            onClick={() => closeWithAnimation(onClose)}
+            aria-label="Fermer"
+          >
+            <img src={iconSheetClose} alt="" />
+          </button>
         </div>
 
         <div className="company-sheet__content">

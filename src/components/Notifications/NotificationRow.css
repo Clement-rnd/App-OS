@@ -37,8 +37,8 @@
   background-color: #2c95ff;
 }
 
-.notif-row-action--archive {
-  background-color: #8ea1b2;
+.notif-row-action--delete {
+  background-color: #fc6530;
 }
 
 .notif-row {

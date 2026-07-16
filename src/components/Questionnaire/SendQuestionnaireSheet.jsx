@@ -9,6 +9,7 @@ import iconPlusChannel from '../../assets/questionnaire/icon-plus-channel.svg'
 import iconAutoSend from '../../assets/questionnaire/icon-auto-send.svg'
 import iconChevronRightSmall from '../../assets/questionnaire/icon-chevron-right-small.svg'
 import iconBack from '../../assets/questionnaire/icon-back.svg'
+import iconSendDisabled from '../../assets/questionnaire/icon-send-disabled.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
@@ -23,10 +24,40 @@ const CHANNELS = [
   { id: 'email', label: 'Email', icon: iconEmail },
 ]
 
-const DEFAULT_MESSAGE =
-  'Salut ! Pourriez-vous prendre un moment pour partager vos retours ? Cela nous aide vraiment. Merci !\n\nURL'
+const DEFAULT_MESSAGE_INTRO =
+  'Salut ! Pourriez-vous prendre un moment pour partager vos retours ? Cela nous aide vraiment. Merci !'
 
-export function SendQuestionnaireSheet({ recipients, onClose }) {
+// The link itself lives in the message text, not a separate disconnected
+// "URL" caption underneath -- same reasoning as ResendQuestionnaireSheet's
+// own message field.
+function getDefaultMessage(recipient) {
+  return `${DEFAULT_MESSAGE_INTRO}\n\nhttps://avis.opinion-system.fr/r/${recipient.id}`
+}
+
+// Contacts picked from the phone's address book only ever carry a phone
+// number here (see RecipientSelectSheet's CONTACTS) -- a manually-added
+// contact can have a real one, but for the rest the simulated Email screen
+// still needs something plausible to address the message to.
+function getRecipientEmail(recipient) {
+  if (recipient.email) return recipient.email
+  const normalized = recipient.name
+    .toLowerCase()
+    .replace(/[àâá]/g, 'a')
+    .replace(/[èêéë]/g, 'e')
+    .replace(/[ìîï]/g, 'i')
+    .replace(/[òôö]/g, 'o')
+    .replace(/[ùûü]/g, 'u')
+    .replace(/ç/g, 'c')
+    .replace(/[^a-z\s]/g, '')
+    .trim()
+    .split(/\s+/)
+    .join('.')
+  return `${normalized}@exemple.fr`
+}
+
+const EMAIL_SUBJECT = 'Demande d’avis - Opinion System'
+
+export function SendQuestionnaireSheet({ recipients, onClose, onSent }) {
   useLockBodyScroll()
   const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
@@ -35,7 +66,9 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
   const [sentIndices, setSentIndices] = useState(() => new Set())
   const [autoSendByEmail, setAutoSendByEmail] = useState(false)
   const [messages, setMessages] = useState({})
-  const [showQrScreen, setShowQrScreen] = useState(false)
+  // 'sms' | 'email' | 'qrcode' | null -- which channel's simulated send
+  // screen is currently showing in place of the main compose view.
+  const [channelScreen, setChannelScreen] = useState(null)
   const [qrDataUrl, setQrDataUrl] = useState(null)
 
   const closeWithAnimation = callback => {
@@ -51,34 +84,39 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
 
   const total = recipients.length
   const recipient = recipients[currentIndex]
-  const message = messages[recipient.id] ?? DEFAULT_MESSAGE
+  const message = messages[recipient.id] ?? getDefaultMessage(recipient)
   const isSent = sentIndices.has(recipient.id)
 
   const goPrev = () => setCurrentIndex(i => Math.max(0, i - 1))
   const goNext = () => setCurrentIndex(i => Math.min(total - 1, i + 1))
 
-  const toggleChannel = channelId => {
-    setSelectedChannels(prev => {
-      const next = new Set(prev)
-      if (next.has(channelId)) {
-        next.delete(channelId)
-      } else {
-        next.add(channelId)
-      }
-      return next
-    })
-    setSentIndices(prev => new Set(prev).add(recipient.id))
-  }
+  // Tapping a channel just opens its simulated send screen -- the
+  // recipient isn't marked sent until the user confirms *inside* that
+  // screen (see handleConfirmSend), same as actually switching to the
+  // Messages/Mail app would only send once you tap its own send button.
+  const openChannelScreen = channelId => setChannelScreen(channelId)
 
-  const handleChannelClick = channelId => {
-    toggleChannel(channelId)
-    if (channelId === 'qrcode') {
-      setShowQrScreen(true)
+  const handleConfirmSend = () => {
+    const channelId = channelScreen
+    setChannelScreen(null)
+    setSelectedChannels(prev => new Set(prev).add(channelId))
+
+    const next = new Set(sentIndices).add(recipient.id)
+    setSentIndices(next)
+    // Every recipient has been dispatched through some channel -- the
+    // batch is done, so hand off to the success screen instead of leaving
+    // the sheet open with nothing left to do.
+    if (next.size === recipients.length) {
+      setTimeout(() => closeWithAnimation(onSent), 600)
+    } else if (currentIndex < total - 1) {
+      // Otherwise move straight on to the next recipient so the same
+      // pick-a-channel-and-send flow can repeat for them.
+      goNext()
     }
   }
 
   useEffect(() => {
-    if (!showQrScreen) return
+    if (channelScreen !== 'qrcode') return
     let cancelled = false
     const surveyUrl = `https://avis.opinion-system.fr/r/${recipient.id}`
     QRCode.toDataURL(surveyUrl, {
@@ -91,7 +129,7 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
     return () => {
       cancelled = true
     }
-  }, [showQrScreen, recipient.id])
+  }, [channelScreen, recipient.id])
 
   return (
     <div
@@ -111,12 +149,12 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
 
         <div className="send-sheet__appbar">
           <div className="send-sheet__title-row">
-            {showQrScreen && (
+            {channelScreen && (
               <button
                 type="button"
                 className="send-sheet__back-btn"
                 aria-label="Retour"
-                onClick={() => setShowQrScreen(false)}
+                onClick={() => setChannelScreen(null)}
               >
                 <img src={iconBack} alt="" />
               </button>
@@ -156,18 +194,63 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
               <span className="send-sheet__recipient-avatar">{recipient.name[0]}</span>
               <span className="send-sheet__recipient-text">
                 <span className="send-sheet__recipient-name">{recipient.name}</span>
-                <span className="send-sheet__recipient-phone">{recipient.phone}</span>
+                <span className="send-sheet__recipient-phone">
+                  {channelScreen === 'email' ? getRecipientEmail(recipient) : recipient.phone}
+                </span>
               </span>
             </div>
           </div>
 
-          {showQrScreen ? (
-            <div className="send-sheet__field" style={{ animationDelay: `${SHEET_ENTRANCE_MS + 50}ms` }}>
-              <span className="send-sheet__label">Code QR</span>
-              <div className="send-sheet__qr-box">
-                {qrDataUrl && <img src={qrDataUrl} alt="QR code du questionnaire" className="send-sheet__qr-image" />}
+          {channelScreen === 'qrcode' ? (
+            <>
+              <div className="send-sheet__field" style={{ animationDelay: `${SHEET_ENTRANCE_MS + 50}ms` }}>
+                <span className="send-sheet__label">Code QR</span>
+                <div className="send-sheet__qr-box">
+                  {qrDataUrl && (
+                    <img src={qrDataUrl} alt="QR code du questionnaire" className="send-sheet__qr-image" />
+                  )}
+                </div>
               </div>
-            </div>
+              <button
+                type="button"
+                className="send-sheet__confirm-btn"
+                style={{ animationDelay: `${SHEET_ENTRANCE_MS + 100}ms` }}
+                onClick={handleConfirmSend}
+              >
+                J&rsquo;ai terminé
+              </button>
+            </>
+          ) : channelScreen === 'sms' || channelScreen === 'email' ? (
+            <>
+              <div className="send-sheet__field" style={{ animationDelay: `${SHEET_ENTRANCE_MS + 50}ms` }}>
+                <span className="send-sheet__sim-banner">
+                  <img src={channelScreen === 'sms' ? iconSms : iconEmail} alt="" />
+                  Simulation {channelScreen === 'sms' ? 'de l’application Messages' : 'de l’application Mail'}
+                </span>
+              </div>
+
+              {channelScreen === 'email' && (
+                <div className="send-sheet__field" style={{ animationDelay: `${SHEET_ENTRANCE_MS + 75}ms` }}>
+                  <span className="send-sheet__label">Objet</span>
+                  <p className="send-sheet__sim-subject">{EMAIL_SUBJECT}</p>
+                </div>
+              )}
+
+              <div className="send-sheet__field" style={{ animationDelay: `${SHEET_ENTRANCE_MS + 100}ms` }}>
+                <span className="send-sheet__label">Message</span>
+                <p className="send-sheet__sim-message">{message}</p>
+              </div>
+
+              <button
+                type="button"
+                className="send-sheet__confirm-btn"
+                style={{ animationDelay: `${SHEET_ENTRANCE_MS + 150}ms` }}
+                onClick={handleConfirmSend}
+              >
+                <img src={iconSendDisabled} alt="" className="send-sheet__confirm-btn-icon" />
+                Envoyer {channelScreen === 'sms' ? 'le SMS' : 'l’email'}
+              </button>
+            </>
           ) : (
             <>
               <div className="send-sheet__field" style={{ animationDelay: `${SHEET_ENTRANCE_MS + 50}ms` }}>
@@ -189,7 +272,7 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
                       className={`send-sheet__channel${
                         selectedChannels.has(channel.id) ? ' send-sheet__channel--selected' : ''
                       }`}
-                      onClick={() => handleChannelClick(channel.id)}
+                      onClick={() => openChannelScreen(channel.id)}
                     >
                       <span className="send-sheet__channel-avatar">
                         <img src={channel.icon} alt="" />
@@ -215,9 +298,7 @@ export function SendQuestionnaireSheet({ recipients, onClose }) {
                 <span className="send-sheet__auto-send-icon">
                   <img src={iconAutoSend} alt="" />
                 </span>
-                <span className="send-sheet__auto-send-text">
-                  Laissez le système d&rsquo;opinion l&rsquo;envoyer par e-mail
-                </span>
+                <span className="send-sheet__auto-send-text">Laissez Opinion System l&rsquo;envoyer par e-mail</span>
                 <img
                   src={iconChevronRightSmall}
                   alt=""

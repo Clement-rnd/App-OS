@@ -153,14 +153,20 @@
 
 .home__reputation {
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.home__reputation-row {
+  display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
   font-size: 12px;
   font-weight: 500;
   color: #00d492;
   white-space: nowrap;
-  padding-top: 2px;
 }
 
 .home__reputation-dot {
@@ -170,13 +176,39 @@
   background-color: #00bc7d;
 }
 
+/* Tier colors -- same amber/red the app already uses elsewhere for
+   "needs a look" vs. "needs action now" (warning banners, détracteur
+   badges), so this reads as the same severity language, not a new one. */
+.home__reputation--watch .home__reputation-row {
+  color: #f29003;
+}
+
+.home__reputation--watch .home__reputation-dot {
+  background-color: #f29003;
+}
+
+.home__reputation--attention .home__reputation-row {
+  color: #fc6530;
+}
+
+.home__reputation--attention .home__reputation-dot {
+  background-color: #fc6530;
+}
+
+.home__reputation-reason {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+
 /* Dashboard */
 .home__dashboard {
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 8px;
+  gap: 16px;
   width: 100%;
 }
 
@@ -203,6 +235,17 @@
 
 .home__stat--clickable {
   cursor: pointer;
+}
+
+/* Marks whichever tile is actually driving the reputation pill's tier (see
+   Home.jsx's REPUTATION_STATUS.flags) -- an inset border instead of a real
+   one so it doesn't shift the tile's own layout. */
+.home__stat--flagged-watch {
+  box-shadow: inset 3px 0 0 0 #f29003;
+}
+
+.home__stat--flagged-attention {
+  box-shadow: inset 3px 0 0 0 #fc6530;
 }
 
 .home__stat-label {

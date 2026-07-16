@@ -12,6 +12,7 @@ import iconFlagCanada from '../../assets/questionnaire/icon-flag-canada.svg'
 import iconFlagNetherlands from '../../assets/questionnaire/icon-flag-netherlands.svg'
 import iconFlagItaly from '../../assets/questionnaire/icon-flag-italy.svg'
 import iconAddRecipient from '../../assets/questionnaire/icon-add-recipient.svg'
+import iconMinusCircle from '../../assets/questionnaire/icon-minus-circle.svg'
 import { ServiceInputSheet } from './ServiceInputSheet'
 import { SurveySelectSheet } from './SurveySelectSheet'
 import { RecipientSelectSheet } from './RecipientSelectSheet'
@@ -20,22 +21,27 @@ import { SendQuestionnaireSheet } from './SendQuestionnaireSheet'
 import { ConfirmLeaveModal } from './ConfirmLeaveModal'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import { ContactsPermissionModal } from './ContactsPermissionModal'
+import { ResponseAlert } from '../ResponseAlert/ResponseAlert'
 import './Questionnaire.css'
+
+// Matches RecipientSelectSheet's own MAX_RECIPIENTS -- once this many are
+// added, "Ajouter un autre destinataire" has nothing left to add towards.
+const MAX_RECIPIENTS = 5
 
 const steps = [
   {
     number: 1,
-    title: 'Quel service avez-vous récemment fourni ?',
+    title: 'Quel service avez-vous récemment fourni ?',
     completedTitle: 'Détails du service',
     description: 'Veuillez préciser le service que vous avez récemment fourni à votre client.',
   },
   {
     number: 2,
-    title: 'Sélectionnez une enquête à envoyer',
-    completedTitle: "Sélection d'enquête",
+    title: 'Sélectionnez un questionnaire à envoyer',
+    completedTitle: 'Sélection de questionnaire',
     description: (
       <>
-        Les avis recueillis à partir de ces enquêtes peuvent également être partagés sur{' '}
+        Les avis recueillis à partir de ces questionnaires peuvent également être partagés sur{' '}
         <span className="questionnaire__google-g">G</span>
         <span className="questionnaire__google-o1">o</span>
         <span className="questionnaire__google-o2">o</span>
@@ -49,7 +55,7 @@ const steps = [
     number: 3,
     title: 'Sélectionnez votre(s) destinataire(s)',
     completedTitle: 'Sélectionnez votre(s) destinataire(s)',
-    description: 'Envoyez facilement un sondage à une ou plusieurs personnes pour recueillir leurs retours',
+    description: 'Envoyez facilement un questionnaire à une ou plusieurs personnes pour recueillir leurs retours',
   },
 ]
 
@@ -69,13 +75,11 @@ const CATEGORIES = [
 
 const DROPDOWN_CLOSE_ANIMATION_MS = 200
 
-function SurveyDetails({ survey, onChangeSurvey }) {
-  const [language, setLanguage] = useState(LANGUAGES[0])
+function SurveyDetails({ survey, onChangeSurvey, language, onLanguageChange, category, onCategoryChange }) {
   const [isLanguageOpen, setLanguageOpen] = useState(false)
   const [isLanguageDropdownClosing, setLanguageDropdownClosing] = useState(false)
   const languageFieldRef = useRef(null)
 
-  const [category, setCategory] = useState(CATEGORIES[0])
   const [isCategoryOpen, setCategoryOpen] = useState(false)
   const [isCategoryDropdownClosing, setCategoryDropdownClosing] = useState(false)
   const categoryFieldRef = useRef(null)
@@ -153,7 +157,7 @@ function SurveyDetails({ survey, onChangeSurvey }) {
           onClick={onChangeSurvey}
           role="button"
           tabIndex={0}
-          aria-label="Changer d'enquête"
+          aria-label="Changer de questionnaire"
           onKeyDown={e => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
@@ -207,7 +211,7 @@ function SurveyDetails({ survey, onChangeSurvey }) {
                 }`}
                 style={{ animationDelay: `${index * 40}ms` }}
                 onClick={() => {
-                  setLanguage(lang)
+                  onLanguageChange(lang)
                   closeLanguageDropdown()
                 }}
               >
@@ -251,7 +255,7 @@ function SurveyDetails({ survey, onChangeSurvey }) {
                 }`}
                 style={{ animationDelay: `${index * 40}ms` }}
                 onClick={() => {
-                  setCategory(cat)
+                  onCategoryChange(cat)
                   closeCategoryDropdown()
                 }}
               >
@@ -265,7 +269,7 @@ function SurveyDetails({ survey, onChangeSurvey }) {
   )
 }
 
-function RecipientList({ recipients, onEditRecipient, onAddMore }) {
+function RecipientList({ recipients, onEditRecipient, onRemoveRecipient, onAddMore }) {
   return (
     <div className="questionnaire__recipients">
       {recipients.map(recipient => (
@@ -283,13 +287,91 @@ function RecipientList({ recipients, onEditRecipient, onAddMore }) {
           >
             <img src={iconPencil} alt="" />
           </button>
+          <button
+            type="button"
+            className="questionnaire__recipient-remove"
+            aria-label="Retirer ce destinataire"
+            onClick={() => onRemoveRecipient(recipient.id)}
+          >
+            <img src={iconMinusCircle} alt="" />
+          </button>
         </div>
       ))}
-      <button type="button" className="questionnaire__recipient-add-btn" onClick={onAddMore}>
-        <img src={iconAddRecipient} alt="" />
-        Ajouter un autre destinataire
-      </button>
+      {recipients.length < MAX_RECIPIENTS && (
+        <button type="button" className="questionnaire__recipient-add-btn" onClick={onAddMore}>
+          <img src={iconAddRecipient} alt="" />
+          Ajouter un autre destinataire
+        </button>
+      )}
     </div>
+  )
+}
+
+function SendPlaneIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" width="18" height="18">
+      <path
+        d="M13.557 1.25573C14.3301 0.998052 15.0853 1.72885 14.8245 2.51598L14.825 2.51647L10.9447 14.2816L10.9442 14.2831C10.6654 15.1195 9.52524 15.2129 9.11361 14.4398L6.51595 9.5609L1.71224 7.03258C0.933117 6.62295 1.02313 5.48021 1.86166 5.20055L13.555 1.25622L13.557 1.25573ZM2.1805 6.14831L7.118 8.74743L7.18148 8.78698C7.24153 8.83115 7.29117 8.88859 7.3265 8.95495L9.99496 13.9672L9.99545 13.9667L13.8748 2.20446L13.8739 2.20397L2.1805 6.14831Z"
+        fill="#041b44"
+      />
+      <path
+        d="M9.39619 6.04697C9.59126 5.85156 9.90778 5.85098 10.1032 6.046C10.2986 6.24108 10.2988 6.55759 10.1037 6.75303L7.279 9.58311C7.08399 9.77847 6.76742 9.77896 6.57197 9.58408C6.37654 9.38899 6.37591 9.072 6.571 8.87656L9.39619 6.04697Z"
+        fill="#041b44"
+      />
+    </svg>
+  )
+}
+
+// Same label-left/value-right divider row Profile's own InfoRow uses for
+// "Informations personnelles" -- this summary is read-only in exactly the
+// same way, so it reads as the same kind of information instead of
+// inventing a new layout for it.
+function SuccessFieldRow({ label, value }) {
+  return (
+    <div className="questionnaire__success-field-row">
+      <p className="questionnaire__success-field-label">{label}</p>
+      <p className="questionnaire__success-field-value">{value}</p>
+    </div>
+  )
+}
+
+function SuccessContent({ result }) {
+  return (
+    <>
+      <p className="questionnaire__success-desc">Votre questionnaire a été envoyé avec succès&nbsp;!</p>
+
+      <div className="questionnaire__success-card">
+        <div className="questionnaire__success-sent-header">
+          <span className="questionnaire__step-badge questionnaire__step-badge--done">
+            <img src={iconCheckFilled} alt="" />
+          </span>
+          <p className="questionnaire__success-sent-title">Envoyé à :</p>
+        </div>
+
+        {result.recipients.map(recipient => (
+          <div key={recipient.id} className="questionnaire__success-recipient">
+            <span className="questionnaire__recipient-avatar">{recipient.name[0]}</span>
+            <span className="questionnaire__recipient-text">
+              <span className="questionnaire__recipient-name">{recipient.name}</span>
+              <span className="questionnaire__recipient-phone">{recipient.phone}</span>
+            </span>
+            <span className="questionnaire__success-sent-status">
+              <img src={iconSendDisabled} alt="" />
+              <span className="questionnaire__success-sent-badge">
+                <img src={iconCheckFilled} alt="" />
+              </span>
+            </span>
+          </div>
+        ))}
+
+        <div className="questionnaire__success-details">
+          <SuccessFieldRow label="Questionnaire" value={result.survey?.title} />
+          <SuccessFieldRow label="Langue" value={result.language.label} />
+          <SuccessFieldRow label="Catégorie" value={result.category.label} />
+          <SuccessFieldRow label="Service" value={result.service} />
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -355,6 +437,17 @@ export function Questionnaire({ onNavigate }) {
   const [editingRecipient, setEditingRecipient] = useState(null)
   const [isSendSheetOpen, setSendSheetOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  // Lifted out of SurveyDetails (rather than kept local to it) so the
+  // success screen below can still read the final choice after the survey
+  // step's own card has been replaced by that screen.
+  const [language, setLanguage] = useState(LANGUAGES[0])
+  const [category, setCategory] = useState(CATEGORIES[0])
+  // Snapshot taken the moment sending completes (see handleQuestionnaireSent)
+  // -- holds its own copy of everything the success screen shows, so it
+  // keeps displaying "what was sent" even after handleSendAnother resets
+  // the fields above for the next questionnaire.
+  const [sentResult, setSentResult] = useState(null)
+  const [sentAlert, setSentAlert] = useState(null)
   const hasContactsAccessRef = useRef(false)
   const screenHeight = useStandaloneScreenHeight()
   // Same iOS PWA viewport under-measurement as BottomNav/the sheet overlays:
@@ -381,11 +474,30 @@ export function Questionnaire({ onNavigate }) {
   const progressPercent = (completedStepsCount / steps.length) * 100
 
   const handleClose = () => {
-    if (hasProgress) {
+    // Nothing left to lose once it's already sent -- leave straight away
+    // instead of asking to confirm abandoning progress that no longer exists.
+    if (hasProgress && !sentResult) {
       setLeaveConfirmOpen(true)
     } else {
       onNavigate?.('home')
     }
+  }
+
+  const handleQuestionnaireSent = () => {
+    setSendSheetOpen(false)
+    setSentResult({ recipients, service: serviceAnswer, survey: surveyAnswer, language, category })
+    setSentAlert('Le questionnaire a été envoyé')
+  }
+
+  // Clears every field, including sentResult -- back to the step list for a
+  // fresh questionnaire instead of staying on the success screen.
+  const handleSendAnother = () => {
+    setServiceAnswer('')
+    setSurveyAnswer(null)
+    setRecipients([])
+    setLanguage(LANGUAGES[0])
+    setCategory(CATEGORIES[0])
+    setSentResult(null)
   }
 
   const openRecipientSheet = () => {
@@ -450,7 +562,7 @@ export function Questionnaire({ onNavigate }) {
       <header className={`questionnaire__header${isScrolled ? ' questionnaire__header--scrolled' : ''}`}>
         <div className="questionnaire__status-bar" />
         <div className="questionnaire__appbar">
-          <h1 className="questionnaire__title">Boostez vos avis !</h1>
+          <h1 className="questionnaire__title">Récolter des avis</h1>
           <button
             type="button"
             className="questionnaire__close-btn"
@@ -473,11 +585,15 @@ export function Questionnaire({ onNavigate }) {
           }
         }}
       >
+        {sentResult ? (
+          <SuccessContent result={sentResult} />
+        ) : (
+          <>
         <p className="questionnaire__description">
-          Envoyer une enquête est un moyen efficace de recueillir les avis des clients.
+          Envoyer un questionnaire est un moyen efficace de recueillir les avis des clients.
           <br />
           <br />
-          Suivez les étapes ci-dessous pour distribuer rapidement des enquêtes et augmenter vos avis.
+          Suivez les étapes ci-dessous pour distribuer rapidement des questionnaires et augmenter vos avis.
         </p>
 
         <StepCard
@@ -509,7 +625,16 @@ export function Questionnaire({ onNavigate }) {
           isActive={activeStepNumber === 2}
           onOpen={() => setSurveySheetOpen(true)}
         >
-          {surveyAnswer && <SurveyDetails survey={surveyAnswer} onChangeSurvey={() => setSurveySheetOpen(true)} />}
+          {surveyAnswer && (
+            <SurveyDetails
+              survey={surveyAnswer}
+              onChangeSurvey={() => setSurveySheetOpen(true)}
+              language={language}
+              onLanguageChange={setLanguage}
+              category={category}
+              onCategoryChange={setCategory}
+            />
+          )}
         </StepCard>
 
         <StepCard
@@ -521,21 +646,44 @@ export function Questionnaire({ onNavigate }) {
           onOpen={openRecipientSheet}
         >
           {recipients.length > 0 && (
-            <RecipientList recipients={recipients} onEditRecipient={setEditingRecipient} onAddMore={openRecipientSheet} />
+            <RecipientList
+              recipients={recipients}
+              onEditRecipient={setEditingRecipient}
+              onRemoveRecipient={handleDeleteRecipient}
+              onAddMore={openRecipientSheet}
+            />
           )}
         </StepCard>
+          </>
+        )}
       </div>
 
       <footer className="questionnaire__footer" style={footerStandaloneStyle}>
-        <button
-          type="button"
-          className="questionnaire__submit-btn"
-          disabled={!isComplete}
-          onClick={() => setSendSheetOpen(true)}
-        >
-          Envoyer le sondage
-          <img src={iconSendDisabled} alt="" />
-        </button>
+        {sentResult ? (
+          <div className="questionnaire__success-footer-buttons">
+            <button type="button" className="questionnaire__success-primary-btn" onClick={handleSendAnother}>
+              Envoyer un autre questionnaire
+              <SendPlaneIcon />
+            </button>
+            <button
+              type="button"
+              className="questionnaire__success-secondary-btn"
+              onClick={() => onNavigate?.('home')}
+            >
+              Accueil
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="questionnaire__submit-btn"
+            disabled={!isComplete}
+            onClick={() => setSendSheetOpen(true)}
+          >
+            Envoyer le questionnaire
+            <img src={iconSendDisabled} alt="" />
+          </button>
+        )}
         <div className="questionnaire__home-indicator" />
       </footer>
 
@@ -590,12 +738,23 @@ export function Questionnaire({ onNavigate }) {
           recipient={editingRecipient}
           onClose={() => setEditingRecipient(null)}
           onSave={handleSaveRecipient}
-          onDelete={handleDeleteRecipient}
         />
       )}
 
       {isSendSheetOpen && (
-        <SendQuestionnaireSheet recipients={recipients} onClose={() => setSendSheetOpen(false)} />
+        <SendQuestionnaireSheet
+          recipients={recipients}
+          onClose={() => setSendSheetOpen(false)}
+          onSent={handleQuestionnaireSent}
+        />
+      )}
+
+      {sentAlert && (
+        <ResponseAlert
+          message={sentAlert}
+          onClose={() => setSentAlert(null)}
+          className="response-alert--above-success-footer"
+        />
       )}
     </div>
   )

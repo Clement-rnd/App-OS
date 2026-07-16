@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import logo from '../../assets/opinion-system-logo.svg'
 import illustration from '../../assets/forgot-password-illustration.svg'
+import { ResponseAlert } from '../ResponseAlert/ResponseAlert'
 import './ForgotPassword.css'
 
 export function ForgotPassword({ onBack, onSendLink, onResetPassword }) {
@@ -9,12 +10,6 @@ export function ForgotPassword({ onBack, onSendLink, onResetPassword }) {
   const [sent, setSent] = useState(false)
 
   const isValid = identifiant.trim().length > 0 && !sent
-
-  useEffect(() => {
-    if (!showSuccess) return
-    const dismissTimer = setTimeout(() => setShowSuccess(false), 4000)
-    return () => clearTimeout(dismissTimer)
-  }, [showSuccess])
 
   useEffect(() => {
     if (!sent) return
@@ -99,25 +94,10 @@ export function ForgotPassword({ onBack, onSendLink, onResetPassword }) {
       </div>
 
       {showSuccess && (
-        <div className="forgot-password__alert" role="status">
-          <svg
-            className="forgot-password__alert-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 22 22"
-            fill="none"
-            width="22"
-            height="22"
-            aria-hidden="true"
-          >
-            <path
-              d="M15.2075 6.94833L9.16667 12.9892L5.87583 9.7075L4.58333 11L9.16667 15.5833L16.5 8.25L15.2075 6.94833ZM11 1.83333C5.94 1.83333 1.83333 5.94 1.83333 11C1.83333 16.06 5.94 20.1667 11 20.1667C16.06 20.1667 20.1667 16.06 20.1667 11C20.1667 5.94 16.06 1.83333 11 1.83333ZM11 18.3333C6.94833 18.3333 3.66667 15.0517 3.66667 11C3.66667 6.94833 6.94833 3.66667 11 3.66667C15.0517 3.66667 18.3333 6.94833 18.3333 11C18.3333 15.0517 15.0517 18.3333 11 18.3333Z"
-              fill="#43b6a3"
-            />
-          </svg>
-          <p className="forgot-password__alert-text">
-            Un lien de réinitialisation de mot de passe a été envoyé à votre adresse e-mail.
-          </p>
-        </div>
+        <ResponseAlert
+          message="Si nous trouvons un compte associé aux informations fournies, vous recevrez un e-mail contenant un lien de réinitialisation de mot de passe."
+          onClose={() => setShowSuccess(false)}
+        />
       )}
     </div>
   )

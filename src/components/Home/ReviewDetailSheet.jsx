@@ -10,6 +10,15 @@ import { useSheetViewTransition } from '../../hooks/useSheetViewTransition'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
 import { ReviewSummaryCard } from './ReviewSummaryCard'
 import { RespondFields } from './RespondFields'
+import {
+  GOOGLE_BOOST_DEFAULT_MESSAGE,
+  getReviewerPhone,
+  GoogleWordmark,
+  SmsIcon,
+  QrCodeIcon,
+  EmailIcon,
+  MoreIcon,
+} from '../Reviews/GoogleBoostShared'
 import './ReviewDetailSheet.css'
 
 const RATING_BARS = [
@@ -25,7 +34,7 @@ const NPS_BADGE_CLASS = {
   Détracteur: 'review-detail-nps-badge--detractor',
 }
 
-export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
+export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete, onSendGoogleBoost }) {
   useLockBodyScroll()
   const screenHeight = useStandaloneScreenHeight()
   // .review-detail-sheet's own max-height: 90vh (in CSS) is exposed to the
@@ -33,11 +42,12 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
   // useStandaloneScreenHeight for why screenHeight is the reliable value.
   const sheetMaxHeight = screenHeight * 0.9
   const npsCategory = getNpsCategory(parseFloat(review.rating))
-  // 'details' | 'respond' -- switching between them morphs the content of
-  // this same sheet (see withViewTransition) instead of opening a second
-  // modal on top of it.
+  // 'details' | 'respond' | 'google-boost' -- switching between them morphs
+  // the content of this same sheet (see withViewTransition) instead of
+  // opening a second modal on top of it.
   const [view, setView] = useState('details')
   const [replyText, setReplyText] = useState(review.response || '')
+  const [googleBoostMessage, setGoogleBoostMessage] = useState(GOOGLE_BOOST_DEFAULT_MESSAGE)
   const [isContentScrolled, setContentScrolled] = useState(false)
 
   const { swapInnerRef, isContentExiting, withViewTransition, swapStyle, onSwapTransitionEnd } =
@@ -45,6 +55,8 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
 
   const isEditing = Boolean(review.response)
   const isValid = replyText.trim().length > 0
+  const hasPendingGoogleReminder = !review.googleShared && Boolean(review.googleReminderSentDate)
+  const reviewerPhone = getReviewerPhone(review)
 
   const handleSubmit = () => {
     onSubmit?.(review, replyText.trim())
@@ -57,13 +69,24 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
     withViewTransition('details')
   }
 
+  const handleSendGoogleBoost = () => {
+    onSendGoogleBoost?.(review)
+    withViewTransition('details')
+  }
+
   return (
     <div className="review-detail-overlay" style={{ height: screenHeight }}>
       <div className="review-detail-backdrop" onClick={onClose} />
       <div
         className="review-detail-sheet"
         role="dialog"
-        aria-label={view === 'respond' ? "Répondre à l'avis" : "Détails de l'avis"}
+        aria-label={
+          view === 'respond'
+            ? "Répondre à l'avis"
+            : view === 'google-boost'
+              ? 'Boostez mon avis sur Google'
+              : "Détails de l'avis"
+        }
         style={{ maxHeight: sheetMaxHeight }}
       >
         <div className="review-detail-sheet__handle-row">
@@ -75,7 +98,7 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
             key={view}
             className={`review-detail-sheet__appbar-main${isContentExiting ? ' review-detail-sheet__appbar-main--exiting' : ''}`}
           >
-            {view === 'respond' && (
+            {view !== 'details' && (
               <button
                 type="button"
                 className="review-detail-sheet__back"
@@ -86,7 +109,13 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
               </button>
             )}
             <p className="review-detail-sheet__title">
-              {view === 'respond' ? (isEditing ? 'Modifier la réponse' : "Répondre à l'avis") : "Détails de l'avis"}
+              {view === 'respond' && (isEditing ? 'Modifier la réponse' : "Répondre à l'avis")}
+              {view === 'google-boost' && (
+                <>
+                  Boostez mon avis sur <GoogleWordmark />
+                </>
+              )}
+              {view === 'details' && "Détails de l'avis"}
             </p>
           </div>
           <button type="button" className="review-detail-sheet__close" onClick={onClose} aria-label="Fermer">
@@ -98,7 +127,7 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
           className="review-detail-sheet__content"
           onScroll={e => setContentScrolled(e.currentTarget.scrollTop > 0)}
         >
-          <ReviewSummaryCard review={review} />
+          {view !== 'google-boost' && <ReviewSummaryCard review={review} />}
 
           <div className="review-detail-swap" style={swapStyle} onTransitionEnd={onSwapTransitionEnd}>
             <div
@@ -149,10 +178,16 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
                     </div>
                     <div className="review-detail-info__row">
                       <p className="review-detail-info__label">Partage Google</p>
-                      <span className="review-detail-chip review-detail-chip--google">
-                        <img src={iconGoogle} alt="" />
-                        {review.googleShared ? 'Partagé' : 'Non Partagé'}
-                      </span>
+                      {hasPendingGoogleReminder ? (
+                        <p className="review-detail-info__value review-detail-info__value--pending">
+                          Rappel envoyé le {review.googleReminderSentDate}
+                        </p>
+                      ) : (
+                        <span className="review-detail-chip review-detail-chip--google">
+                          <img src={iconGoogle} alt="" />
+                          {review.googleShared ? 'Partagé' : 'Non Partagé'}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -172,8 +207,71 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
                     ))}
                   </div>
                 </>
-              ) : (
+              ) : view === 'respond' ? (
                 <RespondFields review={review} replyText={replyText} onReplyTextChange={setReplyText} />
+              ) : (
+                <>
+                  <p className="review-detail-google-boost-intro">
+                    Demandez à votre évaluateur de publier aussi son avis sur Google, car les avis publics augmentent
+                    votre visibilité, renforcent la confiance et aident votre entreprise à se démarquer.
+                  </p>
+
+                  <div className="review-detail-google-boost-section">
+                    <p className="review-detail-google-boost-label">Destinataire</p>
+                    <div className="review-detail-google-boost-recipient">
+                      <span className="review-detail-google-boost-avatar">
+                        {review.author.charAt(0).toUpperCase()}
+                      </span>
+                      <div className="review-detail-google-boost-recipient-text">
+                        <p className="review-detail-google-boost-recipient-name">{review.author}</p>
+                        <p className="review-detail-google-boost-recipient-contact">{reviewerPhone}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="review-detail-google-boost-section">
+                    <p className="review-detail-google-boost-label">Message au destinataire</p>
+                    <textarea
+                      className="review-detail-google-boost-textarea"
+                      value={googleBoostMessage}
+                      onChange={e => setGoogleBoostMessage(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="review-detail-google-boost-section">
+                    <p className="review-detail-google-boost-label">Envoyer par</p>
+                    <div className="review-detail-google-boost-channels">
+                      <button type="button" className="review-detail-google-boost-channel" onClick={handleSendGoogleBoost}>
+                        <span className="review-detail-google-boost-channel-icon">
+                          <SmsIcon />
+                        </span>
+                        SMS
+                      </button>
+                      <button type="button" className="review-detail-google-boost-channel" onClick={handleSendGoogleBoost}>
+                        <span className="review-detail-google-boost-channel-icon">
+                          <QrCodeIcon />
+                        </span>
+                        QR Code
+                      </button>
+                      <button type="button" className="review-detail-google-boost-channel" onClick={handleSendGoogleBoost}>
+                        <span className="review-detail-google-boost-channel-icon">
+                          <EmailIcon />
+                        </span>
+                        Email
+                      </button>
+                      <button
+                        type="button"
+                        className="review-detail-google-boost-channel review-detail-google-boost-channel--disabled"
+                        disabled
+                      >
+                        <span className="review-detail-google-boost-channel-icon review-detail-google-boost-channel-icon--disabled">
+                          <MoreIcon />
+                        </span>
+                        Plus
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -196,14 +294,18 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
                     Répondre
                   </button>
                 )}
-                {!review.googleShared && (
-                  <button type="button" className="review-detail-sheet__share-btn">
+                {!review.googleShared && !hasPendingGoogleReminder && (
+                  <button
+                    type="button"
+                    className="review-detail-sheet__share-btn"
+                    onClick={() => withViewTransition('google-boost')}
+                  >
                     <img src={iconGoogle} alt="" />
                     Demander à partager sur Google
                   </button>
                 )}
               </>
-            ) : (
+            ) : view === 'respond' ? (
               <>
                 <button
                   type="button"
@@ -220,7 +322,7 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete }) {
                   </button>
                 )}
               </>
-            )}
+            ) : null}
           </div>
           <div className="review-detail-sheet__home-indicator-wrap" />
         </div>

@@ -179,27 +179,20 @@
 /* Tier colors -- same amber/red the app already uses elsewhere for
    "needs a look" vs. "needs action now" (warning banners, détracteur
    badges), so this reads as the same severity language, not a new one. */
-.home__reputation--watch .home__reputation-row {
+.home__reputation--en-progres .home__reputation-row {
   color: #f29003;
 }
 
-.home__reputation--watch .home__reputation-dot {
+.home__reputation--en-progres .home__reputation-dot {
   background-color: #f29003;
 }
 
-.home__reputation--attention .home__reputation-row {
+.home__reputation--en-sommeil .home__reputation-row {
   color: #fc6530;
 }
 
-.home__reputation--attention .home__reputation-dot {
+.home__reputation--en-sommeil .home__reputation-dot {
   background-color: #fc6530;
-}
-
-.home__reputation-reason {
-  font-size: 11px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.7);
-  white-space: nowrap;
 }
 
 /* Dashboard */
@@ -237,15 +230,15 @@
   cursor: pointer;
 }
 
-/* Marks whichever tile is actually driving the reputation pill's tier (see
-   Home.jsx's REPUTATION_STATUS.flags) -- an inset border instead of a real
-   one so it doesn't shift the tile's own layout. */
-.home__stat--flagged-watch {
-  box-shadow: inset 3px 0 0 0 #f29003;
+/* Independent of the reputation badge above -- sans-réponse/à-récolter each
+   get this the moment their own ratio passes 49% of total avis. An inset
+   border instead of a real one so it doesn't shift the tile's own layout. */
+.home__stat--warning {
+  box-shadow: inset 3px 0 0 0 #fc6530;
 }
 
-.home__stat--flagged-attention {
-  box-shadow: inset 3px 0 0 0 #fc6530;
+.home__stat-value--warning {
+  color: #fc6530;
 }
 
 .home__stat-label {

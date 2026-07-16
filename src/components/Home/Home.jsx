@@ -35,73 +35,41 @@ const DEFAULT_COMPANY_ID = 'bastien-arfi'
 const DEFAULT_COMPANY_REVIEWS = COMPANY_REVIEWS_DATA[DEFAULT_COMPANY_ID].reviews
 const TOTAL_REVIEWS_COUNT = DEFAULT_COMPANY_REVIEWS.length
 const UNANSWERED_COUNT = DEFAULT_COMPANY_REVIEWS.filter(review => !review.response).length
-const NEGATIVE_COUNT = DEFAULT_COMPANY_REVIEWS.filter(
-  review => getNpsCategory(parseFloat(review.rating)) === 'Détracteur',
-).length
 const PENDING_COUNT = (COMPANY_PENDING_REVIEWS[DEFAULT_COMPANY_ID] || []).length
 
-// Ratios rather than raw counts for négatifs/sans-réponse -- 15 negatives
-// reads very differently out of 20 reviews than out of 200, so the count
-// alone can't tell "fine" from "worrying". À relancer has no natural total
-// to divide by (it's outstanding requests, not reviews), so it stays a raw
-// count.
-const NEGATIVE_ATTENTION_RATIO = 0.15
-const NEGATIVE_WATCH_RATIO = 0.08
-const UNANSWERED_ATTENTION_RATIO = 0.5
-const UNANSWERED_WATCH_RATIO = 0.25
-const PENDING_ATTENTION_COUNT = 10
-const PENDING_WATCH_COUNT = 5
+// "Ma note Opinion System" only counts reviews collected through Opinion
+// System AND certified -- Google-sourced reviews have their own separate
+// kpiGoogle rating, and non-certified reviews aren't held to the same bar.
+const CERTIFIED_OS_REVIEWS = DEFAULT_COMPANY_REVIEWS.filter(
+  review => review.source === 'opinion-system' && review.certification === 'certifie-os',
+)
+const OS_RATING =
+  CERTIFIED_OS_REVIEWS.length > 0
+    ? Math.round(
+        (CERTIFIED_OS_REVIEWS.reduce((sum, review) => sum + parseFloat(review.rating), 0) /
+          CERTIFIED_OS_REVIEWS.length) *
+          10,
+      ) / 10
+    : 0
+const [OS_RATING_WHOLE, OS_RATING_DECIMAL] = OS_RATING.toFixed(1).split('.')
 
-// Highest tier whose thresholds are breached wins; within a tier, négatifs
-// is called out first since a bad review hurts reputation more directly
-// than a slow reply or an unanswered questionnaire request.
-function getReputationStatus({ total, unansweredCount, negativeCount, pendingCount }) {
-  const unansweredRatio = total > 0 ? unansweredCount / total : 0
-  const negativeRatio = total > 0 ? negativeCount / total : 0
-
-  const tiers = [
-    {
-      tier: 'attention',
-      label: 'Nécessite votre attention',
-      thresholds: { negative: NEGATIVE_ATTENTION_RATIO, unanswered: UNANSWERED_ATTENTION_RATIO, pending: PENDING_ATTENTION_COUNT },
-    },
-    {
-      tier: 'watch',
-      label: 'Réputation à surveiller',
-      thresholds: { negative: NEGATIVE_WATCH_RATIO, unanswered: UNANSWERED_WATCH_RATIO, pending: PENDING_WATCH_COUNT },
-    },
-  ]
-
-  for (const { tier, label, thresholds } of tiers) {
-    const flags = {
-      negative: negativeRatio >= thresholds.negative,
-      unanswered: unansweredRatio >= thresholds.unanswered,
-      pending: pendingCount >= thresholds.pending,
-    }
-    if (flags.negative || flags.unanswered || flags.pending) {
-      const reason = flags.negative
-        ? `${negativeCount} avis négatifs`
-        : flags.unanswered
-          ? `${unansweredCount} avis sans réponse`
-          : `${pendingCount} relances en attente`
-      return { tier, label, reason, flags }
-    }
-  }
-
-  return {
-    tier: 'excellent',
-    label: 'Réputation excellente',
-    reason: null,
-    flags: { negative: false, unanswered: false, pending: false },
-  }
+// MVP reputation badge is driven purely by the OS rating, using the
+// validated business terminology/bands -- no longer a function of
+// négatifs/sans-réponse/à-relancer (those now only drive their own tile
+// warnings below, independently of this badge).
+function getReputationTier(rating) {
+  if (rating >= 4.5) return { tier: 'excellente', label: 'Réputation excellente' }
+  if (rating >= 3) return { tier: 'en-progres', label: 'Réputation en progrès' }
+  return { tier: 'en-sommeil', label: 'Réputation en sommeil' }
 }
 
-const REPUTATION_STATUS = getReputationStatus({
-  total: TOTAL_REVIEWS_COUNT,
-  unansweredCount: UNANSWERED_COUNT,
-  negativeCount: NEGATIVE_COUNT,
-  pendingCount: PENDING_COUNT,
-})
+const REPUTATION_TIER = getReputationTier(OS_RATING)
+
+// Sans-réponse and à-récolter each get their own independent warning once
+// they pass 49% of total avis -- a plain highlight, not a tiered badge.
+const WARNING_RATIO = 0.49
+const SANS_REPONSE_WARNING = TOTAL_REVIEWS_COUNT > 0 && UNANSWERED_COUNT / TOTAL_REVIEWS_COUNT > WARNING_RATIO
+const A_RECOLTER_WARNING = TOTAL_REVIEWS_COUNT > 0 && PENDING_COUNT / TOTAL_REVIEWS_COUNT > WARNING_RATIO
 // Matches Reviews.jsx's own TODAY anchor -- stamped onto a review the moment
 // a Google-boost reminder is sent from here.
 const TODAY_STR = '06/09/2026'
@@ -305,10 +273,10 @@ export function Home({
   }
 
   const unansweredCount = UNANSWERED_COUNT
-  const sansReponseFlagClass = REPUTATION_STATUS.flags.unanswered
-    ? ` home__stat--flagged-${REPUTATION_STATUS.tier}`
-    : ''
-  const aRelancerFlagClass = REPUTATION_STATUS.flags.pending ? ` home__stat--flagged-${REPUTATION_STATUS.tier}` : ''
+  const sansReponseFlagClass = SANS_REPONSE_WARNING ? ' home__stat--warning' : ''
+  const aRelancerFlagClass = A_RECOLTER_WARNING ? ' home__stat--warning' : ''
+  const sansReponseValueClass = SANS_REPONSE_WARNING ? ' home__stat-value--warning' : ''
+  const aRelancerValueClass = A_RECOLTER_WARNING ? ' home__stat-value--warning' : ''
 
   return (
     <div className="home">
@@ -336,10 +304,10 @@ export function Home({
               <span>La Boîte Immobilière</span>
             </div>
           </div>
-          <div className={`home__reputation home__reputation--${REPUTATION_STATUS.tier}`}>
+          <div className={`home__reputation home__reputation--${REPUTATION_TIER.tier}`}>
             <span className="home__reputation-row">
               <span className="home__reputation-dot" />
-              {REPUTATION_STATUS.label}
+              {REPUTATION_TIER.label}
             </span>
           </div>
         </div>
@@ -378,7 +346,10 @@ export function Home({
             <p className="home__stat-label">Ma note Opinion System</p>
             <div className="home__stat-value-row">
               <p className="home__stat-value">
-                4<span className="home__stat-value-sep">,</span>7<span className="home__stat-value-suffix">/5</span>
+                {OS_RATING_WHOLE}
+                <span className="home__stat-value-sep">,</span>
+                {OS_RATING_DECIMAL}
+                <span className="home__stat-value-suffix">/5</span>
               </p>
               <svg
                 className="home__stat-icon home__stat-icon--logo"
@@ -411,7 +382,7 @@ export function Home({
           >
             <p className="home__stat-label">Avis collectés</p>
             <div className="home__stat-value-row">
-              <p className="home__stat-value home__stat-value--medium">527</p>
+              <p className="home__stat-value home__stat-value--medium">{TOTAL_REVIEWS_COUNT}</p>
               <img src={iconStatReviews} alt="" className="home__stat-icon" />
             </div>
           </div>
@@ -429,7 +400,7 @@ export function Home({
           >
             <p className="home__stat-label home__stat-label--dark">Avis sans réponse</p>
             <div className="home__stat-value-row">
-              <p className="home__stat-value home__stat-value--medium home__stat-value--dark">
+              <p className={`home__stat-value home__stat-value--medium home__stat-value--dark${sansReponseValueClass}`}>
                 {String(unansweredCount).padStart(2, '0')}
               </p>
               <img src={iconStatChevron} alt="" className="home__stat-icon" />
@@ -449,7 +420,7 @@ export function Home({
           >
             <p className="home__stat-label home__stat-label--dark">Avis à récolter</p>
             <div className="home__stat-value-row">
-              <p className="home__stat-value home__stat-value--medium home__stat-value--dark">
+              <p className={`home__stat-value home__stat-value--medium home__stat-value--dark${aRelancerValueClass}`}>
                 {String(PENDING_COUNT).padStart(2, '0')}
               </p>
               <img src={iconStatChevron} alt="" className="home__stat-icon" />

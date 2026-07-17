@@ -4,6 +4,7 @@ import { Home } from './components/Home/Home'
 import { ForgotPassword } from './components/ForgotPassword/ForgotPassword'
 import { ResetPassword } from './components/ResetPassword/ResetPassword'
 import { Reviews } from './components/Reviews/Reviews'
+import { COMPANY_REVIEWS_DATA } from './components/Reviews/mockReviewsData'
 import { Questionnaire } from './components/Questionnaire/Questionnaire'
 import { Profile } from './components/Profile/Profile'
 import { Notifications } from './components/Notifications/Notifications'
@@ -24,6 +25,14 @@ const AUTH_PAGES = ['login', 'forgot-password', 'reset-password']
 function App() {
   const [page, setPage] = useState('login')
   const [notifications, setNotifications] = useState(initialNotifications)
+  // Lifted out of Reviews.jsx so Home's stat tiles can read the exact same
+  // live data Reviews mutates when a response is submitted/deleted --
+  // otherwise "Avis sans réponse" would only ever reflect whatever
+  // COMPANY_REVIEWS_DATA looked like at import time, never a response
+  // actioned afterward.
+  const [reviewsByCompany, setReviewsByCompany] = useState(() =>
+    Object.fromEntries(Object.entries(COMPANY_REVIEWS_DATA).map(([id, data]) => [id, data.reviews]))
+  )
   const [isSupportChatOpen, setIsSupportChatOpen] = useState(false)
   // Set right before navigating to 'reviews' so it can pre-select a tab
   // there (see handleOpenReviewsTab) -- cleared on every other navigation
@@ -108,6 +117,8 @@ function App() {
           initialTabLabel={reviewsInitialTab}
           initialSelectedReview={reviewsInitialReview}
           onAddNotification={handleAddNotification}
+          reviewsByCompany={reviewsByCompany}
+          onChangeReviewsByCompany={setReviewsByCompany}
         />
       )
     }
@@ -125,6 +136,7 @@ function App() {
           onOpenReviewsTab={handleOpenReviewsTab}
           onAddNotification={handleAddNotification}
           unreadNotifCount={notifications.filter(n => n.unread).length}
+          reviewsByCompany={reviewsByCompany}
         />
       )
     }

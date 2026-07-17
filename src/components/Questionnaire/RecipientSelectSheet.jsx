@@ -28,7 +28,9 @@ function prefillFromQuery(raw) {
   return { firstName: firstName || '', lastName: rest.join(' ') }
 }
 
-const CONTACTS = [
+// Hand-picked, pun-named contacts -- kept verbatim (ids included) since
+// nothing else about the app depends on them beyond this list.
+const NAMED_CONTACTS = [
   { id: 'annie', name: 'Annie Versaire', phone: '+33 6 12 34 56 78' },
   { id: 'anita', name: 'Anita Listing', phone: '+33 6 23 45 67 89' },
   { id: 'artie', name: 'Artie Choke', phone: '+33 6 34 56 78 90' },
@@ -48,6 +50,41 @@ const CONTACTS = [
   { id: 'marge', name: 'Marge Arita', phone: '+33 6 44 55 66 77' },
   { id: 'carrie', name: 'Carrie Oki', phone: '+33 6 50 61 72 83' },
   { id: 'robin', name: 'Robin Banks', phone: '+33 6 60 71 82 93' },
+]
+
+// Fills the rest of the phone's "contacts" out to a realistic ~100 so the
+// list actually needs to scroll -- cycled first/last name pools the same
+// way CollaboratorSelectSheet.jsx generates its collaborators.
+const GEN_FIRST_NAMES = [
+  'Camille', 'Julien', 'Sophie', 'Nicolas', 'Claire', 'Antoine', 'Léa', 'Maxime', 'Julie', 'Thomas',
+  'Emma', 'Hugo', 'Chloé', 'Lucas', 'Manon', 'Mathieu', 'Sarah', 'Alexandre', 'Laura', 'Pierre',
+  'Charlotte', 'Kevin', 'Amandine', 'Florian', 'Aurélie', 'Baptiste', 'Marine', 'Romain', 'Elodie', 'Vincent',
+]
+const GEN_LAST_NAMES = [
+  'Dupont', 'Moreau', 'Lefevre', 'Girard', 'Bonnet', 'Rousseau', 'Fontaine', 'Chevalier', 'Robert', 'Petit',
+  'Leroy', 'Simon', 'Laurent', 'Michel', 'Garcia', 'David', 'Bertrand', 'Roux', 'Fournier', 'Morel',
+  'Andre', 'Mercier', 'Blanc', 'Guerin', 'Boyer', 'Renard', 'Faure', 'Dumas', 'Perrin', 'Marchand',
+]
+const GENERATED_CONTACT_COUNT = 100 - NAMED_CONTACTS.length
+
+// Spread across the 8-digit space with a large, fixed step -- for a sample
+// this small (under 100) that never wraps or collides.
+function generatedPhone(index) {
+  const digits = String(20345678 + index * 91177).padStart(8, '0')
+  return `+33 6 ${digits.slice(0, 2)} ${digits.slice(2, 4)} ${digits.slice(4, 6)} ${digits.slice(6, 8)}`
+}
+
+const CONTACTS = [
+  ...NAMED_CONTACTS,
+  ...Array.from({ length: GENERATED_CONTACT_COUNT }, (_, i) => {
+    const firstName = GEN_FIRST_NAMES[i % GEN_FIRST_NAMES.length]
+    const lastName = GEN_LAST_NAMES[Math.floor(i / GEN_FIRST_NAMES.length) % GEN_LAST_NAMES.length]
+    return {
+      id: `${firstName}-${lastName}-${i}`.toLowerCase(),
+      name: `${firstName} ${lastName}`,
+      phone: generatedPhone(i),
+    }
+  }),
 ]
 
 export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
@@ -70,6 +107,9 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
   const [contactLanguage, setContactLanguage] = useState('fr')
   const [contactPhone, setContactPhone] = useState('')
   const [contactEmail, setContactEmail] = useState('')
+  // Cosmetic only -- there's no real device Contacts API behind this,
+  // same as ContactsPermissionModal's "Allow" earlier in this flow.
+  const [addToPhone, setAddToPhone] = useState(true)
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -142,6 +182,7 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
     setContactLanguage('fr')
     setContactPhone(prefill.phone || '')
     setContactEmail(prefill.email || '')
+    setAddToPhone(true)
     withViewTransition('add-contact')
   }
 
@@ -337,6 +378,19 @@ export function RecipientSelectSheet({ initialSelected, onClose, onConfirm }) {
                     value={contactEmail}
                     onChange={e => setContactEmail(e.target.value)}
                   />
+                </div>
+
+                <div className="recipient-sheet__field recipient-sheet__field--switch">
+                  <span className="recipient-sheet__switch-label">Ajouter à votre téléphone</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={addToPhone}
+                    className={`recipient-sheet__switch${addToPhone ? ' recipient-sheet__switch--on' : ''}`}
+                    onClick={() => setAddToPhone(v => !v)}
+                  >
+                    <span className="recipient-sheet__switch-knob" />
+                  </button>
                 </div>
               </div>
             )}

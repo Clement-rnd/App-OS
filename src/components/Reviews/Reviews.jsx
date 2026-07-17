@@ -271,7 +271,14 @@ const NAME_EXIT_MS = 180
 // Matches the CSS transition duration on .reviews__list > .reviews__card.
 const LIST_EXIT_MS = 180
 
-export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, onAddNotification }) {
+export function Reviews({
+  onNavigate,
+  initialTabLabel,
+  initialSelectedReview,
+  onAddNotification,
+  reviewsByCompany,
+  onChangeReviewsByCompany,
+}) {
   const isLoading = useSimulatedLoading('reviews')
   const [isShareSheetOpen, setShareSheetOpen] = useState(false)
   const [isCompanySheetOpen, setCompanySheetOpen] = useState(false)
@@ -336,9 +343,7 @@ export function Reviews({ onNavigate, initialTabLabel, initialSelectedReview, on
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const loadMoreSentinelRef = useRef(null)
-  const [reviewsByCompany, setReviewsByCompany] = useState(() =>
-    Object.fromEntries(Object.entries(COMPANY_REVIEWS_DATA).map(([id, data]) => [id, data.reviews]))
-  )
+  const setReviewsByCompany = onChangeReviewsByCompany
   // A notification (e.g. an already-answered negative review) can deep-link
   // straight to that review's details sheet (see App.jsx's
   // handleOpenReviewDetails) -- same lazy-initializer reasoning as

@@ -28,30 +28,13 @@ import { buildGoogleShareConfirmedNotification } from '../Notifications/notifica
 import './Home.css'
 
 const initialReviews = CANONICAL_REVIEWS.map(review => ({ ...review, response: null }))
-// Same default company Reviews.jsx starts on (COMPANIES[0] there) -- every
-// stat below is computed from this one shared dataset instead of the small
-// carousel sample above, so they always agree with what Mes Avis shows.
+// Same default company Reviews.jsx starts on (COMPANIES[0] there). Unlike
+// before, the actual review list now comes in as a prop (see Home()below)
+// instead of a static snapshot of COMPANY_REVIEWS_DATA taken once at import
+// time -- that snapshot never picked up a response actioned in Mes Avis
+// afterward, so this tile could go stale the moment you left the page.
 const DEFAULT_COMPANY_ID = 'bastien-arfi'
-const DEFAULT_COMPANY_REVIEWS = COMPANY_REVIEWS_DATA[DEFAULT_COMPANY_ID].reviews
-const TOTAL_REVIEWS_COUNT = DEFAULT_COMPANY_REVIEWS.length
-const UNANSWERED_COUNT = DEFAULT_COMPANY_REVIEWS.filter(review => !review.response).length
 const PENDING_COUNT = (COMPANY_PENDING_REVIEWS[DEFAULT_COMPANY_ID] || []).length
-
-// "Ma note Opinion System" only counts reviews collected through Opinion
-// System AND certified -- Google-sourced reviews have their own separate
-// kpiGoogle rating, and non-certified reviews aren't held to the same bar.
-const CERTIFIED_OS_REVIEWS = DEFAULT_COMPANY_REVIEWS.filter(
-  review => review.source === 'opinion-system' && review.certification === 'certifie-os',
-)
-const OS_RATING =
-  CERTIFIED_OS_REVIEWS.length > 0
-    ? Math.round(
-        (CERTIFIED_OS_REVIEWS.reduce((sum, review) => sum + parseFloat(review.rating), 0) /
-          CERTIFIED_OS_REVIEWS.length) *
-          10,
-      ) / 10
-    : 0
-const [OS_RATING_WHOLE, OS_RATING_DECIMAL] = OS_RATING.toFixed(1).split('.')
 
 // MVP reputation badge is driven purely by the OS rating, using the
 // validated business terminology/bands -- no longer a function of
@@ -63,13 +46,9 @@ function getReputationTier(rating) {
   return { tier: 'en-sommeil', label: 'Réputation en sommeil' }
 }
 
-const REPUTATION_TIER = getReputationTier(OS_RATING)
-
 // Sans-réponse and à-récolter each get their own independent warning once
 // they pass 49% of total avis -- a plain highlight, not a tiered badge.
 const WARNING_RATIO = 0.49
-const SANS_REPONSE_WARNING = TOTAL_REVIEWS_COUNT > 0 && UNANSWERED_COUNT / TOTAL_REVIEWS_COUNT > WARNING_RATIO
-const A_RECOLTER_WARNING = TOTAL_REVIEWS_COUNT > 0 && PENDING_COUNT / TOTAL_REVIEWS_COUNT > WARNING_RATIO
 // Matches Reviews.jsx's own TODAY anchor -- stamped onto a review the moment
 // a Google-boost reminder is sent from here.
 const TODAY_STR = '06/09/2026'
@@ -213,9 +192,38 @@ export function Home({
   onOpenReviewsTab,
   onAddNotification,
   unreadNotifCount = 0,
+  reviewsByCompany,
 }) {
   const isLoading = useSimulatedLoading('home')
   const reviewsScrollerRef = useRef(null)
+
+  // Recomputed on every render (not a one-time snapshot) so a response
+  // actioned in Mes Avis -- which mutates this same shared prop, lifted up
+  // to App.jsx -- shows up here immediately, no matter which screen you
+  // navigate back from.
+  const defaultCompanyReviews = reviewsByCompany?.[DEFAULT_COMPANY_ID] ?? COMPANY_REVIEWS_DATA[DEFAULT_COMPANY_ID].reviews
+  const totalReviewsCount = defaultCompanyReviews.length
+  const unansweredCount = defaultCompanyReviews.filter(review => !review.response).length
+
+  // "Ma note Opinion System" only counts reviews collected through Opinion
+  // System AND certified -- Google-sourced reviews have their own separate
+  // kpiGoogle rating, and non-certified reviews aren't held to the same bar.
+  const certifiedOsReviews = defaultCompanyReviews.filter(
+    review => review.source === 'opinion-system' && review.certification === 'certifie-os',
+  )
+  const osRating =
+    certifiedOsReviews.length > 0
+      ? Math.round(
+          (certifiedOsReviews.reduce((sum, review) => sum + parseFloat(review.rating), 0) /
+            certifiedOsReviews.length) *
+            10,
+        ) / 10
+      : 0
+  const [osRatingWhole, osRatingDecimal] = osRating.toFixed(1).split('.')
+  const reputationTier = getReputationTier(osRating)
+
+  const sansReponseWarning = totalReviewsCount > 0 && unansweredCount / totalReviewsCount > WARNING_RATIO
+  const aRecolterWarning = totalReviewsCount > 0 && PENDING_COUNT / totalReviewsCount > WARNING_RATIO
   const [reviews, setReviews] = useState(initialReviews)
   const [activeReviewIndex, setActiveReviewIndex] = useState(0)
   const [selectedReview, setSelectedReview] = useState(null)
@@ -272,11 +280,10 @@ export function Home({
     setActiveReviewIndex(Math.max(0, Math.min(index, reviews.length - 1)))
   }
 
-  const unansweredCount = UNANSWERED_COUNT
-  const sansReponseFlagClass = SANS_REPONSE_WARNING ? ' home__stat--warning' : ''
-  const aRelancerFlagClass = A_RECOLTER_WARNING ? ' home__stat--warning' : ''
-  const sansReponseValueClass = SANS_REPONSE_WARNING ? ' home__stat-value--warning' : ''
-  const aRelancerValueClass = A_RECOLTER_WARNING ? ' home__stat-value--warning' : ''
+  const sansReponseFlagClass = sansReponseWarning ? ' home__stat--warning' : ''
+  const aRelancerFlagClass = aRecolterWarning ? ' home__stat--warning' : ''
+  const sansReponseValueClass = sansReponseWarning ? ' home__stat-value--warning' : ''
+  const aRelancerValueClass = aRecolterWarning ? ' home__stat-value--warning' : ''
 
   return (
     <div className="home">
@@ -304,10 +311,10 @@ export function Home({
               <span>La Boîte Immobilière</span>
             </div>
           </div>
-          <div className={`home__reputation home__reputation--${REPUTATION_TIER.tier}`}>
+          <div className={`home__reputation home__reputation--${reputationTier.tier}`}>
             <span className="home__reputation-row">
               <span className="home__reputation-dot" />
-              {REPUTATION_TIER.label}
+              {reputationTier.label}
             </span>
           </div>
         </div>
@@ -346,9 +353,9 @@ export function Home({
             <p className="home__stat-label">Ma note Opinion System</p>
             <div className="home__stat-value-row">
               <p className="home__stat-value">
-                {OS_RATING_WHOLE}
+                {osRatingWhole}
                 <span className="home__stat-value-sep">,</span>
-                {OS_RATING_DECIMAL}
+                {osRatingDecimal}
                 <span className="home__stat-value-suffix">/5</span>
               </p>
               <svg
@@ -382,7 +389,7 @@ export function Home({
           >
             <p className="home__stat-label">Avis collectés</p>
             <div className="home__stat-value-row">
-              <p className="home__stat-value home__stat-value--medium">{TOTAL_REVIEWS_COUNT}</p>
+              <p className="home__stat-value home__stat-value--medium">{totalReviewsCount}</p>
               <img src={iconStatReviews} alt="" className="home__stat-icon" />
             </div>
           </div>

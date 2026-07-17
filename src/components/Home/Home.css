@@ -234,11 +234,11 @@
    get this the moment their own ratio passes 49% of total avis. An inset
    border instead of a real one so it doesn't shift the tile's own layout. */
 .home__stat--warning {
-  box-shadow: inset 3px 0 0 0 #fc6530;
+  box-shadow: inset 3px 0 0 0 #f29003;
 }
 
 .home__stat-value--warning {
-  color: #fc6530;
+  color: #f29003;
 }
 
 .home__stat-label {

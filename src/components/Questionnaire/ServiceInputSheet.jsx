@@ -1,8 +1,5 @@
 import { useState } from 'react'
 import iconClose from '../../assets/home/icon-detail-close.svg'
-import iconBack from '../../assets/questionnaire/icon-back.svg'
-import iconAddRecipient from '../../assets/questionnaire/icon-add-recipient.svg'
-import iconChevronRightSmall from '../../assets/questionnaire/icon-chevron-right-small.svg'
 import iconServiceTag from '../../assets/questionnaire/icon-service-tag.svg'
 import iconServiceHouse from '../../assets/questionnaire/icon-service-house.svg'
 import iconServiceKey from '../../assets/questionnaire/icon-service-key.svg'
@@ -16,14 +13,13 @@ import './ServiceInputSheet.css'
 const MAX_LENGTH = 80
 const PLACEHOLDER = 'Exemple : Annonce exclusive : appartement de 2 chambres à Bordeaux'
 const CLOSE_ANIMATION_MS = 380
-const TITLE = 'Quel service avez-vous récemment fourni ?'
+const TITLE = 'Quel service avez-vous récemment fourni ?'
 const INFO_BANNER_INTRO =
   'Les informations saisies ici seront visibles dans votre avis public. Assurez-vous qu’elles reflètent bien votre expérience.'
 const INFO_BANNER_HINT = 'Sélectionnez une option ci-dessous ou rédigez votre propre texte.'
 
-// Capped at 4 -- the most common services, so the list stays a quick pick
-// instead of a long scroll; anything else goes through "Rédiger ma propre
-// réponse" below.
+// Capped at 4 -- the most common services, so the list stays a quick pick;
+// anything else can be typed directly into the field below.
 const SERVICES = [
   {
     id: 'vente',
@@ -54,17 +50,13 @@ const SERVICES = [
 export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
   useLockBodyScroll()
   const screenHeight = useStandaloneScreenHeight()
-  const matchedService = SERVICES.find(service => service.title === initialValue)
-  // Both derived from the same boolean so the typing screen can never open
-  // with an empty field while a custom answer already exists -- editing an
-  // answer that matches one of the presets instead reopens on the choices
-  // list, with that preset showing its checkmark (see isSelected below).
-  const opensAsCustom = !matchedService && Boolean(initialValue)
-  const [view, setView] = useState(opensAsCustom ? 'custom' : 'choices')
-  const [value, setValue] = useState(opensAsCustom ? initialValue : '')
-  const [selectedServiceId, setSelectedServiceId] = useState(matchedService?.id ?? null)
+  const [value, setValue] = useState(initialValue || '')
   const [isClosing, setIsClosing] = useState(false)
   const isValid = value.trim().length > 0
+  // Derived, not stored -- a preset is "selected" only while the field's
+  // text exactly matches its title, so typing a single character away from
+  // a pick clears its checkmark instead of leaving a stale one behind.
+  const selectedService = SERVICES.find(service => service.title === value.trim())
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -73,10 +65,9 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
   }
 
   const handleClose = () => closeWithAnimation(onClose)
-  const handleSelectService = service => {
-    setSelectedServiceId(service.id)
-    closeWithAnimation(() => onSubmit?.(service.title))
-  }
+  // Fills the field rather than submitting -- the user can still edit,
+  // clear, or pick a different preset before confirming.
+  const handleSelectService = service => setValue(service.title)
   const handleSubmit = () => closeWithAnimation(() => onSubmit?.(value.trim()))
 
   const { dragHandlers, dragStyle, isDragClosing } = useSheetDrag({
@@ -99,11 +90,6 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
 
         <div className="service-sheet__appbar">
           <div className="service-sheet__title-row">
-            {view === 'custom' && (
-              <button type="button" className="service-sheet__back-btn" aria-label="Retour" onClick={() => setView('choices')}>
-                <img src={iconBack} alt="" />
-              </button>
-            )}
             <p className="service-sheet__title">{TITLE}</p>
           </div>
           <button type="button" className="service-sheet__close" onClick={handleClose} aria-label="Fermer">
@@ -118,74 +104,60 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
           </p>
         </div>
 
-        {view === 'choices' ? (
-          <>
-            <div className="service-sheet__list">
-              {SERVICES.map(service => {
-                const isSelected = service.id === selectedServiceId
-                return (
-                  <button
-                    key={service.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    className={`service-sheet__item${isSelected ? ' service-sheet__item--selected' : ''}`}
-                    onClick={() => handleSelectService(service)}
-                  >
-                    <span className="service-sheet__item-badge">
-                      <img src={service.icon} alt="" />
-                    </span>
-                    <span className="service-sheet__item-text">
-                      <span className="service-sheet__item-title">{service.title}</span>
-                      <span className="service-sheet__item-subtitle">{service.subtitle}</span>
-                    </span>
-                    {isSelected && <img src={iconCheckSelected} alt="" className="service-sheet__item-check" />}
-                  </button>
-                )
-              })}
+        <div className="service-sheet__scroll">
+          <div className="service-sheet__list">
+            {SERVICES.map(service => {
+              const isSelected = service.id === selectedService?.id
+              return (
+                <button
+                  key={service.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  className={`service-sheet__item${isSelected ? ' service-sheet__item--selected' : ''}`}
+                  onClick={() => handleSelectService(service)}
+                >
+                  <span className="service-sheet__item-badge">
+                    <img src={service.icon} alt="" />
+                  </span>
+                  <span className="service-sheet__item-text">
+                    <span className="service-sheet__item-title">{service.title}</span>
+                    <span className="service-sheet__item-subtitle">{service.subtitle}</span>
+                  </span>
+                  {isSelected && <img src={iconCheckSelected} alt="" className="service-sheet__item-check" />}
+                </button>
+              )
+            })}
+          </div>
 
-              <button type="button" className="service-sheet__item" onClick={() => setView('custom')}>
-                <span className="service-sheet__item-badge service-sheet__item-badge--accent">
-                  <img src={iconAddRecipient} alt="" />
-                </span>
-                <span className="service-sheet__item-text">
-                  <span className="service-sheet__item-title">Rédiger ma propre réponse</span>
-                </span>
-                <img src={iconChevronRightSmall} alt="" className="service-sheet__item-chevron" />
-              </button>
+          <div className="service-sheet__content">
+            <p className="service-sheet__field-label">Votre réponse</p>
+            <div className="service-sheet__field">
+              <textarea
+                className="service-sheet__textarea"
+                placeholder={PLACEHOLDER}
+                value={value}
+                maxLength={MAX_LENGTH}
+                onChange={e => setValue(e.target.value)}
+              />
+              <span className="service-sheet__counter">
+                {value.length}/{MAX_LENGTH}
+              </span>
             </div>
-          </>
-        ) : (
-          <>
-            <div className="service-sheet__content">
-              <div className="service-sheet__field">
-                <textarea
-                  className="service-sheet__textarea"
-                  placeholder={PLACEHOLDER}
-                  value={value}
-                  maxLength={MAX_LENGTH}
-                  onChange={e => setValue(e.target.value)}
-                  autoFocus
-                />
-                <span className="service-sheet__counter">
-                  {value.length}/{MAX_LENGTH}
-                </span>
-              </div>
-            </div>
+          </div>
+        </div>
 
-            <div className="service-sheet__footer">
-              <button
-                type="button"
-                className={`service-sheet__submit-btn${isValid ? ' service-sheet__submit-btn--enabled' : ''}`}
-                disabled={!isValid}
-                onClick={handleSubmit}
-              >
-                Confirmer
-              </button>
-              <div className="service-sheet__home-indicator-wrap" />
-            </div>
-          </>
-        )}
+        <div className="service-sheet__footer">
+          <button
+            type="button"
+            className={`service-sheet__submit-btn${isValid ? ' service-sheet__submit-btn--enabled' : ''}`}
+            disabled={!isValid}
+            onClick={handleSubmit}
+          >
+            Confirmer
+          </button>
+          <div className="service-sheet__home-indicator-wrap" />
+        </div>
       </div>
     </div>
   )

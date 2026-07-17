@@ -12,7 +12,7 @@ const initialManager = {
   id: 'u-1',
   firstName: 'Marc',
   lastName: 'Delacroix',
-  role: 'Manager',
+  role: 'Gestionnaire',
   language: 'fr-FR',
   phone: '+33 6 12 34 56 78',
   email: 'marc.delacroix@lbi.fr',

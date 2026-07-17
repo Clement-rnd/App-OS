@@ -112,24 +112,6 @@
   color: #041b44;
 }
 
-.send-sheet__back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  padding: 4px;
-  margin-left: -4px;
-  border: none;
-  border-radius: 100px;
-  background: none;
-  cursor: pointer;
-}
-
-.send-sheet__back-btn img {
-  width: 24px;
-  height: 24px;
-}
-
 .send-sheet__pagination {
   display: flex;
   align-items: center;
@@ -250,25 +232,6 @@
   font-size: 12px;
   font-weight: 500;
   color: #8ea1b2;
-}
-
-.send-sheet__qr-box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 261px;
-  padding: 16px;
-  border-radius: 20px;
-  background-color: #f7fafc;
-  box-sizing: border-box;
-}
-
-.send-sheet__qr-image {
-  width: 230px;
-  height: 230px;
-  max-width: 100%;
-  border-radius: 4px;
 }
 
 .send-sheet__message {
@@ -394,66 +357,5 @@
 
 .send-sheet__auto-send-chevron--active {
   transform: rotate(90deg);
-}
-
-/* Simulated SMS/Email/QR send screens */
-.send-sheet__sim-banner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background-color: rgba(44, 149, 255, 0.1);
-  font-family: 'Poppins', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: #041b44;
-}
-
-.send-sheet__sim-banner img {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.send-sheet__sim-subject,
-.send-sheet__sim-message {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #dfe9ef;
-  border-radius: 12px;
-  background-color: #f7fafc;
-  font-family: 'Poppins', sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: #041b44;
-  white-space: pre-wrap;
-  box-sizing: border-box;
-}
-
-.send-sheet__confirm-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  height: 44px;
-  border: none;
-  border-radius: 10px;
-  background-color: #ffd500;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #041b44;
-  animation: send-sheet-content-fade-in 280ms ease-out both;
-}
-
-.send-sheet__confirm-btn-icon {
-  width: 18px;
-  height: 18px;
-  filter: brightness(0) saturate(100%);
 }
 

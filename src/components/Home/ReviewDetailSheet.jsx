@@ -160,7 +160,7 @@ export function ReviewDetailSheet({ review, onClose, onSubmit, onDelete, onSendG
                         Type de questionnaire
                       </p>
                       <span className="review-detail-chip">
-                        {review.certification === 'standard-os' ? 'Standard OS' : 'Certifié OS'}
+                        {review.certification === 'standard-os' ? 'Simple OS' : 'Certifié OS'}
                       </span>
                     </div>
                     <div className="review-detail-info__row">

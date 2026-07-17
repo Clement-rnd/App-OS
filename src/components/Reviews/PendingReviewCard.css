@@ -17,7 +17,7 @@
 }
 
 .pending-card__author {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #041b44;
 }
@@ -67,7 +67,7 @@
   cursor: pointer;
   text-align: left;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #041b44;
   white-space: nowrap;
@@ -90,7 +90,7 @@
 }
 
 .pending-card__service {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   color: #8ea1b2;
 }
@@ -99,7 +99,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   color: #8ea1b2;
 }
@@ -114,7 +114,7 @@
   align-items: center;
   gap: 4px;
   padding-top: 8px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #f29003;
 }
@@ -126,7 +126,7 @@
 
 .pending-card__meta {
   padding-top: 6px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: #8ea1b2;
 }
@@ -147,7 +147,7 @@
   background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: #f29003;
 }

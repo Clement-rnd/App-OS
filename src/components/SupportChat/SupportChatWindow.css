@@ -127,7 +127,7 @@
 
 .support-chat-panel__hub-title {
   flex: 1;
-  font-size: 19px;
+  font-size: 23px;
   font-weight: 700;
   color: #ffffff;
 }
@@ -163,7 +163,7 @@
   outline: none;
   background: none;
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
+  font-size: 16px;
   color: #041b44;
 }
 
@@ -195,7 +195,7 @@
 }
 
 .support-chat-panel__title {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: #ffffff;
   white-space: nowrap;
@@ -204,7 +204,7 @@
 }
 
 .support-chat-panel__subtitle {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.65);
   white-space: nowrap;
@@ -265,7 +265,7 @@
 }
 
 .support-chat-message__label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #041b44;
 }
@@ -277,7 +277,7 @@
   padding: 10px 14px;
   border-radius: 16px 16px 16px 4px;
   background-color: #f0f6f9;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.4;
   color: #041b44;
@@ -296,7 +296,7 @@
 .support-chat-message__time {
   align-self: flex-end;
   margin-top: 4px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   color: #8ea1b2;
 }
@@ -374,7 +374,7 @@
   outline: none;
   background: none;
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
+  font-size: 16px;
   color: #041b44;
 }
 
@@ -429,7 +429,7 @@
 .support-chat-panel__disclaimer {
   padding: 0 16px max(10px, env(safe-area-inset-bottom));
   text-align: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 400;
   color: #8ea1b2;
   flex-shrink: 0;
@@ -468,7 +468,7 @@
   border-radius: 100px;
   background-color: #2c95ff;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #ffffff;
 }
@@ -500,7 +500,7 @@
   flex: 1;
   min-width: 0;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #041b44;
   white-space: nowrap;
@@ -511,14 +511,14 @@
 .support-chat-history__time {
   flex-shrink: 0;
   font-family: 'Poppins', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: #8ea1b2;
 }
 
 .support-chat-history__preview {
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   color: #8ea1b2;
   white-space: nowrap;
@@ -540,7 +540,7 @@
 .support-chat-help__section-title {
   margin: 4px 0 8px;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: #8ea1b2;
   text-transform: uppercase;
@@ -579,7 +579,7 @@
 
 .support-chat-help__article span {
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.4;
   color: #041b44;
@@ -617,14 +617,14 @@
 
 .support-chat-help__category-name {
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #041b44;
 }
 
 .support-chat-help__category-count {
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   color: #8ea1b2;
 }
@@ -658,7 +658,7 @@
   border: 1.5px solid transparent;
   background-color: #f0f6f9;
   font-family: 'Poppins', sans-serif;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   color: #041b44;
   cursor: pointer;

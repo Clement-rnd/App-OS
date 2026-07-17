@@ -102,7 +102,7 @@
 
 .collaborator-sheet__title {
   flex: 1;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.15px;
   color: #041b44;
@@ -168,7 +168,7 @@
   outline: none;
   background: none;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 400;
   color: #041b44;
 }
@@ -196,7 +196,7 @@
 .collaborator-sheet__empty {
   padding: 32px 16px;
   text-align: center;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   color: #8ea1b2;
 }
@@ -249,7 +249,7 @@
 }
 
 .collaborator-sheet__name {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 500;
   color: #041b44;
   overflow: hidden;
@@ -258,7 +258,7 @@
 }
 
 .collaborator-sheet__email {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: #8ea1b2;
   overflow: hidden;

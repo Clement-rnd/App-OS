@@ -7,11 +7,11 @@ import phoneIllustration1 from '../../assets/home/phone-illustration-1.svg'
 import phoneIllustration2 from '../../assets/home/phone-illustration-2.svg'
 import phoneIllustration3 from '../../assets/home/phone-illustration-3.svg'
 import backgroundStars from '../../assets/home/background-stars.svg'
-import iconReviewRating from '../../assets/home/icon-review-rating.svg'
 import iconGoogle from '../../assets/home/icon-google.svg'
 import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
+import iconReviewRating from '../../assets/home/icon-review-rating.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
 import { StarRating } from '../StarRating/StarRating'
 import { ReviewDetailSheet } from './ReviewDetailSheet'
@@ -308,7 +308,7 @@ export function Home({
           <div className="home__greeting-text">
             <p className="home__greeting-name">Marc Delacroix</p>
             <div className="home__greeting-company">
-              <span>La Boîte Immobilière</span>
+              <span>La Boîte IMMO</span>
             </div>
           </div>
           <div className={`home__reputation home__reputation--${reputationTier.tier}`}>
@@ -350,7 +350,7 @@ export function Home({
           ) : (
             <>
           <div className="home__stat home__stat--tint">
-            <p className="home__stat-label">Ma note Opinion System</p>
+            <p className="home__stat-label">Note Opinion System</p>
             <div className="home__stat-value-row">
               <p className="home__stat-value">
                 {osRatingWhole}
@@ -439,12 +439,11 @@ export function Home({
 
         <div className="home__cta">
           <div className="home__cta-text">
-            <h2 className="home__cta-heading">
-              Améliorez
-              <br />
-              votre réputation
-            </h2>
-            <p className="home__cta-subtext">en envoyant des questionnaires</p>
+            <h2 className="home__cta-heading">Améliorez votre réputation</h2>
+            <p className="home__cta-subtext">
+              en envoyant des questionnaires <span className="home__cta-subtext-highlight">Certifiés</span> ou{' '}
+              <span className="home__cta-subtext-highlight">Simples</span>
+            </p>
             <button type="button" className="home__cta-btn" onClick={onOpenQuestionnaire}>
               Récolter des avis
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" width="18" height="18">
@@ -471,8 +470,9 @@ export function Home({
       <div className="home__reviews">
         <div className="home__reviews-header">
           <p className="home__reviews-title">Derniers avis reçus</p>
-          <button type="button" className="home__reviews-see-all">
+          <button type="button" className="home__reviews-see-all" onClick={() => onNavigate?.('chat')}>
             Voir tout
+            <img src={iconChevronRight} alt="" className="home__reviews-see-all-icon" />
           </button>
         </div>
 

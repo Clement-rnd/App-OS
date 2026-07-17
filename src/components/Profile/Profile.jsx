@@ -19,7 +19,7 @@ const initialManager = {
 }
 
 const initialCompany = {
-  name: 'La Boîte Immobilière',
+  name: 'La Boîte IMMO',
   logoUrl: null,
   coverUrl: null,
   brandColors: ['#2c95ff', '#1cb68d'],

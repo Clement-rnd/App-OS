@@ -23,7 +23,7 @@
   border: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: #ffffff;
 }
@@ -69,7 +69,7 @@
   border-radius: 100px;
   background-color: #ede7f6;
   font-family: 'Poppins', sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.15px;
   color: #4527a0;
@@ -109,7 +109,7 @@
 }
 
 .notif-row__message {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.4;
   color: #041b44;
@@ -130,7 +130,7 @@
 
 .notif-row__time {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: #b8c2cc;
   white-space: nowrap;
@@ -146,7 +146,7 @@
   background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.16px;
   color: #041b44;

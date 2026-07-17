@@ -68,7 +68,7 @@
 
 .notifications__title {
   flex: 1;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 700;
   color: #ffffff;
   white-space: nowrap;
@@ -117,7 +117,7 @@
   background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: #041b44;
   white-space: nowrap;
@@ -189,7 +189,7 @@
   background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 400;
   letter-spacing: 0.4px;
   color: #8ea1b2;
@@ -212,7 +212,7 @@
   padding: 0 2px;
   border-radius: 10px;
   background-color: #d32f2f;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: #ffffff;
   box-sizing: border-box;
@@ -284,7 +284,7 @@
   padding: 10px 20px 11px;
   background-color: #f7fafc;
   border-bottom: 1px solid #dfe9ef;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: #8ea1b2;
 }
@@ -292,7 +292,7 @@
 .notifications__empty {
   padding: 48px 16px;
   text-align: center;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   color: #8ea1b2;
 }

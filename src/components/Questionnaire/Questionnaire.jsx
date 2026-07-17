@@ -1,10 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import iconClose from '../../assets/questionnaire/icon-close.svg'
+import iconBack from '../../assets/questionnaire/icon-back.svg'
 import iconSendDisabled from '../../assets/questionnaire/icon-send-disabled.svg'
 import iconChevron from '../../assets/questionnaire/icon-chevron.svg'
 import iconCheckFilled from '../../assets/questionnaire/icon-check-filled.svg'
 import iconPencil from '../../assets/home/icon-pencil.svg'
 import iconSurveyBadge from '../../assets/questionnaire/icon-survey-badge.svg'
+import iconClipboardSimple from '../../assets/questionnaire/icon-clipboard-simple.svg'
+import iconBenefitCheck from '../../assets/questionnaire/icon-benefit-check.svg'
 import iconSurveySwap from '../../assets/questionnaire/icon-survey-swap.svg'
 import iconDropdownChevron from '../../assets/questionnaire/icon-dropdown-chevron.svg'
 import iconFlagFrance from '../../assets/questionnaire/icon-flag-france.svg'
@@ -30,13 +33,13 @@ const MAX_RECIPIENTS = 5
 
 const steps = [
   {
-    number: 1,
+    number: 2,
     title: 'Quel service avez-vous récemment fourni ?',
     completedTitle: 'Détails du service',
     description: 'Veuillez préciser le service que vous avez récemment fourni à votre client.',
   },
   {
-    number: 2,
+    number: 1,
     title: 'Sélectionnez un questionnaire à envoyer',
     completedTitle: 'Sélection de questionnaire',
     description: (
@@ -58,6 +61,69 @@ const steps = [
     description: 'Envoyez facilement un questionnaire à une ou plusieurs personnes pour recueillir leurs retours',
   },
 ]
+
+// Chosen once, up front (see QuestionnaireTypeChoice) -- everything after
+// this follows from it (which surveys show up in step 1, whether the
+// resulting reviews can be shared to Google) instead of a tab the user
+// could flip mid-flow.
+const QUESTIONNAIRE_TYPES = [
+  {
+    id: 'certified',
+    title: 'Questionnaire Certifié',
+    icon: iconSurveyBadge,
+    benefits: [
+      'Certifié AFNOR triple et authentifié par Opinion System',
+      'Une demande de partage de l’avis sur Google My Business sera faite à la fin du questionnaire, si la note globale est supérieure à 75% de satisfaction',
+      'Renforce la crédibilité auprès de vos clients',
+    ],
+  },
+  {
+    id: 'simple',
+    title: 'Questionnaire Simple',
+    icon: iconClipboardSimple,
+    benefits: [
+      'Questions ouvertes, sans vérification',
+      'Idéal pour les retours internes',
+      'Mise en place rapide, sans certification',
+      'Une demande de partage de l’avis sur Google My Business sera faite à la fin du questionnaire, si la note globale est supérieure à 75% de satisfaction',
+    ],
+  },
+]
+
+function QuestionnaireTypeChoice({ onSelect }) {
+  return (
+    <>
+      <p className="questionnaire__description">
+        Quel type de questionnaire souhaitez-vous envoyer&nbsp;? Ce choix déterminera les questionnaires disponibles
+        à l&rsquo;étape suivante.
+      </p>
+
+      <div className="questionnaire__type-cards">
+      {QUESTIONNAIRE_TYPES.map(type => (
+        <button key={type.id} type="button" className="questionnaire__type-card" onClick={() => onSelect(type.id)}>
+          <span className="questionnaire__type-card-header">
+            <span className="questionnaire__type-card-badge">
+              <img src={type.icon} alt="" />
+            </span>
+            <span className="questionnaire__type-card-title">{type.title}</span>
+            <span className="questionnaire__type-card-chevron" aria-hidden="true">
+              <img src={iconChevron} alt="" />
+            </span>
+          </span>
+          <ul className="questionnaire__type-card-benefits">
+            {type.benefits.map(benefit => (
+              <li key={benefit}>
+                <img src={iconBenefitCheck} alt="" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </button>
+      ))}
+      </div>
+    </>
+  )
+}
 
 const LANGUAGES = [
   { code: 'fr-FR', label: 'Français (France)', flag: iconFlagFrance },
@@ -426,6 +492,9 @@ function StepCard({ step, isCompleted, isActive, completedAction, onOpen, childr
 }
 
 export function Questionnaire({ onNavigate }) {
+  // Asked once, up front, before any of the 3 steps below (see
+  // QuestionnaireTypeChoice) -- 'certified' | 'simple' | null.
+  const [questionnaireType, setQuestionnaireType] = useState(null)
   const [serviceAnswer, setServiceAnswer] = useState('')
   const [isServiceSheetOpen, setServiceSheetOpen] = useState(false)
   const [surveyAnswer, setSurveyAnswer] = useState(null)
@@ -466,8 +535,9 @@ export function Questionnaire({ onNavigate }) {
   }, [])
 
   const isComplete = Boolean(serviceAnswer) && Boolean(surveyAnswer) && recipients.length > 0
-  const hasProgress = Boolean(serviceAnswer) || Boolean(surveyAnswer) || recipients.length > 0
-  const activeStepNumber = !serviceAnswer ? 1 : !surveyAnswer ? 2 : 3
+  const hasProgress =
+    Boolean(questionnaireType) || Boolean(serviceAnswer) || Boolean(surveyAnswer) || recipients.length > 0
+  const activeStepNumber = !surveyAnswer ? 1 : !serviceAnswer ? 2 : 3
   const completedStepsCount = [Boolean(serviceAnswer), Boolean(surveyAnswer), recipients.length > 0].filter(
     Boolean
   ).length
@@ -483,6 +553,19 @@ export function Questionnaire({ onNavigate }) {
     }
   }
 
+  // A survey answer only makes sense for the type it was picked under --
+  // switching type after already picking one clears it so step 1 doesn't
+  // keep showing a certified survey while the flow is now "simple" (or
+  // vice versa). Re-picking the same type leaves it untouched.
+  const handleSelectQuestionnaireType = nextType => {
+    if (surveyAnswer && surveyAnswer.type !== nextType) {
+      setSurveyAnswer(null)
+    }
+    setQuestionnaireType(nextType)
+  }
+
+  const handleBackToTypeChoice = () => setQuestionnaireType(null)
+
   const handleQuestionnaireSent = () => {
     setSendSheetOpen(false)
     setSentResult({ recipients, service: serviceAnswer, survey: surveyAnswer, language, category })
@@ -492,6 +575,7 @@ export function Questionnaire({ onNavigate }) {
   // Clears every field, including sentResult -- back to the step list for a
   // fresh questionnaire instead of staying on the success screen.
   const handleSendAnother = () => {
+    setQuestionnaireType(null)
     setServiceAnswer('')
     setSurveyAnswer(null)
     setRecipients([])
@@ -562,6 +646,16 @@ export function Questionnaire({ onNavigate }) {
       <header className={`questionnaire__header${isScrolled ? ' questionnaire__header--scrolled' : ''}`}>
         <div className="questionnaire__status-bar" />
         <div className="questionnaire__appbar">
+          {questionnaireType && !sentResult && (
+            <button
+              type="button"
+              className="questionnaire__back-btn"
+              aria-label="Retour"
+              onClick={handleBackToTypeChoice}
+            >
+              <img src={iconBack} alt="" />
+            </button>
+          )}
           <h1 className="questionnaire__title">Récolter des avis</h1>
           <button
             type="button"
@@ -572,9 +666,11 @@ export function Questionnaire({ onNavigate }) {
             <img src={iconClose} alt="" />
           </button>
         </div>
-        <div className="questionnaire__progress">
-          <div className="questionnaire__progress-fill" style={{ width: `${progressPercent}%` }} />
-        </div>
+        {questionnaireType && (
+          <div className="questionnaire__progress">
+            <div className="questionnaire__progress-fill" style={{ width: `${progressPercent}%` }} />
+          </div>
+        )}
       </header>
 
       <div
@@ -587,6 +683,8 @@ export function Questionnaire({ onNavigate }) {
       >
         {sentResult ? (
           <SuccessContent result={sentResult} />
+        ) : !questionnaireType ? (
+          <QuestionnaireTypeChoice onSelect={handleSelectQuestionnaireType} />
         ) : (
           <>
         <p className="questionnaire__description">
@@ -597,11 +695,31 @@ export function Questionnaire({ onNavigate }) {
         </p>
 
         <StepCard
+          key={surveyAnswer ? 'survey-done' : 'survey-pending'}
+          cardRef={el => (stepRefs.current[1] = el)}
+          step={steps[1]}
+          isCompleted={Boolean(surveyAnswer)}
+          isActive={activeStepNumber === 1}
+          onOpen={() => setSurveySheetOpen(true)}
+        >
+          {surveyAnswer && (
+            <SurveyDetails
+              survey={surveyAnswer}
+              onChangeSurvey={() => setSurveySheetOpen(true)}
+              language={language}
+              onLanguageChange={setLanguage}
+              category={category}
+              onCategoryChange={setCategory}
+            />
+          )}
+        </StepCard>
+
+        <StepCard
           key={serviceAnswer ? 'service-done' : 'service-pending'}
           cardRef={el => (stepRefs.current[0] = el)}
           step={steps[0]}
           isCompleted={Boolean(serviceAnswer)}
-          isActive={activeStepNumber === 1}
+          isActive={activeStepNumber === 2}
           onOpen={() => setServiceSheetOpen(true)}
           completedAction={
             <button
@@ -615,26 +733,6 @@ export function Questionnaire({ onNavigate }) {
           }
         >
           <p className="questionnaire__step-answer">{serviceAnswer}</p>
-        </StepCard>
-
-        <StepCard
-          key={surveyAnswer ? 'survey-done' : 'survey-pending'}
-          cardRef={el => (stepRefs.current[1] = el)}
-          step={steps[1]}
-          isCompleted={Boolean(surveyAnswer)}
-          isActive={activeStepNumber === 2}
-          onOpen={() => setSurveySheetOpen(true)}
-        >
-          {surveyAnswer && (
-            <SurveyDetails
-              survey={surveyAnswer}
-              onChangeSurvey={() => setSurveySheetOpen(true)}
-              language={language}
-              onLanguageChange={setLanguage}
-              category={category}
-              onCategoryChange={setCategory}
-            />
-          )}
         </StepCard>
 
         <StepCard
@@ -673,7 +771,7 @@ export function Questionnaire({ onNavigate }) {
               Accueil
             </button>
           </div>
-        ) : (
+        ) : questionnaireType ? (
           <button
             type="button"
             className="questionnaire__submit-btn"
@@ -683,13 +781,14 @@ export function Questionnaire({ onNavigate }) {
             Envoyer le questionnaire
             <img src={iconSendDisabled} alt="" />
           </button>
-        )}
+        ) : null}
         <div className="questionnaire__home-indicator" />
       </footer>
 
       {isServiceSheetOpen && (
         <ServiceInputSheet
           initialValue={serviceAnswer}
+          categoryCode={category.code}
           onClose={() => setServiceSheetOpen(false)}
           onSubmit={value => {
             captureStepRects()
@@ -701,6 +800,7 @@ export function Questionnaire({ onNavigate }) {
 
       {isSurveySheetOpen && (
         <SurveySelectSheet
+          type={questionnaireType}
           onClose={() => setSurveySheetOpen(false)}
           onSelect={survey => {
             captureStepRects()

@@ -1,10 +1,5 @@
 import { useState } from 'react'
 import iconClose from '../../assets/home/icon-detail-close.svg'
-import iconServiceTag from '../../assets/questionnaire/icon-service-tag.svg'
-import iconServiceHouse from '../../assets/questionnaire/icon-service-house.svg'
-import iconServiceKey from '../../assets/questionnaire/icon-service-key.svg'
-import iconServiceMagnifier from '../../assets/questionnaire/icon-service-magnifier.svg'
-import iconCheckSelected from '../../assets/recipients/icon-check-selected.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
@@ -18,45 +13,73 @@ const INFO_BANNER_INTRO =
   'Les informations saisies ici seront visibles dans votre avis public. Assurez-vous qu’elles reflètent bien votre expérience.'
 const INFO_BANNER_HINT = 'Sélectionnez une option ci-dessous ou rédigez votre propre texte.'
 
-// Capped at 4 -- the most common services, so the list stays a quick pick;
-// anything else can be typed directly into the field below.
-const SERVICES = [
-  {
-    id: 'vente',
-    title: 'Vente d’un bien',
-    subtitle: 'Accompagnement pour la vente d’une maison ou d’un appartement',
-    icon: iconServiceTag,
-  },
-  {
-    id: 'achat',
-    title: 'Achat d’un bien',
-    subtitle: 'Accompagnement pour l’achat d’une maison ou d’un appartement',
-    icon: iconServiceHouse,
-  },
-  {
-    id: 'location',
-    title: 'Location d’un bien',
-    subtitle: 'Mise en location d’un bien pour le compte du propriétaire',
-    icon: iconServiceKey,
-  },
-  {
-    id: 'estimation',
-    title: 'Estimation immobilière',
-    subtitle: 'Évaluation de la valeur d’un bien immobilier',
-    icon: iconServiceMagnifier,
-  },
-]
+// Capped at 2 per category -- just the quickest picks, so the list stays a
+// glance rather than a scroll; anything else goes straight into the field
+// below. Which pair shows depends on the "Catégorie" chosen in the
+// questionnaire step (see Questionnaire.jsx), since a service answer for a
+// driving school doesn't look like one for a real-estate sale.
+const SERVICE_PRESETS_BY_CATEGORY = {
+  logement: [
+    {
+      id: 'vente',
+      title: 'Vente d’un bien',
+      subtitle: 'Accompagnement pour la vente d’une maison ou d’un appartement',
+    },
+    {
+      id: 'achat',
+      title: 'Achat d’un bien',
+      subtitle: 'Accompagnement pour l’achat d’une maison ou d’un appartement',
+    },
+  ],
+  'auto-ecole': [
+    {
+      id: 'cours-conduite',
+      title: 'Cours de conduite',
+      subtitle: 'Accompagnement pour l’apprentissage de la conduite',
+    },
+    {
+      id: 'code-route',
+      title: 'Code de la route',
+      subtitle: 'Préparation à l’examen du code de la route',
+    },
+  ],
+  assurance: [
+    {
+      id: 'souscription',
+      title: 'Souscription d’un contrat',
+      subtitle: 'Accompagnement pour la souscription d’un contrat d’assurance',
+    },
+    {
+      id: 'sinistre',
+      title: 'Déclaration de sinistre',
+      subtitle: 'Prise en charge d’une déclaration de sinistre',
+    },
+  ],
+  'aide-personne': [
+    {
+      id: 'aide-domicile',
+      title: 'Aide à domicile',
+      subtitle: 'Accompagnement pour les tâches du quotidien à domicile',
+    },
+    {
+      id: 'garde-enfants',
+      title: 'Garde d’enfants',
+      subtitle: 'Prise en charge de la garde d’enfants',
+    },
+  ],
+}
 
-export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
+export function ServiceInputSheet({ initialValue, categoryCode, onClose, onSubmit }) {
   useLockBodyScroll()
   const screenHeight = useStandaloneScreenHeight()
   const [value, setValue] = useState(initialValue || '')
   const [isClosing, setIsClosing] = useState(false)
   const isValid = value.trim().length > 0
+  const services = SERVICE_PRESETS_BY_CATEGORY[categoryCode] || SERVICE_PRESETS_BY_CATEGORY.logement
   // Derived, not stored -- a preset is "selected" only while the field's
   // text exactly matches its title, so typing a single character away from
-  // a pick clears its checkmark instead of leaving a stale one behind.
-  const selectedService = SERVICES.find(service => service.title === value.trim())
+  // a pick clears its radio instead of leaving a stale one behind.
+  const selectedService = services.find(service => service.title === value.trim())
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -106,7 +129,7 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
 
         <div className="service-sheet__scroll">
           <div className="service-sheet__list">
-            {SERVICES.map(service => {
+            {services.map(service => {
               const isSelected = service.id === selectedService?.id
               return (
                 <button
@@ -117,21 +140,20 @@ export function ServiceInputSheet({ initialValue, onClose, onSubmit }) {
                   className={`service-sheet__item${isSelected ? ' service-sheet__item--selected' : ''}`}
                   onClick={() => handleSelectService(service)}
                 >
-                  <span className="service-sheet__item-badge">
-                    <img src={service.icon} alt="" />
+                  <span className={`service-sheet__item-radio${isSelected ? ' service-sheet__item-radio--selected' : ''}`}>
+                    <span className="service-sheet__item-radio-dot" />
                   </span>
                   <span className="service-sheet__item-text">
                     <span className="service-sheet__item-title">{service.title}</span>
                     <span className="service-sheet__item-subtitle">{service.subtitle}</span>
                   </span>
-                  {isSelected && <img src={iconCheckSelected} alt="" className="service-sheet__item-check" />}
                 </button>
               )
             })}
           </div>
 
           <div className="service-sheet__content">
-            <p className="service-sheet__field-label">Votre réponse</p>
+            <p className="service-sheet__field-label">Détail de prestation</p>
             <div className="service-sheet__field">
               <textarea
                 className="service-sheet__textarea"

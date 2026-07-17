@@ -13,8 +13,10 @@
 .bottom-nav__row {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  padding: 12px 0;
+  padding: 12px 12px;
+  box-sizing: border-box;
 }
 
 .bottom-nav__item {
@@ -41,14 +43,14 @@
 }
 
 .bottom-nav__icon-wrap svg {
-  width: 21px;
-  height: 21px;
+  width: 23px;
+  height: 23px;
   color: inherit;
 }
 
 .bottom-nav__label {
   font-family: 'Poppins', sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.2;
   color: inherit;
@@ -68,7 +70,7 @@
   border-radius: 10px;
   background-color: #d32f2f;
   color: #ffffff;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1;
   box-sizing: border-box;

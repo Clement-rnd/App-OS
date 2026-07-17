@@ -101,7 +101,7 @@
 
 .edit-profile-sheet__title {
   flex: 1;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: #041b44;
 }
@@ -158,7 +158,7 @@
 }
 
 .edit-profile-sheet__label {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #041b44;
 }
@@ -171,7 +171,7 @@
   border-radius: 8px;
   background-color: #f7fafc;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #041b44;
   outline: none;
@@ -195,7 +195,7 @@
 
 .edit-profile-sheet__hint {
   width: 100%;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   color: #8ea1b2;
 }
@@ -212,7 +212,7 @@
   background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #041b44;
 }

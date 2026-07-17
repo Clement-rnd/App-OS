@@ -22,7 +22,7 @@
   height: 38px;
   border-radius: 100px;
   background-color: #ede7f6;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: #4527a0;
 }
@@ -42,7 +42,7 @@
 }
 
 .review-summary-card__author {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #041b44;
 }
@@ -60,13 +60,13 @@
 }
 
 .review-summary-card__rating span {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #041b44;
 }
 
 .review-summary-card__date {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   color: #b8c2cc;
 }
@@ -83,7 +83,7 @@
   gap: 4px;
   padding: 4px 8px;
   border-radius: 100px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.16px;
   white-space: nowrap;
@@ -115,7 +115,7 @@
 }
 
 .review-summary-card__text {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 1.43;
   letter-spacing: 0.17px;

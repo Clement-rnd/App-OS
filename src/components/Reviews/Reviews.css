@@ -102,7 +102,7 @@
 
 .reviews__title {
   flex: 1;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 600;
   letter-spacing: 0.15px;
   color: #ffffff;
@@ -217,7 +217,7 @@
 }
 
 .reviews__summary-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   color: #ffffff;
@@ -231,7 +231,7 @@
 }
 
 .reviews__summary-value {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #ffffff;
   animation: reviews-value-fade-up 250ms ease-out both;
@@ -311,7 +311,7 @@
 }
 
 .reviews__kpi-title span {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   text-transform: uppercase;
   color: #ffffff;
@@ -328,14 +328,14 @@
 }
 
 .reviews__kpi-value {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 700;
   line-height: 1;
   color: #ffffff;
 }
 
 .reviews__kpi-value-suffix {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 400;
 }
 
@@ -343,7 +343,7 @@
   padding: 4px 8px;
   border-radius: 20px;
   background-color: rgba(44, 149, 255, 0.3);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1;
   color: #00d492;
@@ -429,14 +429,14 @@
 }
 
 .reviews__tab-value {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1;
   color: #041b44;
 }
 
 .reviews__tab-label {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 1;
   color: #8ea1b2;
@@ -473,7 +473,7 @@
   border: 1px solid #041b44;
   background-color: #f0f6f9;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   letter-spacing: 0.16px;
   color: #041b44;
@@ -504,7 +504,7 @@
   padding: 0 4px;
   border-radius: 10px;
   background-color: #ffd500;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: #041b44;
 }
@@ -517,7 +517,7 @@
 .reviews__results-count {
   flex: 1;
   text-align: right;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.16px;
   color: #041b44;
@@ -562,7 +562,7 @@
   background-color: rgba(44, 149, 255, 0.2);
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   letter-spacing: 0.16px;
   color: #ffffff;
@@ -578,7 +578,7 @@
   width: 100%;
   padding: 24px 16px;
   text-align: center;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #8ea1b2;
   animation: reviews-fade-up 400ms ease-out backwards;
@@ -632,7 +632,8 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: 16px;
+  border: 1px solid #dfe9ef;
+  border-radius: 12px;
   background-color: #ffffff;
   overflow: hidden;
   cursor: pointer;
@@ -640,23 +641,28 @@
 
 .reviews__card-title {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 8px 16px 0;
 }
 
 .reviews__card-author {
-  font-size: 14px;
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
   font-weight: 600;
   color: #041b44;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .reviews__card-score {
   display: flex;
   align-items: center;
-  align-self: flex-end;
+  flex-shrink: 0;
   gap: 2px;
-  margin-top: -20px;
 }
 
 .reviews__card-score img {
@@ -665,7 +671,7 @@
 }
 
 .reviews__card-score span {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #041b44;
 }
@@ -678,8 +684,8 @@
 }
 
 .reviews__card-date {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: #b8c2cc;
 }
 
@@ -696,7 +702,7 @@
   gap: 4px;
   padding: 4px 8px;
   border-radius: 100px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.16px;
   white-space: nowrap;
@@ -729,11 +735,15 @@
 
 .reviews__card-text {
   padding: 0 16px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 1.43;
   letter-spacing: 0.17px;
   color: #041b44;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .reviews__card-actions {
@@ -772,10 +782,10 @@
   border: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.16px;
-  color: #041b44;
+  color: #64798c;
 }
 
 .reviews__card-action img,

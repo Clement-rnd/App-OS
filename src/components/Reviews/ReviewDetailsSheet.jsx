@@ -228,7 +228,7 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
                         Type de questionnaire
                       </span>
                       <span className="review-details__info-value">
-                        {review.certification === 'certifie-os' ? 'Certifié OS' : 'Standard OS'}
+                        {review.certification === 'certifie-os' ? 'Certifié OS' : 'Simple OS'}
                       </span>
                     </div>
                     <div className="review-details__info-row">

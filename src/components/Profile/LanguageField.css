@@ -7,7 +7,7 @@
 }
 
 .profile-lang-field__label {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #041b44;
 }
@@ -35,7 +35,7 @@
 
 .profile-lang-field__value {
   flex: 1;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #041b44;
 }
@@ -99,7 +99,7 @@
   background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #041b44;
   text-align: left;

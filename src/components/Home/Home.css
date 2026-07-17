@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 0 0 12px;
+  padding: 0 0 4px;
   width: 100%;
 }
 
@@ -38,7 +38,7 @@
 }
 
 .home__logo {
-  height: 33px;
+  height: 40px;
   width: auto;
   animation: home-fade-up 400ms ease-out both;
 }
@@ -56,8 +56,8 @@
 }
 
 .home__notif-btn img {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 .home__notif-badge {
@@ -82,8 +82,8 @@
 .home__content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 0 16px 16px;
+  gap: 20px;
+  padding: 0 16px 20px;
   width: 100%;
 }
 
@@ -126,13 +126,13 @@
 .home__greeting-text {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .home__greeting-name {
   font-size: 20px;
   font-weight: 600;
-  line-height: 16.5px;
+  line-height: 1.2;
   color: #ffffff;
   white-space: nowrap;
 }
@@ -144,7 +144,7 @@
 }
 
 .home__greeting-company span {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 16.5px;
   color: #ffffff;
@@ -163,7 +163,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: #00d492;
   white-space: nowrap;
@@ -208,8 +208,8 @@
 .home__stat {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 4px;
-  height: 104px;
   padding: 12px;
   border-radius: 12px;
   backdrop-filter: blur(8px);
@@ -218,12 +218,10 @@
 
 .home__stat--tint {
   background-color: rgba(44, 149, 255, 0.2);
-  justify-content: center;
 }
 
 .home__stat--light {
   background-color: #ffffff;
-  justify-content: center;
 }
 
 .home__stat--clickable {
@@ -242,7 +240,7 @@
 }
 
 .home__stat-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #ffffff;
 }
@@ -260,14 +258,14 @@
 
 .home__stat-value {
   flex: 1;
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 800;
   line-height: 1.2;
   color: #ffffff;
 }
 
 .home__stat-value--medium {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 600;
 }
 
@@ -276,12 +274,12 @@
 }
 
 .home__stat-value-sep {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 800;
 }
 
 .home__stat-value-suffix {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 500;
 }
 
@@ -316,6 +314,8 @@
   position: relative;
   z-index: 3;
   display: flex;
+  flex: 1;
+  min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
@@ -323,15 +323,20 @@
 .home__cta-heading {
   font-size: 20px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.2;
   color: #041b44;
+  white-space: nowrap;
 }
 
 .home__cta-subtext {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   color: #041b44;
-  white-space: nowrap;
+}
+
+.home__cta-subtext-highlight {
+  font-weight: 700;
+  color: #2c95ff;
 }
 
 .home__cta-btn {
@@ -346,7 +351,7 @@
   background-color: #ffd500;
   border: none;
   font-family: 'Poppins', sans-serif;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: #041b44;
   cursor: pointer;
@@ -360,6 +365,7 @@
   width: 80px;
   height: 84px;
   margin-left: auto;
+  transform: scale(0.75);
 }
 
 .home__cta-illustration-bg {
@@ -419,18 +425,27 @@
 }
 
 .home__reviews-title {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 500;
   color: #ffffff;
 }
 
 .home__reviews-see-all {
-  font-size: 12px;
-  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 16px;
+  font-weight: 500;
   color: #dfe9ef;
   background: none;
   border: none;
   cursor: pointer;
+}
+
+.home__reviews-see-all-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
 }
 
 .home__reviews-scroller {
@@ -456,7 +471,7 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: 312px;
+  width: 85%;
   scroll-snap-align: start;
   background-color: #ffffff;
   border: 1px solid #dfe9ef;
@@ -467,24 +482,28 @@
 
 .home__review-title {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 8px 16px 0;
 }
 
 .home__review-author {
   flex: 1;
-  font-size: 14px;
+  min-width: 0;
+  font-size: 16px;
   font-weight: 600;
   color: #041b44;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .home__review-score {
   display: flex;
   align-items: center;
-  align-self: flex-end;
+  flex-shrink: 0;
   gap: 2px;
-  margin-top: -20px;
 }
 
 .home__review-score img {
@@ -493,7 +512,7 @@
 }
 
 .home__review-score span {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #041b44;
 }
@@ -506,8 +525,8 @@
 }
 
 .home__review-date {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: #b8c2cc;
 }
 
@@ -524,7 +543,7 @@
   gap: 4px;
   padding: 4px 8px;
   border-radius: 100px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.16px;
   white-space: nowrap;
@@ -557,13 +576,13 @@
 
 .home__review-text {
   padding: 0 16px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 1.43;
   letter-spacing: 0.17px;
   color: #041b44;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -604,10 +623,10 @@
   border: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.16px;
-  color: #041b44;
+  color: #64798c;
 }
 
 .home__review-action img,

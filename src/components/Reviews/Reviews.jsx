@@ -459,7 +459,10 @@ export function Reviews({
   const toggleSourceFilter = sourceId => {
     const current = activeFilters.source
     const nextSource = current.includes(sourceId) ? current.filter(id => id !== sourceId) : [...current, sourceId]
-    applyFilters({ ...activeFilters, source: nextSource })
+    // Routed through applyFilterRules so this gets the same cascade a
+    // manual tap in Filtres would (e.g. selecting Google here also
+    // auto-selects "Google Partagé", hiding non-partagé reviews).
+    applyFilters(applyFilterRules({ ...activeFilters, source: nextSource }, 'source'))
   }
 
   const toggleTabFilter = tabDef => {

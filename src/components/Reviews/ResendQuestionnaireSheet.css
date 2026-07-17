@@ -118,7 +118,7 @@
 
 .resend-sheet__title {
   flex: 1;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.15px;
   color: #041b44;
@@ -231,7 +231,7 @@
 }
 
 .resend-sheet__section-label {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: #8ea1b2;
 }
@@ -261,7 +261,7 @@
   height: 36px;
   border-radius: 100px;
   background-color: rgba(44, 149, 255, 0.12);
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
   color: #2c95ff;
 }
@@ -274,13 +274,13 @@
 }
 
 .resend-sheet__recipient-name {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   color: #041b44;
 }
 
 .resend-sheet__recipient-contact {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: #8ea1b2;
 }
@@ -306,7 +306,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   background-color: rgba(242, 144, 3, 0.1);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.5;
   color: #f29003;
@@ -321,7 +321,7 @@
   border-radius: 10px;
   resize: vertical;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 1.6;
   color: #041b44;
@@ -345,7 +345,7 @@
   background: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: #041b44;
 }
@@ -385,7 +385,7 @@
 }
 
 .resend-sheet__label {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #041b44;
 }
@@ -398,7 +398,7 @@
   border-radius: 8px;
   background-color: #f7fafc;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #041b44;
   outline: none;
@@ -410,7 +410,7 @@
 }
 
 .resend-sheet__hint {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: #8ea1b2;
 }
@@ -467,7 +467,7 @@
 .resend-sheet__system-link-text {
   flex: 1;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.4;
   color: #041b44;
@@ -490,7 +490,7 @@
   background-color: #ffd500;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #102d69;
 }

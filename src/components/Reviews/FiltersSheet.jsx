@@ -32,7 +32,7 @@ export const FILTER_GROUPS = [
     multi: true,
     options: [
       { id: 'certifie-os', label: 'Certifié OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
-      { id: 'standard-os', label: 'Standard OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
+      { id: 'standard-os', label: 'Simple OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
     ],
   },
   {
@@ -159,6 +159,20 @@ const DISABLE_RULES = [
 const AUTO_SELECT_RULES = [
   { whenGroup: 'etat', whenOption: 'expire', alsoSelectGroup: 'etat', alsoSelectOption: 'en-attente' },
   { whenGroup: 'etat', whenOption: 'archive', alsoSelectGroup: 'etat', alsoSelectOption: 'en-attente' },
+  // A Google-sourced review is trivially "on Google" -- pairs with the
+  // DISABLE_RULES entry below that blocks "Google Non-Partagé" from being
+  // selected alongside it, so filtering by Google source actually hides
+  // non-partagé reviews instead of just greying out the chip that would've
+  // shown them. clearOnDeselect undoes the pairing when Google source is
+  // turned back off, so "Google Partagé" doesn't stay stuck selected and
+  // keep hiding unshared Opinion System reviews afterward.
+  {
+    whenGroup: 'source',
+    whenOption: 'google',
+    alsoSelectGroup: 'googleSharing',
+    alsoSelectOption: 'google-partage',
+    clearOnDeselect: true,
+  },
 ]
 
 function groupIncludes(value, optionId) {
@@ -233,6 +247,22 @@ export function applyFilterRules(filters, changedGroupId) {
       } else if (targetValue !== rule.alsoSelectOption) {
         updated[rule.alsoSelectGroup] = rule.alsoSelectOption
       }
+    }
+  })
+
+  // Mirrors the pass above for any rule opted into it (clearOnDeselect) --
+  // turning the trigger option back off undoes the pairing instead of
+  // leaving the paired option stuck selected forever. Only applies to
+  // rules that ask for it (e.g. NOT the etat:expire/archive ones, which
+  // deliberately keep "en-attente" locked on via their own noClear
+  // DISABLE_RULES instead of this).
+  AUTO_SELECT_RULES.forEach(rule => {
+    if (
+      rule.clearOnDeselect &&
+      rule.whenGroup === changedGroupId &&
+      !groupIncludes(updated[changedGroupId], rule.whenOption)
+    ) {
+      updated[rule.alsoSelectGroup] = clearOption(updated[rule.alsoSelectGroup], rule.alsoSelectOption)
     }
   })
 

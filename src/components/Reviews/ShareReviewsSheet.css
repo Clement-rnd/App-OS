@@ -119,7 +119,7 @@
 }
 
 .share-reviews-sheet__url {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #8ea1b2;
   overflow: hidden;
@@ -150,13 +150,13 @@
 }
 
 .share-reviews-sheet__title {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 500;
   color: #041b44;
 }
 
 .share-reviews-sheet__subtitle {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #8ea1b2;
 }

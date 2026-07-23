@@ -5,11 +5,6 @@ import { useSwipeActions } from '../../hooks/useSwipeActions'
 import { NOTIFICATION_TYPES } from './notificationsData'
 import './NotificationRow.css'
 
-const ACTION_LABELS = {
-  respond: 'Répondre',
-  boost: 'Envoyer une demande',
-}
-
 export function NotificationRow({ notification, onMarkRead, onDelete, onRowClick, animationDelay, isExiting }) {
   const { dragHandlers, translateX, isDragging, close } = useSwipeActions()
   const typeConfig = NOTIFICATION_TYPES[notification.type] || {}
@@ -92,7 +87,7 @@ export function NotificationRow({ notification, onMarkRead, onDelete, onRowClick
                   onRowClick(notification)
                 }}
               >
-                {ACTION_LABELS[typeConfig.actionType] || 'Voir'}
+                Traiter
                 <img src={iconChevronRightFilled} alt="" />
               </button>
             )}

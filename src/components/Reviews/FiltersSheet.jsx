@@ -6,6 +6,8 @@ import iconFilterOsDark from '../../assets/reviews/icon-filter-os-dark.svg'
 import iconFilterGoogleColor from '../../assets/reviews/icon-filter-google-color.svg'
 import iconFilterOsCertifWhite from '../../assets/reviews/icon-filter-os-certif-white.svg'
 import iconFilterGoogleCertif from '../../assets/reviews/icon-filter-google-certif.svg'
+import iconChevronDown from '../../assets/questionnaire/icon-dropdown-chevron.svg'
+import iconClipboardSimple from '../../assets/questionnaire/icon-clipboard-simple.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useStandaloneScreenHeight } from '../../hooks/useStandaloneScreenHeight'
@@ -32,12 +34,19 @@ export const FILTER_GROUPS = [
     multi: true,
     options: [
       { id: 'certifie-os', label: 'Certifié OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
-      { id: 'standard-os', label: 'Simple OS', icon: iconFilterOsCertifWhite, iconMuted: iconFilterOsDark },
+      // No white variant of this icon exists -- invertOnSelect flips the
+      // same dark-stroke file to white via CSS filter instead, only while
+      // this chip is actually selected against its dark background.
+      { id: 'standard-os', label: 'Simple OS', icon: iconClipboardSimple, invertOnSelect: true },
     ],
   },
   {
     id: 'etat',
-    label: "État de l'envoi du questionnaire",
+    // Rendered as a custom "Public / En attente" pair in the sheet (see
+    // FiltersSheet below) instead of these three chips in a row -- this
+    // label/options list still backs countActiveFilters/getActiveFilterEntries
+    // /isOptionDisabled, which key off the real option ids either way.
+    label: 'Statut de l’envoi',
     multi: true,
     options: [
       { id: 'en-attente', label: 'En attente' },
@@ -47,10 +56,6 @@ export const FILTER_GROUPS = [
   },
   {
     id: 'source',
-    // No review exists yet while "En attente" is active (see the État
-    // group above) -- hidden outright instead of shown disabled, rather
-    // than greying out a whole section of chips the user can't use anyway.
-    hiddenWhenPending: true,
     label: "Source de l'avis",
     multi: true,
     options: [
@@ -60,7 +65,6 @@ export const FILTER_GROUPS = [
   },
   {
     id: 'note',
-    hiddenWhenPending: true,
     label: "Note de l'avis",
     multi: true,
     options: [
@@ -71,7 +75,6 @@ export const FILTER_GROUPS = [
   },
   {
     id: 'nps',
-    hiddenWhenPending: true,
     label: 'Badge NPS',
     multi: true,
     options: [
@@ -82,7 +85,6 @@ export const FILTER_GROUPS = [
   },
   {
     id: 'reponse',
-    hiddenWhenPending: true,
     label: "Réponse a l'avis",
     multi: false,
     options: [
@@ -92,7 +94,6 @@ export const FILTER_GROUPS = [
   },
   {
     id: 'googleSharing',
-    hiddenWhenPending: true,
     label: 'Partage sur Google',
     multi: true,
     // Google's logo always renders in its own brand colors (no muted
@@ -104,6 +105,11 @@ export const FILTER_GROUPS = [
     ],
   },
 ]
+
+// Grouped under one collapsible "Mes avis" section in the sheet (see
+// AVIS_GROUP_IDS below) -- hidden altogether while "En attente" is active,
+// since none of them are meaningful before a review actually exists.
+const AVIS_GROUP_IDS = ['source', 'note', 'nps', 'reponse', 'googleSharing']
 
 export const EMPTY_FILTERS = {
   source: [],
@@ -123,7 +129,6 @@ export const EMPTY_FILTERS = {
 // (only listed here in the direction the product asked for). Omitting
 // disablesOption disables every option in that group instead of just one.
 const DISABLE_RULES = [
-  { whenGroup: 'source', whenOption: 'google', disablesGroup: 'googleSharing', disablesOption: 'google-non-partage' },
   { whenGroup: 'type', whenOption: 'standard-os', disablesGroup: 'source', disablesOption: 'google' },
   { whenGroup: 'reponse', whenOption: 'avis-repondu', disablesGroup: 'reponse', disablesOption: 'sans-reponse' },
 
@@ -159,20 +164,6 @@ const DISABLE_RULES = [
 const AUTO_SELECT_RULES = [
   { whenGroup: 'etat', whenOption: 'expire', alsoSelectGroup: 'etat', alsoSelectOption: 'en-attente' },
   { whenGroup: 'etat', whenOption: 'archive', alsoSelectGroup: 'etat', alsoSelectOption: 'en-attente' },
-  // A Google-sourced review is trivially "on Google" -- pairs with the
-  // DISABLE_RULES entry below that blocks "Google Non-Partagé" from being
-  // selected alongside it, so filtering by Google source actually hides
-  // non-partagé reviews instead of just greying out the chip that would've
-  // shown them. clearOnDeselect undoes the pairing when Google source is
-  // turned back off, so "Google Partagé" doesn't stay stuck selected and
-  // keep hiding unshared Opinion System reviews afterward.
-  {
-    whenGroup: 'source',
-    whenOption: 'google',
-    alsoSelectGroup: 'googleSharing',
-    alsoSelectOption: 'google-partage',
-    clearOnDeselect: true,
-  },
 ]
 
 function groupIncludes(value, optionId) {
@@ -289,10 +280,72 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
   const screenHeight = useStandaloneScreenHeight()
   const [isClosing, setIsClosing] = useState(false)
   const [filters, setFilters] = useState(initialFilters)
-  const [customStart, setCustomStart] = useState(initialFilters.periodeRange?.start || '')
-  const [customEnd, setCustomEnd] = useState(initialFilters.periodeRange?.end || '')
+  // Frozen at mount, unlike the initialFilters prop itself -- onReset below
+  // pushes the reset straight into the parent's applied filters, which
+  // flows back into initialFilters on the next render. Comparing against
+  // that live prop would make hasChanges see "reset state" on both sides
+  // and go right back to disabled the instant Réinitialiser is pressed.
+  const [initialSnapshot] = useState(initialFilters)
+  const [customStart, setCustomStart] = useState(initialSnapshot.periodeRange?.start || '')
+  const [customEnd, setCustomEnd] = useState(initialSnapshot.periodeRange?.end || '')
+  const hasInitialAvisFilters = AVIS_GROUP_IDS.some(id => {
+    const value = initialFilters[id]
+    return Array.isArray(value) ? value.length > 0 : Boolean(value)
+  })
+  // Every section starts collapsed, except one that already has an active
+  // filter coming in -- reopening the sheet shouldn't hide an existing
+  // selection behind a collapsed accordion the user never touched.
+  const [openSections, setOpenSections] = useState(() => ({
+    periode: Boolean(initialFilters.periode),
+    questionnaire: initialFilters.type.length > 0 || initialFilters.etat.length > 0,
+    avis: hasInitialAvisFilters,
+  }))
   const isCustomRangeOpen = filters.periode === 'personnalise'
-  const isApplyDisabled = isCustomRangeOpen && (!customStart || !customEnd)
+  // Nothing to apply if the sheet's state still matches what it was opened
+  // with -- covers both "never touched anything" and "touched it, then
+  // toggled every change back off".
+  const hasChanges =
+    JSON.stringify(filters) !== JSON.stringify(initialSnapshot) ||
+    customStart !== (initialSnapshot.periodeRange?.start || '') ||
+    customEnd !== (initialSnapshot.periodeRange?.end || '')
+  const isApplyDisabled = (isCustomRangeOpen && (!customStart || !customEnd)) || !hasChanges
+  // Nothing to clear if every filter is still at its neutral empty state --
+  // covers both a freshly-opened sheet and one already reset back to
+  // nothing this session.
+  const isResetDisabled =
+    JSON.stringify(filters) === JSON.stringify(EMPTY_FILTERS) && !customStart && !customEnd
+  const periodeGroup = FILTER_GROUPS.find(group => group.id === 'periode')
+  const typeGroup = FILTER_GROUPS.find(group => group.id === 'type')
+  const etatGroup = FILTER_GROUPS.find(group => group.id === 'etat')
+  // "En attente" already clears+disables every Mes Avis group on its own
+  // (see DISABLE_RULES) -- this just drives the section's own greyed-out,
+  // locked-closed treatment instead of a real per-field check.
+  const isPendingStatut = filters.etat.includes('en-attente')
+  // Derived, not stored: this way "Mes avis" simply re-collapses while
+  // disabled without forgetting whatever open/closed state the user had it
+  // in, restoring that same state the moment "En attente" is turned back off.
+  const isAvisSectionOpen = openSections.avis && !isPendingStatut
+
+  // Collapsed-section summaries -- one chip per selected option, piled up
+  // on the right so the section title never gets squeezed by however many
+  // there are; a single "all of them" chip when nothing is set.
+  const periodeSummaryChips = filters.periode
+    ? [periodeGroup.options.find(option => option.id === filters.periode)?.label]
+    : ['Toutes les périodes']
+  const questionnaireSummaryChips = [
+    ...typeGroup.options.filter(option => filters.type.includes(option.id)).map(option => option.label),
+    ...(isPendingStatut ? ['En attente'] : []),
+  ]
+  if (questionnaireSummaryChips.length === 0) questionnaireSummaryChips.push('Tous les questionnaires')
+  const avisSummaryChips = AVIS_GROUP_IDS.flatMap(id => {
+    const group = FILTER_GROUPS.find(g => g.id === id)
+    const value = filters[id]
+    const selectedIds = group.multi ? value : value ? [value] : []
+    return group.options.filter(option => selectedIds.includes(option.id)).map(option => option.label)
+  })
+  if (avisSummaryChips.length === 0) avisSummaryChips.push('Tous les avis')
+
+  const toggleSection = id => setOpenSections(prev => ({ ...prev, [id]: !prev[id] }))
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -332,7 +385,14 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
         onClick={() => toggleOption(group, option.id)}
         disabled={isDisabled}
       >
-        {icon && <img src={icon} alt="" className="filters-sheet__chip-icon" />}
+        {icon && (
+          <img
+            src={icon}
+            alt=""
+            className="filters-sheet__chip-icon"
+            style={option.invertOnSelect && isSelected ? { filter: 'brightness(0) invert(1)' } : undefined}
+          />
+        )}
         {option.label}
       </button>
     )
@@ -375,7 +435,12 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
         <div className="filters-sheet__appbar">
           <div className="filters-sheet__title-row">
             <p className="filters-sheet__title">Filtres</p>
-            <button type="button" className="filters-sheet__reset" onClick={handleReset}>
+            <button
+              type="button"
+              className="filters-sheet__reset"
+              onClick={handleReset}
+              disabled={isResetDisabled}
+            >
               <img src={iconFilterReset} alt="" />
               Réinitialiser
             </button>
@@ -391,40 +456,166 @@ export function FiltersSheet({ initialFilters, onClose, onReset, onApply }) {
         </div>
 
         <div className="filters-sheet__content">
-          {FILTER_GROUPS.filter(
-            group => !group.hidden && !(group.hiddenWhenPending && filters.etat.includes('en-attente')),
-          ).map(group => (
-            <div className="filters-sheet__group" key={group.id}>
-              <p className="filters-sheet__group-label">{group.label}</p>
-              <div className="filters-sheet__chips">{group.options.map(option => renderChip(group, option))}</div>
+          <div className="filters-sheet__section">
+            <button
+              type="button"
+              className="filters-sheet__section-header"
+              onClick={() => toggleSection('periode')}
+            >
+              <span className="filters-sheet__section-title">Période</span>
+              <span className="filters-sheet__section-header-right">
+                {!openSections.periode && (
+                  <span className="filters-sheet__section-summary-chips">
+                    {periodeSummaryChips.map(label => (
+                      <span key={label} className="filters-sheet__chip filters-sheet__chip--summary">
+                        {label}
+                      </span>
+                    ))}
+                  </span>
+                )}
+                <img
+                  src={iconChevronDown}
+                  alt=""
+                  className={`filters-sheet__chevron${openSections.periode ? ' filters-sheet__chevron--open' : ''}`}
+                />
+              </span>
+            </button>
+            {openSections.periode && (
+              <div className="filters-sheet__section-body">
+                <div className="filters-sheet__chips">
+                  {periodeGroup.options.map(option => renderChip(periodeGroup, option))}
+                </div>
 
-              {group.id === 'periode' && isCustomRangeOpen && (
-                <div className="filters-sheet__custom-range">
-                  <div className="filters-sheet__custom-range-header">
-                    <span>Période personnalisée</span>
-                    <button
-                      type="button"
-                      className="filters-sheet__custom-range-close"
-                      onClick={closeCustomRange}
-                      aria-label="Fermer la sélection de dates"
-                    >
-                      <img src={iconFilterClose} alt="" />
-                    </button>
+                {isCustomRangeOpen && (
+                  <div className="filters-sheet__custom-range">
+                    <div className="filters-sheet__custom-range-header">
+                      <span>Période personnalisée</span>
+                      <button
+                        type="button"
+                        className="filters-sheet__custom-range-close"
+                        onClick={closeCustomRange}
+                        aria-label="Fermer la sélection de dates"
+                      >
+                        <img src={iconFilterClose} alt="" />
+                      </button>
+                    </div>
+                    <div className="filters-sheet__custom-range-fields">
+                      <label className="filters-sheet__custom-range-field">
+                        <span>Du</span>
+                        <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} />
+                      </label>
+                      <label className="filters-sheet__custom-range-field">
+                        <span>Au</span>
+                        <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
+                      </label>
+                    </div>
                   </div>
-                  <div className="filters-sheet__custom-range-fields">
-                    <label className="filters-sheet__custom-range-field">
-                      <span>Du</span>
-                      <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} />
-                    </label>
-                    <label className="filters-sheet__custom-range-field">
-                      <span>Au</span>
-                      <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
-                    </label>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="filters-sheet__section">
+            <button
+              type="button"
+              className="filters-sheet__section-header"
+              onClick={() => toggleSection('questionnaire')}
+            >
+              <span className="filters-sheet__section-title">Questionnaire</span>
+              <span className="filters-sheet__section-header-right">
+                {!openSections.questionnaire && (
+                  <span className="filters-sheet__section-summary-chips">
+                    {questionnaireSummaryChips.map(label => (
+                      <span key={label} className="filters-sheet__chip filters-sheet__chip--summary">
+                        {label}
+                      </span>
+                    ))}
+                  </span>
+                )}
+                <img
+                  src={iconChevronDown}
+                  alt=""
+                  className={`filters-sheet__chevron${openSections.questionnaire ? ' filters-sheet__chevron--open' : ''}`}
+                />
+              </span>
+            </button>
+            {openSections.questionnaire && (
+              <div className="filters-sheet__section-body">
+                <div className="filters-sheet__subgroup">
+                  <p className="filters-sheet__subgroup-label">Questionnaire envoyé</p>
+                  <div className="filters-sheet__chips">
+                    {typeGroup.options.map(option => renderChip(typeGroup, option))}
                   </div>
                 </div>
-              )}
-            </div>
-          ))}
+
+                <div className="filters-sheet__subgroup">
+                  <p className="filters-sheet__subgroup-label">Statut de l’envoi</p>
+                  <div className="filters-sheet__chips">
+                    <button
+                      type="button"
+                      className={`filters-sheet__chip${!isPendingStatut ? ' filters-sheet__chip--selected' : ''}`}
+                      onClick={() => setFilters(prev => applyFilterRules({ ...prev, etat: [] }, 'etat'))}
+                    >
+                      Public
+                    </button>
+                    {renderChip(etatGroup, etatGroup.options.find(option => option.id === 'en-attente'))}
+                  </div>
+
+                  {isPendingStatut && (
+                    <div className="filters-sheet__nested-box">
+                      <p className="filters-sheet__nested-label">Le questionnaire en attente est aussi :</p>
+                      <div className="filters-sheet__chips">
+                        {renderChip(etatGroup, etatGroup.options.find(option => option.id === 'expire'))}
+                        {renderChip(etatGroup, etatGroup.options.find(option => option.id === 'archive'))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="filters-sheet__section">
+            <button
+              type="button"
+              className="filters-sheet__section-header"
+              onClick={() => toggleSection('avis')}
+              disabled={isPendingStatut}
+            >
+              <span className="filters-sheet__section-title">Avis</span>
+              <span className="filters-sheet__section-header-right">
+                {!isAvisSectionOpen && (
+                  <span className="filters-sheet__section-summary-chips">
+                    {avisSummaryChips.map(label => (
+                      <span key={label} className="filters-sheet__chip filters-sheet__chip--summary">
+                        {label}
+                      </span>
+                    ))}
+                  </span>
+                )}
+                <img
+                  src={iconChevronDown}
+                  alt=""
+                  className={`filters-sheet__chevron${isAvisSectionOpen ? ' filters-sheet__chevron--open' : ''}`}
+                />
+              </span>
+            </button>
+            {isAvisSectionOpen && (
+              <div className="filters-sheet__section-body">
+                {AVIS_GROUP_IDS.map(id => {
+                  const group = FILTER_GROUPS.find(g => g.id === id)
+                  return (
+                    <div className="filters-sheet__subgroup" key={id}>
+                      <p className="filters-sheet__subgroup-label">{group.label}</p>
+                      <div className="filters-sheet__chips">
+                        {group.options.map(option => renderChip(group, option))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="filters-sheet__footer">

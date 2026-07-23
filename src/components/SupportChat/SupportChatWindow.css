@@ -27,13 +27,13 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* Sized to its own content (like every other bottom sheet in the app),
-     capped at 75% of the screen -- no forced/fixed height, so a short
-     conversation stays short instead of stretching to fill a target
-     percentage. dvh fallback for every platform where CSS tracks the real
-     viewport; iOS-standalone overrides this inline from JS (see
-     useStandaloneScreenHeight). */
-  max-height: 75dvh;
+  /* Opens at a fixed 50% of the screen, unlike other bottom sheets in the
+     app that size to content -- a chat window's content grows over the
+     conversation, so it needs a stable frame instead of resizing under the
+     user as messages arrive. dvh fallback for every platform where CSS
+     tracks the real viewport; iOS-standalone overrides this inline from JS
+     (see useStandaloneScreenHeight). */
+  height: 50dvh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
@@ -213,10 +213,9 @@
 .support-chat-panel__messages {
   display: flex;
   flex-direction: column;
-  /* Bottom-anchored so a short conversation sits right above the composer
-     instead of top-aligned with a dead gap below it -- the gap only
-     reappears once there's enough history to fill the scroll area. */
-  justify-content: flex-end;
+  /* Top-anchored so the conversation starts right below the header instead
+     of a short exchange sitting bottom-anchored with a dead gap above it. */
+  justify-content: flex-start;
   gap: 12px;
   flex: 1;
   min-height: 0;
@@ -499,6 +498,7 @@
 .support-chat-history__name {
   flex: 1;
   min-width: 0;
+  margin: 0;
   font-family: 'Poppins', sans-serif;
   font-size: 17px;
   font-weight: 600;

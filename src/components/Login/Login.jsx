@@ -60,6 +60,7 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
               <input
                 className="login__input"
                 type="text"
+                autoComplete="off"
                 placeholder="Votre identifiant"
                 value={identifiant}
                 onChange={e => setIdentifiant(e.target.value)}
@@ -76,6 +77,7 @@ export function Login({ onLogin, onSkip, onForgotPassword }) {
               <input
                 className="login__input"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="off"
                 placeholder="Mot de passe"
                 value={password}
                 onChange={e => setPassword(e.target.value)}

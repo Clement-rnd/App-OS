@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: 90dvh;
+  max-height: 80dvh;
   background-color: #ffffff;
   border-radius: 20px 20px 0 0;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
@@ -27,12 +27,29 @@
   animation: review-detail-slide-up 220ms ease-out;
 }
 
+.review-detail-sheet--closing {
+  animation: review-detail-slide-down 260ms ease-in forwards;
+}
+
+.review-detail-overlay--closing .review-detail-backdrop {
+  animation: review-detail-fade-out 260ms ease-in forwards;
+}
+
 @keyframes review-detail-fade-in {
   from {
     opacity: 0;
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes review-detail-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -45,10 +62,20 @@
   }
 }
 
+@keyframes review-detail-slide-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
 .review-detail-sheet__handle-row {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #f7fafc;
   padding: 16px 0;
   width: 100%;
   flex-shrink: 0;
@@ -58,7 +85,7 @@
   width: 60px;
   height: 5px;
   border-radius: 2.5px;
-  background-color: #e0e0e0;
+  background-color: #b8c2cc;
 }
 
 .review-detail-sheet__appbar {
@@ -145,6 +172,16 @@
   width: 100%;
   min-height: 0;
   overflow-y: auto;
+}
+
+/* Sits inside .review-detail-sheet__content's own 16px padding (not
+   full-bleed) since it's just a plain flex child there like everything
+   else in that column. */
+.review-detail-divider {
+  width: 100%;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: #dfe9ef;
 }
 
 /* Without this, flexbox's default flex-shrink: 1 lets these squeeze smaller
@@ -246,24 +283,57 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 12.5px 20px 12.5px 23.75px;
-  border-left: 3.75px solid #2c95ff;
+  padding: 12.5px 20px;
+  border: 1px solid rgba(44, 149, 255, 0.3);
+  border-radius: 12px;
   background-color: #f0f9ff;
   box-sizing: border-box;
 }
 
 .review-detail-response__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
   width: 100%;
 }
 
+.review-detail-response__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
 .review-detail-response__label {
-  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
   font-weight: 600;
   color: #2c95ff;
+}
+
+.review-detail-response__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 100px;
+  background-color: rgba(44, 149, 255, 0.15);
+}
+
+.review-detail-response__avatar img {
+  width: 12px;
+  height: 12px;
+}
+
+.review-detail-response__date {
+  font-size: 12px;
+  font-weight: 400;
+  color: #64798c;
 }
 
 .review-detail-response__edit {
@@ -280,13 +350,13 @@
 }
 
 .review-detail-response__edit img {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
 }
 
 .review-detail-response__text {
   padding-top: 5px;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   color: #041b44;
 }
@@ -304,89 +374,71 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 26px;
-  width: 100%;
+  height: 26px;
 }
 
 .review-detail-info__label {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 400;
+  line-height: 18px;
   color: #8ea1b2;
 }
 
-.review-detail-info__label--dark {
-  font-weight: 500;
-  color: #041b44;
-}
-
 .review-detail-info__value {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19.5px;
   color: #041b44;
+  text-align: right;
 }
 
-/* "Rappel envoyé le ..." pending state -- same slot as
-   .review-detail-chip--google but text-only, in the app's established
+/* "Rappel envoyé le ..." pending state, in the app's established
    warning-tone orange instead of the default navy. */
 .review-detail-info__value--pending {
   color: #f29003;
 }
 
-.review-detail-info__nps {
+.review-detail-info__value--inline {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
-.review-detail-info__nps-score {
-  font-size: 16px;
-  font-weight: 600;
-  color: #041b44;
-}
-
-.review-detail-nps-badge {
+.review-detail-nps-chip {
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
   border-radius: 100px;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
 }
 
-.review-detail-nps-badge--promoter {
-  border: 1px solid #43b6a3;
+.review-detail-nps-chip--promoter {
   background-color: #e9fff2;
   color: #43b6a3;
 }
 
-.review-detail-nps-badge--passive {
-  border: 1px solid #ed6c02;
+.review-detail-nps-chip--passive {
   background-color: #fff3e0;
   color: #ed6c02;
 }
 
-.review-detail-nps-badge--detractor {
-  border: 1px solid #fc6530;
+.review-detail-nps-chip--detractor {
   background-color: #ffece7;
   color: #fc6530;
 }
 
-.review-detail-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 4px;
-  border-radius: 100px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #041b44;
-  white-space: nowrap;
+.review-detail-info__inline-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
-.review-detail-chip img {
-  width: 12px;
-  height: 12px;
+.review-detail-info__inline-icon--google {
+  width: 16px;
+  height: 16px;
 }
 
 /* Rating breakdown */
@@ -412,8 +464,8 @@
 
 .review-detail-breakdown__label {
   flex-shrink: 0;
-  width: 96px;
-  font-size: 15px;
+  width: 132px;
+  font-size: 14px;
   font-weight: 400;
   color: #8ea1b2;
 }
@@ -436,8 +488,8 @@
   flex-shrink: 0;
   width: 14px;
   font-size: 12px;
-  font-weight: 400;
-  color: #8ea1b2;
+  font-weight: 500;
+  color: #041b44;
   text-align: right;
 }
 
@@ -446,17 +498,22 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 0 16px 8px;
+  padding: 16px 16px 8px;
   flex-shrink: 0;
   background-color: #ffffff;
   border-top: 1px solid #eeeeee;
+  transition: box-shadow 150ms ease;
+}
+
+.review-detail-sheet__footer--scrolled {
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .review-detail-sheet__footer-buttons {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   width: 100%;
   padding-bottom: 16px;
 }
@@ -598,6 +655,7 @@
 }
 
 .review-detail-google-boost-recipient-name {
+  margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #041b44;

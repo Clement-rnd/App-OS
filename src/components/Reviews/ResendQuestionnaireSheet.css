@@ -75,6 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #f7fafc;
   padding: 16px 0;
   width: 100%;
   flex-shrink: 0;
@@ -86,7 +87,7 @@
   width: 60px;
   height: 5px;
   border-radius: 2.5px;
-  background-color: #dfe9ef;
+  background-color: #b8c2cc;
 }
 
 .resend-sheet__appbar {
@@ -124,8 +125,7 @@
   color: #041b44;
 }
 
-.resend-sheet__back,
-.resend-sheet__close {
+.resend-sheet__back {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,7 +137,22 @@
   cursor: pointer;
 }
 
-.resend-sheet__back img,
+.resend-sheet__back img {
+  width: 20px;
+  height: 20px;
+}
+
+.resend-sheet__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 100px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
 .resend-sheet__close img {
   width: 20px;
   height: 20px;
@@ -274,6 +289,7 @@
 }
 
 .resend-sheet__recipient-name {
+  margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #041b44;

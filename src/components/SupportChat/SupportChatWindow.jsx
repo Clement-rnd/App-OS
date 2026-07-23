@@ -122,7 +122,7 @@ export function SupportChatWindow({ onClose }) {
         className={`support-chat-panel${isClosing ? ' support-chat-panel--closing' : ''}`}
         role="dialog"
         aria-label="Assistant support"
-        style={{ maxHeight: screenHeight === undefined ? undefined : screenHeight * 0.75 }}
+        style={{ height: screenHeight === undefined ? undefined : screenHeight * 0.5 }}
       >
         {view === 'chat' ? (
           <div className="support-chat-panel__header">

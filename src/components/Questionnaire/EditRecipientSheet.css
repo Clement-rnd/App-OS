@@ -75,6 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #f7fafc;
   padding: 16px 0;
   width: 100%;
   flex-shrink: 0;
@@ -86,7 +87,7 @@
   width: 60px;
   height: 5px;
   border-radius: 2.5px;
-  background-color: #dfe9ef;
+  background-color: #b8c2cc;
 }
 
 .edit-recipient-sheet__appbar {

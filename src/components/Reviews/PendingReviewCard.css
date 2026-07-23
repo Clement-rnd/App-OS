@@ -17,6 +17,7 @@
 }
 
 .pending-card__author {
+  margin: 0;
   font-size: 17px;
   font-weight: 600;
   color: #041b44;

@@ -23,7 +23,6 @@ import { ResendQuestionnaireSheet } from './ResendQuestionnaireSheet'
 import { ConfirmArchiveModal } from './ConfirmArchiveModal'
 import { SortSheet, SORT_OPTIONS } from './SortSheet'
 import iconPillClose from '../../assets/reviews/icon-pill-close.svg'
-import { COMPANY_REVIEWS_DATA } from './mockReviewsData'
 import { COMPANY_PENDING_REVIEWS } from './mockPendingReviews'
 import { buildGoogleShareConfirmedNotification } from '../Notifications/notificationsData'
 import {
@@ -34,7 +33,14 @@ import {
   removeFilterEntry,
   applyFilterRules,
 } from './FiltersSheet'
-import { reviewMatchesFilters, matchesReponseFilter, parseReviewDate, getNpsFilterId, getDaysUntil } from './filterReviews'
+import {
+  reviewMatchesFilters,
+  matchesReponseFilter,
+  parseReviewDate,
+  getNpsFilterId,
+  getNoteCategory,
+  getDaysUntil,
+} from './filterReviews'
 import { getNpsCategory } from '../../utils/nps'
 import { REVIEW_TAB_SANS_REPONSE, REVIEW_TAB_NEGATIFS, REVIEW_TAB_A_RECUPERER } from '../../utils/reviewTabs'
 import { useSimulatedLoading } from '../../hooks/useSimulatedLoading'
@@ -69,8 +75,12 @@ const NPS_CHIP_CLASS = {
 // combination was active, since combining them freely would make two tabs
 // appear partially active at once.
 const TAB_DEFS = [
-  { label: REVIEW_TAB_SANS_REPONSE, reponse: 'sans-reponse', nps: [], tone: 'info' },
-  { label: REVIEW_TAB_NEGATIFS, reponse: null, nps: ['detracteur'], tone: 'danger' },
+  { label: REVIEW_TAB_SANS_REPONSE, reponse: 'sans-reponse', nps: [], note: [], tone: 'info' },
+  // Note (the review's own rating sentiment) is a separate axis from NPS
+  // Badge (a distinct 1-10 score bucketed into promoteur/passif/détracteur)
+  // -- a Détracteur badge doesn't imply a Négatif review, so this tab keys
+  // off Note directly rather than the NPS badge.
+  { label: REVIEW_TAB_NEGATIFS, reponse: null, nps: [], note: ['negatif'], tone: 'danger' },
   // Not a filter shortcut like the two above -- questionnaires that were
   // sent but never answered aren't reviews at all yet (see
   // COMPANY_PENDING_REVIEWS), so this tab switches the whole list to a
@@ -480,11 +490,15 @@ export function Reviews({
       applyFilters(applyFilterRules({ ...activeFilters, etat: nextEtat }, 'etat'))
       return
     }
-    const isActive = activeFilters.reponse === tabDef.reponse && sameFilterSet(activeFilters.nps, tabDef.nps)
+    const isActive =
+      activeFilters.reponse === tabDef.reponse &&
+      sameFilterSet(activeFilters.nps, tabDef.nps) &&
+      sameFilterSet(activeFilters.note, tabDef.note)
     applyFilters({
       ...activeFilters,
       reponse: isActive ? null : tabDef.reponse,
       nps: isActive ? [] : tabDef.nps,
+      note: isActive ? [] : tabDef.note,
       // Switching to a different tab leaves "À Relancer" behind entirely --
       // Expiré/Archivé only make sense alongside En attente (see
       // AUTO_SELECT_RULES in FiltersSheet.jsx), so all three go together.
@@ -514,15 +528,25 @@ export function Reviews({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCollaborator])
 
-  const companyData = COMPANY_REVIEWS_DATA[selectedCompany.id]
   const companyReviews = reviewsByCompany[selectedCompany.id]
-  // Counted from the actual reviews, not companyData.kpiOS/kpiGoogle.count
-  // (static mock numbers that don't track the real review list) -- so the
-  // KPI badges always agree with "X résultats" and the tabs below them.
-  const osReviewCount = companyReviews.filter(review => review.source === 'opinion-system').length
-  const googleReviewCount = companyReviews.filter(review => review.source === 'google').length
-  const filteredReviews = companyReviews
-    .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
+  // Scoped to the selected collaborator (like filteredReviews below) so the
+  // KPI cards' ratings/counts, the quick filters, and "X résultats" all
+  // agree with each other instead of the cards staying company-wide while
+  // everything else narrows down.
+  const collaboratorReviews = companyReviews.filter(
+    review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id
+  )
+  const osReviews = collaboratorReviews.filter(review => review.source === 'opinion-system')
+  const googleReviews = collaboratorReviews.filter(review => review.source === 'google')
+  const osReviewCount = osReviews.length
+  const googleReviewCount = googleReviews.length
+  const averageRating = reviews =>
+    reviews.length === 0
+      ? '0.0'
+      : (Math.round((reviews.reduce((sum, review) => sum + parseFloat(review.rating), 0) / reviews.length) * 10) / 10).toFixed(1)
+  const osRating = averageRating(osReviews)
+  const googleRating = averageRating(googleReviews)
+  const filteredReviews = collaboratorReviews
     .filter(review => reviewMatchesFilters(review, reviewFilters))
     .slice()
     .sort(SORT_COMPARATORS[sortOrder])
@@ -542,11 +566,14 @@ export function Reviews({
     // if the response is deleted, so the "Sans Réponses"/"À Récupérer" tabs
     // and their counts pick it back up.
     const status = response ? 'archive' : 'sans-reponse'
+    const responseDate = response ? TODAY_STR : null
     setReviewsByCompany(data => ({
       ...data,
-      [selectedCompany.id]: data[selectedCompany.id].map(r => (r.id === review.id ? { ...r, response, status } : r)),
+      [selectedCompany.id]: data[selectedCompany.id].map(r =>
+        r.id === review.id ? { ...r, response, status, responseDate } : r
+      ),
     }))
-    return { ...review, response, status }
+    return { ...review, response, status, responseDate }
   }
 
   const handleSubmitResponse = (review, responseText) => {
@@ -682,12 +709,12 @@ export function Reviews({
   }
 
   // Tab badge counts stay based on every OTHER active filter (source,
-  // collaborator, etc.) but ignore reponse/nps specifically, since those are
-  // exactly what the tabs themselves control -- otherwise selecting a tab
-  // would change the numbers shown on the other two.
-  const tabCountReviews = companyReviews
-    .filter(review => selectedCollaborator.id === 'all' || review.collaboratorId === selectedCollaborator.id)
-    .filter(review => reviewMatchesFilters(review, { ...reviewFilters, reponse: null, nps: [] }))
+  // collaborator, etc.) but ignore reponse/nps/note specifically, since
+  // those are exactly what the tabs themselves control -- otherwise
+  // selecting a tab would change the numbers shown on the other two.
+  const tabCountReviews = collaboratorReviews.filter(review =>
+    reviewMatchesFilters(review, { ...reviewFilters, reponse: null, nps: [], note: [] })
+  )
 
   const tabs = TAB_DEFS.map(tabDef => {
     if (tabDef.isPending) {
@@ -699,13 +726,17 @@ export function Reviews({
     const count = tabCountReviews.filter(
       review =>
         (!tabDef.reponse || matchesReponseFilter(review, tabDef.reponse)) &&
-        (tabDef.nps.length === 0 || tabDef.nps.includes(getNpsFilterId(review.rating))),
+        (tabDef.nps.length === 0 || tabDef.nps.includes(getNpsFilterId(review.rating))) &&
+        (tabDef.note.length === 0 || tabDef.note.includes(getNoteCategory(review.rating))),
     ).length
     return {
       ...tabDef,
       value: String(count),
       isActive:
-        !isPendingView && activeFilters.reponse === tabDef.reponse && sameFilterSet(activeFilters.nps, tabDef.nps),
+        !isPendingView &&
+        activeFilters.reponse === tabDef.reponse &&
+        sameFilterSet(activeFilters.nps, tabDef.nps) &&
+        sameFilterSet(activeFilters.note, tabDef.note),
     }
   })
 
@@ -714,15 +745,9 @@ export function Reviews({
     // "En attente" (and Expiré/Archivé alongside it) already shows up here
     // as a real pill -- État is a normal filter group now, not a synthetic
     // stand-in for the "À Relancer" tab (see isPendingView above).
-    // "Détracteur" reads as "Négatifs" here specifically -- this pill is
-    // reached via the "Avis Négatifs" tab, so it should echo that tab's
-    // wording. The Badge NPS chip inside Filtres itself still says
-    // "Détracteur" (that's the actual NPS category name).
-    activeFilterEntries: activeFilterEntries.map(entry =>
-      entry.groupId === 'nps' && entry.optionId === 'detracteur' ? { ...entry, label: 'Négatifs' } : entry,
-    ),
+    activeFilterEntries,
     removeActiveFilter,
-    resultsCount: filteredReviews.length,
+    resultsCount: isPendingView ? pendingReviews.length : filteredReviews.length,
     onOpenFilters: () => setFiltersSheetOpen(true),
     sortLabel: SORT_OPTIONS.find(option => option.id === sortOrder)?.label,
     onOpenSort: () => setSortSheetOpen(true),
@@ -831,7 +856,7 @@ export function Reviews({
                 </div>
                 <div className="reviews__kpi-value-row">
                   <p className="reviews__kpi-value">
-                    {companyData.kpiOS.rating}
+                    {osRating}
                     <span className="reviews__kpi-value-suffix">/5</span>
                   </p>
                   <span className="reviews__kpi-badge">{osReviewCount} AVIS</span>
@@ -848,7 +873,7 @@ export function Reviews({
                 </div>
                 <div className="reviews__kpi-value-row">
                   <p className="reviews__kpi-value">
-                    {companyData.kpiGoogle.rating}
+                    {googleRating}
                     <span className="reviews__kpi-value-suffix">/5</span>
                   </p>
                   <span className="reviews__kpi-badge">{googleReviewCount} AVIS</span>
@@ -857,6 +882,22 @@ export function Reviews({
             </>
           )}
         </div>
+      </div>
+
+      <div className="reviews__quick-filters">
+        {tabs.map(tab => (
+          <button
+            type="button"
+            className={`reviews__quick-filter${
+              tab.isActive ? ` reviews__quick-filter--active reviews__quick-filter--active-${tab.tone}` : ''
+            }`}
+            key={tab.label}
+            onClick={() => toggleTabFilter(tab)}
+          >
+            <p className="reviews__quick-filter-value">{tab.value}</p>
+            <p className="reviews__quick-filter-label">{tab.label}</p>
+          </button>
+        ))}
       </div>
 
       <div
@@ -877,20 +918,6 @@ export function Reviews({
       )}
 
       <div className="reviews__panel">
-        <div className="reviews__tabs">
-          {tabs.map(tab => (
-            <button
-              type="button"
-              className={`reviews__tab${tab.isActive ? ` reviews__tab--active reviews__tab--active-${tab.tone}` : ''}`}
-              key={tab.label}
-              onClick={() => toggleTabFilter(tab)}
-            >
-              <p className="reviews__tab-value">{tab.value}</p>
-              <p className="reviews__tab-label">{tab.label}</p>
-            </button>
-          ))}
-        </div>
-
         <div className={`reviews__list${isListExiting ? ' reviews__list--exiting' : ''}`}>
           {isLoading ? (
             Array.from({ length: 4 }, (_, index) => <ReviewCardSkeleton key={index} />)
@@ -1024,6 +1051,7 @@ export function Reviews({
       {selectedReview && (
         <ReviewDetailsSheet
           review={selectedReview}
+          companyName={selectedCompany.name}
           onClose={() => setSelectedReview(null)}
           onSubmit={handleSubmitResponse}
           onDelete={handleDeleteResponse}

@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import logoCompact from '../../assets/home/logo-compact.svg'
 import iconBell from '../../assets/home/icon-bell.svg'
-import iconStatReviews from '../../assets/home/icon-stat-reviews.svg'
-import iconStatChevron from '../../assets/home/icon-stat-chevron.svg'
 import phoneIllustration1 from '../../assets/home/phone-illustration-1.svg'
 import phoneIllustration2 from '../../assets/home/phone-illustration-2.svg'
 import phoneIllustration3 from '../../assets/home/phone-illustration-3.svg'
@@ -12,6 +10,7 @@ import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconChevronRight from '../../assets/home/icon-chevron-right.svg'
 import logoIconSmall from '../../assets/home/logo-icon-small.svg'
 import iconReviewRating from '../../assets/home/icon-review-rating.svg'
+import iconCompanyBuilding from '../../assets/reviews/icon-company-building.svg'
 import { BottomNav } from '../BottomNav/BottomNav'
 import { StarRating } from '../StarRating/StarRating'
 import { ReviewDetailSheet } from './ReviewDetailSheet'
@@ -240,7 +239,7 @@ export function Home({
 
   const handleSubmitResponse = (review, responseText) => {
     const wasEditing = Boolean(review.response)
-    const updatedReview = { ...review, response: responseText }
+    const updatedReview = { ...review, response: responseText, responseDate: TODAY_STR }
     setReviews(list => list.map(r => (r.id === review.id ? updatedReview : r)))
     setRespondingReview(null)
     setSelectedReview(updatedReview)
@@ -248,7 +247,7 @@ export function Home({
   }
 
   const handleDeleteResponse = review => {
-    const updatedReview = { ...review, response: null }
+    const updatedReview = { ...review, response: null, responseDate: null }
     setReviews(list => list.map(r => (r.id === review.id ? updatedReview : r)))
     setRespondingReview(null)
     setSelectedReview(updatedReview)
@@ -280,8 +279,8 @@ export function Home({
     setActiveReviewIndex(Math.max(0, Math.min(index, reviews.length - 1)))
   }
 
-  const sansReponseFlagClass = sansReponseWarning ? ' home__stat--warning' : ''
-  const aRelancerFlagClass = aRecolterWarning ? ' home__stat--warning' : ''
+  const sansReponseFlagClass = sansReponseWarning ? ' home__stat-tile--warning' : ''
+  const aRelancerFlagClass = aRecolterWarning ? ' home__stat-tile--warning' : ''
   const sansReponseValueClass = sansReponseWarning ? ' home__stat-value--warning' : ''
   const aRelancerValueClass = aRecolterWarning ? ' home__stat-value--warning' : ''
 
@@ -308,131 +307,126 @@ export function Home({
           <div className="home__greeting-text">
             <p className="home__greeting-name">Marc Delacroix</p>
             <div className="home__greeting-company">
-              <span>La Boîte IMMO</span>
+              <span className="home__greeting-company-chip">
+                <img src={iconCompanyBuilding} alt="" />
+                La Boîte IMMO
+              </span>
             </div>
           </div>
-          <div className={`home__reputation home__reputation--${reputationTier.tier}`}>
-            <span className="home__reputation-row">
-              <span className="home__reputation-dot" />
-              {reputationTier.label}
-            </span>
-          </div>
+          {!isLoading && (
+            <div className={`home__reputation home__reputation--${reputationTier.tier}`}>
+              <span className="home__reputation-row">
+                <span className="home__reputation-dot" />
+                {reputationTier.label}
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="home__dashboard">
+        <div className="home__stats-grid">
           {isLoading ? (
             <>
-              <div className="home__stat home__stat--tint" aria-hidden="true">
-                <Skeleton className="skeleton-bar--light" width={140} height={13} />
-                <div className="home__stat-value-row">
-                  <Skeleton className="skeleton-bar--light" width={80} height={32} />
+              {[0, 1, 2, 3].map(i => (
+                <div className="home__stat-tile" aria-hidden="true" key={i}>
+                  <Skeleton className="skeleton-bar--light" width={90} height={13} />
+                  <Skeleton className="skeleton-bar--light" width={60} height={28} />
                 </div>
-              </div>
-              <div className="home__stat home__stat--tint" aria-hidden="true">
-                <Skeleton className="skeleton-bar--light" width={90} height={13} />
-                <div className="home__stat-value-row">
-                  <Skeleton className="skeleton-bar--light" width={50} height={24} />
-                </div>
-              </div>
-              <div className="home__stat home__stat--light" aria-hidden="true">
-                <Skeleton width={110} height={13} />
-                <div className="home__stat-value-row">
-                  <Skeleton width={40} height={24} />
-                </div>
-              </div>
-              <div className="home__stat home__stat--light" aria-hidden="true">
-                <Skeleton width={100} height={13} />
-                <div className="home__stat-value-row">
-                  <Skeleton width={40} height={24} />
-                </div>
-              </div>
+              ))}
             </>
           ) : (
             <>
-          <div className="home__stat home__stat--tint">
-            <p className="home__stat-label">Note Opinion System</p>
-            <div className="home__stat-value-row">
-              <p className="home__stat-value">
-                {osRatingWhole}
-                <span className="home__stat-value-sep">,</span>
-                {osRatingDecimal}
-                <span className="home__stat-value-suffix">/5</span>
-              </p>
-              <svg
-                className="home__stat-icon home__stat-icon--logo"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 16 16"
-                fill="none"
+              <div className="home__stat-tile">
+                <p className="home__stat-label">Ma note</p>
+                <div className="home__stat-value-row">
+                  <p className="home__stat-value">
+                    {osRatingWhole}
+                    <span className="home__stat-value-sep">,</span>
+                    {osRatingDecimal}
+                    <span className="home__stat-value-suffix">/5</span>
+                  </p>
+                  <svg className="home__stat-badge" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M14.3066 7.99998C14.3066 11.6309 11.2381 14.5452 7.55283 14.2911C4.443 14.0767 1.92349 11.5573 1.7089 8.44752C1.4546 4.76212 4.36894 1.69344 7.99997 1.69344C9.09669 1.69344 10.1277 1.9738 11.0261 2.46611L12.2187 1.20334C10.8652 0.361376 9.24288 -0.089147 7.50887 0.0147358C3.49549 0.255176 0.247282 3.50822 0.0139174 7.52202C-0.109228 9.64011 0.592181 11.5928 1.82698 13.0889L1.04719 15.6519C0.995203 15.8227 1.14643 15.9864 1.32086 15.948L4.57653 15.2314C5.72314 15.7752 7.01905 16.0555 8.38672 15.9908C12.4989 15.7965 15.8304 12.4374 15.9936 8.32387C16.0561 6.74748 15.6598 5.26902 14.931 4.00673L13.8493 5.64247C14.1432 6.37098 14.3066 7.1662 14.3066 7.99998Z"
+                      fill="#ffffff"
+                    />
+                    <path
+                      d="M15.2194 0.306195L8.00714 7.94269L5.5528 5.82212L4.82573 6.54915L3.83049 7.58653L8.00714 11.6391L15.4043 0.452399C15.4834 0.331654 15.3186 0.201358 15.2194 0.306195Z"
+                      fill="#23ad85"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <div
+                className={`home__stat-tile home__stat-tile--light home__stat-tile--clickable${sansReponseFlagClass}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => onOpenReviewsTab?.(REVIEW_TAB_SANS_REPONSE)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onOpenReviewsTab?.(REVIEW_TAB_SANS_REPONSE)
+                  }
+                }}
               >
-                <path
-                  d="M14.3066 7.99998C14.3066 11.6309 11.2381 14.5452 7.55283 14.2911C4.443 14.0767 1.92349 11.5573 1.7089 8.44752C1.4546 4.76212 4.36894 1.69344 7.99997 1.69344C9.09669 1.69344 10.1277 1.9738 11.0261 2.46611L12.2187 1.20334C10.8652 0.361376 9.24288 -0.089147 7.50887 0.0147358C3.49549 0.255176 0.247282 3.50822 0.0139174 7.52202C-0.109228 9.64011 0.592181 11.5928 1.82698 13.0889L1.04719 15.6519C0.995203 15.8227 1.14643 15.9864 1.32086 15.948L4.57653 15.2314C5.72314 15.7752 7.01905 16.0555 8.38672 15.9908C12.4989 15.7965 15.8304 12.4374 15.9936 8.32387C16.0561 6.74748 15.6598 5.26902 14.931 4.00673L13.8493 5.64247C14.1432 6.37098 14.3066 7.1662 14.3066 7.99998Z"
-                  fill="#ffffff"
-                />
-                <path
-                  d="M15.2194 0.306195L8.00714 7.94269L5.5528 5.82212L4.82573 6.54915L3.83049 7.58653L8.00714 11.6391L15.4043 0.452399C15.4834 0.331654 15.3186 0.201358 15.2194 0.306195Z"
-                  fill="#23ad85"
-                />
-              </svg>
-            </div>
-          </div>
-          <div
-            className="home__stat home__stat--tint home__stat--clickable"
-            role="button"
-            tabIndex={0}
-            onClick={() => onNavigate?.('chat')}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onNavigate?.('chat')
-              }
-            }}
-          >
-            <p className="home__stat-label">Avis collectés</p>
-            <div className="home__stat-value-row">
-              <p className="home__stat-value home__stat-value--medium">{totalReviewsCount}</p>
-              <img src={iconStatReviews} alt="" className="home__stat-icon" />
-            </div>
-          </div>
-          <div
-            className={`home__stat home__stat--light home__stat--clickable${sansReponseFlagClass}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => onOpenReviewsTab?.(REVIEW_TAB_SANS_REPONSE)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onOpenReviewsTab?.(REVIEW_TAB_SANS_REPONSE)
-              }
-            }}
-          >
-            <p className="home__stat-label home__stat-label--dark">Avis sans réponse</p>
-            <div className="home__stat-value-row">
-              <p className={`home__stat-value home__stat-value--medium home__stat-value--dark${sansReponseValueClass}`}>
-                {String(unansweredCount).padStart(2, '0')}
-              </p>
-              <img src={iconStatChevron} alt="" className="home__stat-icon" />
-            </div>
-          </div>
-          <div
-            className={`home__stat home__stat--light home__stat--clickable${aRelancerFlagClass}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => onOpenReviewsTab?.(REVIEW_TAB_A_RECUPERER)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onOpenReviewsTab?.(REVIEW_TAB_A_RECUPERER)
-              }
-            }}
-          >
-            <p className="home__stat-label home__stat-label--dark">Avis à récolter</p>
-            <div className="home__stat-value-row">
-              <p className={`home__stat-value home__stat-value--medium home__stat-value--dark${aRelancerValueClass}`}>
-                {String(PENDING_COUNT).padStart(2, '0')}
-              </p>
-              <img src={iconStatChevron} alt="" className="home__stat-icon" />
-            </div>
-          </div>
+                <div className="home__stat-header-row">
+                  <p className="home__stat-label home__stat-label--dark">Avis sans réponse</p>
+                </div>
+                <div className="home__stat-value-row">
+                  <p
+                    className={`home__stat-value home__stat-value--dark home__stat-value--small${sansReponseValueClass}`}
+                  >
+                    {String(unansweredCount).padStart(2, '0')}
+                  </p>
+                  <img src={iconChevronRight} alt="" className="home__stat-chevron" />
+                </div>
+              </div>
+
+              <div
+                className="home__stat-tile home__stat-tile--clickable"
+                role="button"
+                tabIndex={0}
+                onClick={() => onNavigate?.('chat')}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onNavigate?.('chat')
+                  }
+                }}
+              >
+                <div className="home__stat-header-row">
+                  <p className="home__stat-label">Avis collectés</p>
+                </div>
+                <div className="home__stat-value-row">
+                  <p className="home__stat-value home__stat-value--small">{totalReviewsCount}</p>
+                  <img src={iconChevronRight} alt="" className="home__stat-chevron home__stat-chevron--light" />
+                </div>
+              </div>
+
+              <div
+                className={`home__stat-tile home__stat-tile--light home__stat-tile--clickable${aRelancerFlagClass}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => onOpenReviewsTab?.(REVIEW_TAB_A_RECUPERER)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onOpenReviewsTab?.(REVIEW_TAB_A_RECUPERER)
+                  }
+                }}
+              >
+                <div className="home__stat-header-row">
+                  <p className="home__stat-label home__stat-label--dark">Avis à relancer</p>
+                </div>
+                <div className="home__stat-value-row">
+                  <p
+                    className={`home__stat-value home__stat-value--dark home__stat-value--small${aRelancerValueClass}`}
+                  >
+                    {String(PENDING_COUNT).padStart(2, '0')}
+                  </p>
+                  <img src={iconChevronRight} alt="" className="home__stat-chevron" />
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -506,6 +500,7 @@ export function Home({
       {selectedReview && (
         <ReviewDetailSheet
           review={selectedReview}
+          companyName="La Boîte IMMO"
           onClose={() => setSelectedReview(null)}
           onSubmit={handleSubmitResponse}
           onDelete={handleDeleteResponse}

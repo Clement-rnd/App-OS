@@ -143,18 +143,31 @@
   gap: 14px;
 }
 
-.home__greeting-company span {
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 16.5px;
+.home__greeting-company-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(44, 149, 255, 0.2);
+  font-size: 13px;
+  font-weight: 500;
   color: #ffffff;
   white-space: nowrap;
+}
+
+.home__greeting-company-chip img {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
 }
 
 .home__reputation {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 2px;
   flex-shrink: 0;
 }
@@ -195,106 +208,109 @@
   background-color: #fc6530;
 }
 
-/* Dashboard */
-.home__dashboard {
+/* Stats grid -- 4 separate square tiles (per Figma's original layout),
+   each its own clickable card instead of a merged rating+list panel. */
+.home__stats-grid {
   display: grid;
-  grid-auto-flow: column;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
 }
 
-.home__stat {
+.home__stat-tile {
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 4px;
+  gap: 8px;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 8px;
+  background-color: rgba(44, 149, 255, 0.2);
   backdrop-filter: blur(8px);
   box-sizing: border-box;
 }
 
-.home__stat--tint {
-  background-color: rgba(44, 149, 255, 0.2);
-}
-
-.home__stat--light {
-  background-color: #ffffff;
-}
-
-.home__stat--clickable {
+.home__stat-tile--clickable {
   cursor: pointer;
 }
 
-/* Independent of the reputation badge above -- sans-réponse/à-récolter each
-   get this the moment their own ratio passes 49% of total avis. An inset
-   border instead of a real one so it doesn't shift the tile's own layout. */
-.home__stat--warning {
-  box-shadow: inset 3px 0 0 0 #f29003;
+.home__stat-tile--warning {
+  border-left: 3px solid #f29003;
 }
 
-.home__stat-value--warning {
-  color: #f29003;
+.home__stat-tile--light {
+  background-color: #ffffff;
+  backdrop-filter: none;
+}
+
+.home__stat-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .home__stat-label {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #ffffff;
+  white-space: nowrap;
 }
 
 .home__stat-label--dark {
   color: #041b44;
 }
 
+.home__stat-chevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.home__stat-chevron--light {
+  filter: brightness(0) invert(1);
+}
+
 .home__stat-value-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-  width: 100%;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .home__stat-value {
-  flex: 1;
   font-size: 40px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1;
   color: #ffffff;
-}
-
-.home__stat-value--medium {
-  font-size: 30px;
-  font-weight: 600;
 }
 
 .home__stat-value--dark {
   color: #041b44;
 }
 
+.home__stat-value--warning {
+  color: #f29003;
+}
+
+.home__stat-value--small {
+  font-size: 32px;
+}
+
 .home__stat-value-sep {
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 800;
 }
 
 .home__stat-value-suffix {
   font-size: 20px;
   font-weight: 500;
+  opacity: 0.6;
 }
 
-.home__stat-icon {
-  width: 20px;
-  height: 20px;
+.home__stat-badge {
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
-  padding: 4px;
-  box-sizing: border-box;
-}
-
-.home__stat-icon--logo {
-  width: 30px;
-  height: 30px;
-  padding: 0;
 }
 
 /* CTA */
@@ -329,7 +345,7 @@
 }
 
 .home__cta-subtext {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 400;
   color: #041b44;
 }
@@ -491,6 +507,7 @@
 .home__review-author {
   flex: 1;
   min-width: 0;
+  margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #041b44;
@@ -525,9 +542,9 @@
 }
 
 .home__review-date {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
-  color: #b8c2cc;
+  color: #64798c;
 }
 
 .home__review-chips {
@@ -542,9 +559,9 @@
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  border-radius: 100px;
-  font-size: 11px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 400;
   letter-spacing: 0.16px;
   white-space: nowrap;
 }
@@ -570,13 +587,13 @@
 }
 
 .home__chip--muted {
+  background-color: #f0f6f9;
   color: #8ea1b2;
-  padding: 3px 8px 3px 4px;
 }
 
 .home__review-text {
   padding: 0 16px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.43;
   letter-spacing: 0.17px;

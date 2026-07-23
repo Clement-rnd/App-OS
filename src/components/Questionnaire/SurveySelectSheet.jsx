@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import iconClose from '../../assets/questionnaire/icon-sheet-close.svg'
+import iconTabBadge from '../../assets/questionnaire/icon-tab-badge.svg'
+import iconTabBadgeDark from '../../assets/questionnaire/icon-tab-badge-dark.svg'
 import iconListBadge from '../../assets/questionnaire/icon-list-item-badge.svg'
+import iconClipboardSimple from '../../assets/questionnaire/icon-clipboard-simple.svg'
 import iconChevron from '../../assets/reviews/icon-chevron-big.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
@@ -9,6 +12,10 @@ import './SurveySelectSheet.css'
 
 const CLOSE_ANIMATION_MS = 380
 const SHEET_ENTRANCE_MS = 380
+const EXIT_ITEM_BASE_DELAY = 40
+const EXIT_ITEM_STEP = 40
+const EXIT_DURATION_MS = 180
+const TAB_EXIT_MS = EXIT_ITEM_BASE_DELAY + EXIT_ITEM_STEP * 2 + EXIT_DURATION_MS + 20
 
 const CERTIFIED_SURVEYS = [
   { id: 'transaction', title: 'Transaction immobilière', subtitle: '10 questions - 3 fois certifié' },
@@ -21,18 +28,20 @@ const SIMPLE_SURVEYS = [
   { id: 'equipe-2', title: 'Equipe Interne', subtitle: '10 questions' },
 ]
 
-const TYPE_INFO = {
+const TAB_INFO = {
   certified: 'Certifié AFNOR triple et authentifié par Opinion System. Ces avis peuvent être partagés sur Google.',
-  simple: 'Questions ouvertes, sans vérification. Idéal pour les retours internes.',
+  simple: 'Questions ouvertes, sans vérification. Idéal pour les retours internes. Ces avis peuvent être partagés sur Google.',
 }
 
-// The Certifié/Simple choice is made once, up front (see
-// QuestionnaireTypeChoice) -- this sheet no longer offers a tab to switch
-// between them, it just lists whichever type was already chosen.
-export function SurveySelectSheet({ type, onClose, onSelect }) {
+export function SurveySelectSheet({ onClose, onSelect }) {
   useLockBodyScroll()
   const screenHeight = useStandaloneScreenHeight()
+  const [tab, setTab] = useState('certified')
   const [isClosing, setIsClosing] = useState(false)
+  const [frameHeight, setFrameHeight] = useState(null)
+  const [isContentExiting, setContentExiting] = useState(false)
+  const contentRef = useRef(null)
+  const hasSwitchedTabRef = useRef(false)
 
   const closeWithAnimation = callback => {
     if (isClosing) return
@@ -40,12 +49,35 @@ export function SurveySelectSheet({ type, onClose, onSelect }) {
     setTimeout(callback, CLOSE_ANIMATION_MS)
   }
 
+  const changeTab = nextTab => {
+    if (nextTab === tab || isContentExiting) return
+    if (contentRef.current) {
+      setFrameHeight(contentRef.current.scrollHeight)
+    }
+    setContentExiting(true)
+    setTimeout(() => {
+      hasSwitchedTabRef.current = true
+      setTab(nextTab)
+      setContentExiting(false)
+    }, TAB_EXIT_MS)
+  }
+
+  const entranceBaseDelay = hasSwitchedTabRef.current ? 0 : SHEET_ENTRANCE_MS
+
   const { dragHandlers, dragStyle, isDragClosing } = useSheetDrag({
     onRequestClose: () => closeWithAnimation(onClose),
     closeDurationMs: CLOSE_ANIMATION_MS,
   })
 
-  const surveys = type === 'certified' ? CERTIFIED_SURVEYS : SIMPLE_SURVEYS
+  useLayoutEffect(() => {
+    if (frameHeight === null || !contentRef.current) return
+    const newHeight = contentRef.current.scrollHeight
+    const raf = requestAnimationFrame(() => setFrameHeight(newHeight))
+    return () => cancelAnimationFrame(raf)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab])
+
+  const surveys = tab === 'certified' ? CERTIFIED_SURVEYS : SIMPLE_SURVEYS
 
   return (
     <div
@@ -75,10 +107,56 @@ export function SurveySelectSheet({ type, onClose, onSelect }) {
           </button>
         </div>
 
-        <div className="survey-sheet__tab-content-frame">
-          <div className="survey-sheet__tab-content">
-            <div className="survey-sheet__banner-wrap" style={{ animationDelay: `${SHEET_ENTRANCE_MS}ms` }}>
-              <p className="survey-sheet__banner">{TYPE_INFO[type]}</p>
+        <div className="survey-sheet__tabs-wrap">
+          <div className="survey-sheet__tabs">
+            <div
+              className="survey-sheet__tab-indicator"
+              style={{ transform: tab === 'simple' ? 'translateX(100%)' : 'translateX(0%)' }}
+            />
+            <button
+              type="button"
+              className={`survey-sheet__tab${tab === 'certified' ? ' survey-sheet__tab--active' : ''}`}
+              onClick={() => changeTab('certified')}
+            >
+              <img
+                src={tab === 'certified' ? iconTabBadge : iconTabBadgeDark}
+                alt=""
+                className="survey-sheet__tab-icon"
+              />
+              Certifié
+            </button>
+            <button
+              type="button"
+              className={`survey-sheet__tab${tab === 'simple' ? ' survey-sheet__tab--active' : ''}`}
+              onClick={() => changeTab('simple')}
+            >
+              <img
+                src={iconClipboardSimple}
+                alt=""
+                className={`survey-sheet__tab-icon${tab === 'simple' ? ' survey-sheet__tab-icon--invert' : ''}`}
+              />
+              Simple
+            </button>
+          </div>
+        </div>
+
+        <div
+          className="survey-sheet__tab-content-frame"
+          style={frameHeight !== null ? { height: frameHeight } : undefined}
+          onTransitionEnd={e => {
+            if (e.target === e.currentTarget && e.propertyName === 'height') setFrameHeight(null)
+          }}
+        >
+          <div
+            className={`survey-sheet__tab-content${isContentExiting ? ' survey-sheet__tab-content--exiting' : ''}`}
+            key={tab}
+            ref={contentRef}
+          >
+            <div
+              className="survey-sheet__banner-wrap"
+              style={{ animationDelay: `${isContentExiting ? 0 : entranceBaseDelay}ms` }}
+            >
+              <p className="survey-sheet__banner">{TAB_INFO[tab]}</p>
             </div>
 
             <div className="survey-sheet__list">
@@ -87,11 +165,15 @@ export function SurveySelectSheet({ type, onClose, onSelect }) {
                   key={survey.id}
                   type="button"
                   className="survey-sheet__item"
-                  style={{ animationDelay: `${SHEET_ENTRANCE_MS + 60 + index * 50}ms` }}
-                  onClick={() => closeWithAnimation(() => onSelect({ ...survey, type }))}
+                  style={{
+                    animationDelay: isContentExiting
+                      ? `${EXIT_ITEM_BASE_DELAY + index * EXIT_ITEM_STEP}ms`
+                      : `${entranceBaseDelay + 60 + index * 50}ms`,
+                  }}
+                  onClick={() => closeWithAnimation(() => onSelect({ ...survey, type: tab }))}
                 >
                   <span className="survey-sheet__item-badge">
-                    <img src={iconListBadge} alt="" />
+                    <img src={tab === 'simple' ? iconClipboardSimple : iconListBadge} alt="" />
                   </span>
                   <span className="survey-sheet__item-text">
                     <span className="survey-sheet__item-title">{survey.title}</span>

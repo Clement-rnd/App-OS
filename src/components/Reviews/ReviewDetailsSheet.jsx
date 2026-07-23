@@ -5,6 +5,9 @@ import iconReviewRating from '../../assets/home/icon-review-rating.svg'
 import iconGoogle from '../../assets/home/icon-google.svg'
 import iconArrowReply from '../../assets/home/icon-arrow-reply.svg'
 import iconPencil from '../../assets/home/icon-pencil.svg'
+import iconClipboardSimple from '../../assets/questionnaire/icon-clipboard-simple.svg'
+import iconCompanyBuilding from '../../assets/reviews/icon-company-building.svg'
+import iconSurveyBadge from '../../assets/questionnaire/icon-survey-badge.svg'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll'
 import { useSheetViewTransition } from '../../hooks/useSheetViewTransition'
@@ -13,6 +16,7 @@ import { StarRating } from '../StarRating/StarRating'
 import { RespondFields } from '../Home/RespondFields'
 import { getNpsCategory, getNpsScore, getRatingBreakdown } from '../../utils/nps'
 import { parseReviewDate } from './filterReviews'
+import { COLLABORATORS } from './CollaboratorSelectSheet'
 import {
   GOOGLE_BOOST_DEFAULT_MESSAGE,
   getReviewerPhone,
@@ -56,21 +60,25 @@ const RATING_BAR_LABELS = {
   delais: 'Délais',
 }
 
-const NPS_BADGE_CLASS = {
-  Promoteur: 'review-details__nps-badge--promoter',
-  Passif: 'review-details__nps-badge--passive',
-  Détracteur: 'review-details__nps-badge--detractor',
+const NPS_CHIP_CLASS = {
+  Promoteur: 'review-details__nps-chip--promoter',
+  Passif: 'review-details__nps-chip--passive',
+  Détracteur: 'review-details__nps-chip--detractor',
 }
 
-export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSendGoogleBoost }) {
+export function ReviewDetailsSheet({ review, companyName, onClose, onSubmit, onDelete, onSendGoogleBoost }) {
   useLockBodyScroll()
   const screenHeight = useStandaloneScreenHeight()
-  // .review-details-sheet's own max-height: 90vh (in CSS) is exposed to the
+  // .review-details-sheet's own max-height: 80dvh (in CSS) is exposed to the
   // exact same iOS under-measurement as the overlay -- see
   // useStandaloneScreenHeight for why screenHeight is the reliable value.
-  const sheetMaxHeight = screenHeight * 0.9
+  const sheetMaxHeight = screenHeight * 0.8
   const [isClosing, setIsClosing] = useState(false)
   const [isContentScrolled, setContentScrolled] = useState(false)
+  // Footer only needs its own separation shadow while there's more content
+  // below still to reveal -- once scrolled all the way down there's nothing
+  // left to imply, so the shadow would just be visual noise.
+  const [isScrolledToBottom, setScrolledToBottom] = useState(false)
   // 'details' | 'respond' | 'google-boost' -- switching between them morphs
   // the content of this same sheet (see withViewTransition) instead of
   // opening a second modal on top of it.
@@ -116,6 +124,7 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
   const npsScore = getNpsScore(rating)
   const breakdown = getRatingBreakdown(review)
   const serviceType = getServiceType(review)
+  const collaboratorName = COLLABORATORS.find(collaborator => collaborator.id === review.collaboratorId)?.name
   const reviewerPhone = getReviewerPhone(review)
   const initial = review.author.charAt(0).toUpperCase()
   const isGoogleShared = review.googleSharing === 'google-partage'
@@ -124,7 +133,6 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
   const reviewCard = (
     <div className="review-details__card">
       <div className="review-details__title-row">
-        <div className="review-details__avatar">{initial}</div>
         <p className="review-details__author">{review.author}</p>
         <div className="review-details__score">
           <img src={iconReviewRating} alt="" />
@@ -193,7 +201,11 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
 
         <div
           className="review-details-sheet__content"
-          onScroll={e => setContentScrolled(e.currentTarget.scrollTop > 0)}
+          onScroll={e => {
+            const el = e.currentTarget
+            setContentScrolled(el.scrollTop > 0)
+            setScrolledToBottom(el.scrollTop + el.clientHeight < el.scrollHeight - 1)
+          }}
         >
           {view !== 'google-boost' && reviewCard}
 
@@ -208,7 +220,17 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
                   {review.response && (
                     <div className="review-details__response">
                       <div className="review-details__response-header">
-                        <p className="review-details__response-label">Votre réponse</p>
+                        <div className="review-details__response-meta">
+                          <p className="review-details__response-label">
+                            <span className="review-details__response-avatar">
+                              <img src={iconCompanyBuilding} alt="" />
+                            </span>
+                            {companyName}
+                          </p>
+                          <p className="review-details__response-date">
+                            Répondu le {review.responseDate || review.date}
+                          </p>
+                        </div>
                         <button
                           type="button"
                           className="review-details__response-edit"
@@ -222,23 +244,32 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
                     </div>
                   )}
 
+                  <div className="review-details__divider" />
+
                   <div className="review-details__info-rows">
                     <div className="review-details__info-row">
-                      <span className="review-details__info-label review-details__info-label--strong">
-                        Type de questionnaire
-                      </span>
-                      <span className="review-details__info-value">
+                      <span className="review-details__info-label">Type de questionnaire</span>
+                      <span className="review-details__info-value review-details__info-value--inline">
+                        <img
+                          src={review.certification === 'certifie-os' ? iconSurveyBadge : iconClipboardSimple}
+                          alt=""
+                          className="review-details__inline-icon"
+                        />
                         {review.certification === 'certifie-os' ? 'Certifié OS' : 'Simple OS'}
                       </span>
                     </div>
+                    {collaboratorName && (
+                      <div className="review-details__info-row">
+                        <span className="review-details__info-label">Collaborateur</span>
+                        <span className="review-details__info-value">{collaboratorName}</span>
+                      </div>
+                    )}
                     <div className="review-details__info-row">
                       <span className="review-details__info-label">Score NPS</span>
-                      <div className="review-details__nps">
-                        <span className="review-details__nps-score">{npsScore} / 10</span>
-                        <span className={`review-details__nps-badge ${NPS_BADGE_CLASS[npsCategory]}`}>
-                          {npsCategory}
-                        </span>
-                      </div>
+                      <span className="review-details__info-value review-details__info-value--inline">
+                        {npsScore} / 10
+                        <span className={`review-details__nps-chip ${NPS_CHIP_CLASS[npsCategory]}`}>{npsCategory}</span>
+                      </span>
                     </div>
                     <div className="review-details__info-row">
                       <span className="review-details__info-label">Service</span>
@@ -246,16 +277,22 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
                     </div>
                     <div className="review-details__info-row">
                       <span className="review-details__info-label">Partage Google</span>
-                      {hasPendingGoogleReminder ? (
-                        <span className="review-details__info-value review-details__info-value--pending">
-                          Rappel envoyé le {formatFullDate(review.googleReminderSentDate)}
-                        </span>
-                      ) : (
-                        <span className="review-details__info-value review-details__info-value--icon">
-                          <img src={iconGoogle} alt="" />
-                          {isGoogleShared ? 'Partagé' : 'Non Partagé'}
-                        </span>
-                      )}
+                      <span
+                        className={`review-details__info-value review-details__info-value--inline${
+                          hasPendingGoogleReminder ? ' review-details__info-value--pending' : ''
+                        }`}
+                      >
+                        <img
+                          src={iconGoogle}
+                          alt=""
+                          className="review-details__inline-icon review-details__inline-icon--google"
+                        />
+                        {hasPendingGoogleReminder
+                          ? `Rappel envoyé le ${formatFullDate(review.googleReminderSentDate)}`
+                          : isGoogleShared
+                            ? 'Partagé'
+                            : 'Non Partagé'}
+                      </span>
                     </div>
                   </div>
 
@@ -340,7 +377,11 @@ export function ReviewDetailsSheet({ review, onClose, onSubmit, onDelete, onSend
           </div>
         </div>
 
-        <div className="review-details-sheet__footer">
+        <div
+          className={`review-details-sheet__footer${
+            isScrolledToBottom ? ' review-details-sheet__footer--scrolled' : ''
+          }`}
+        >
           <div
             key={view}
             className={`review-details-sheet__footer-buttons${isContentExiting ? ' review-details-sheet__footer-buttons--exiting' : ''}`}

@@ -68,14 +68,16 @@ export function Profile({ onNavigate, onLogout }) {
               <img src={iconUserAvatar} alt="" />
             </span>
             <div className="profile__user-card-text">
-              <p className="profile__user-card-name">
-                {currentUser.firstName} {currentUser.lastName}
-              </p>
+              <div className="profile__user-card-name-row">
+                <p className="profile__user-card-name">
+                  {currentUser.firstName} {currentUser.lastName}
+                </p>
+                <span className="profile__user-card-chip">
+                  <img src={iconChipBuilding} alt="" />
+                  {company.name}
+                </span>
+              </div>
               <p className="profile__user-card-role">{currentUser.role}</p>
-              <span className="profile__user-card-chip">
-                <img src={iconChipBuilding} alt="" />
-                {company.name}
-              </span>
             </div>
           </div>
         </div>

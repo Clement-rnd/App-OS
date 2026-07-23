@@ -41,7 +41,7 @@
 
 .profile__title {
   flex: 1;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.15px;
   color: #ffffff;
@@ -91,13 +91,24 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 0;
   flex: 1;
   min-width: 0;
 }
 
+.profile__user-card-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
 .profile__user-card-name {
-  font-size: 17px;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 16px;
   font-weight: 600;
   color: #ffffff;
   white-space: nowrap;
@@ -107,7 +118,7 @@
 }
 
 .profile__user-card-role {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
@@ -119,14 +130,15 @@
 .profile__user-card-chip {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 6px;
-  margin-top: 4px;
-  padding: 2px 10px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background-color: rgba(44, 149, 255, 0.25);
-  font-size: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(44, 149, 255, 0.2);
+  font-size: 13px;
   font-weight: 500;
-  color: #7ec8ff;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -134,9 +146,10 @@
 }
 
 .profile__user-card-chip img {
-  width: 11px;
-  height: 11px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
+  filter: brightness(0) invert(1);
 }
 
 .profile__panel {

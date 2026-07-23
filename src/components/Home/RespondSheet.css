@@ -27,12 +27,29 @@
   animation: respond-sheet-slide-up 220ms ease-out;
 }
 
+.respond-sheet--closing {
+  animation: respond-sheet-slide-down 260ms ease-in forwards;
+}
+
+.respond-sheet-overlay--closing .respond-sheet-backdrop {
+  animation: respond-sheet-fade-out 260ms ease-in forwards;
+}
+
 @keyframes respond-sheet-fade-in {
   from {
     opacity: 0;
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes respond-sheet-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -45,10 +62,20 @@
   }
 }
 
+@keyframes respond-sheet-slide-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
 .respond-sheet__handle-row {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #f7fafc;
   padding: 16px 0;
   width: 100%;
   flex-shrink: 0;
@@ -58,7 +85,7 @@
   width: 60px;
   height: 5px;
   border-radius: 2.5px;
-  background-color: #e0e0e0;
+  background-color: #b8c2cc;
 }
 
 .respond-sheet__appbar {
@@ -105,6 +132,13 @@
   overflow-y: auto;
 }
 
+.respond-sheet__divider {
+  width: 100%;
+  height: 1px;
+  flex-shrink: 0;
+  background-color: #dfe9ef;
+}
+
 /* AI suggestion */
 .respond-sheet__ai {
   display: flex;
@@ -140,7 +174,7 @@
 }
 
 .respond-sheet__ai-label {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
   color: #041b44;
   white-space: nowrap;
@@ -160,15 +194,15 @@
   border: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: #041b44;
   white-space: nowrap;
 }
 
 .respond-sheet__ai-regenerate img {
-  width: 11px;
-  height: 11px;
+  width: 16px;
+  height: 16px;
 }
 
 .respond-sheet__ai-regenerate:disabled,
@@ -201,7 +235,7 @@
   border: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: #041b44;
   text-decoration: underline;
@@ -209,7 +243,7 @@
 }
 
 .respond-sheet__ai-text {
-  padding: 8px 12px;
+  padding: 16px 12px;
   font-size: 15px;
   font-weight: 400;
   line-height: 18px;
@@ -314,17 +348,30 @@
 }
 
 .respond-sheet__textarea {
+  box-sizing: border-box;
   width: 100%;
-  height: 150px;
+  height: 48px;
   padding: 12px;
   border: 1px solid #dfe9ef;
   border-radius: 12px;
   background-color: #ffffff;
   font-family: 'Poppins', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
+  line-height: 18px;
   color: #041b44;
   resize: none;
   outline: none;
+  transition: height 150ms ease;
+}
+
+/* Expands from its 48px single-line default to a 4-line max whenever
+   there's something to actually show more of -- while focused (typing) or
+   once it holds real content (AI-filled via "Utiliser", or typed and then
+   blurred) -- :not(:placeholder-shown) covers the latter without extra JS
+   state, since the placeholder only shows on an empty textarea. */
+.respond-sheet__textarea:focus,
+.respond-sheet__textarea:not(:placeholder-shown) {
+  height: 96px;
 }
 
 .respond-sheet__textarea::placeholder {

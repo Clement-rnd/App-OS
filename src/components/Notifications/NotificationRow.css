@@ -130,7 +130,7 @@
 
 .notif-row__time {
   flex-shrink: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: #b8c2cc;
   white-space: nowrap;
@@ -140,6 +140,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
   padding: 3px 10px;
   border: 1px solid #041b44;
   border-radius: 40px;
